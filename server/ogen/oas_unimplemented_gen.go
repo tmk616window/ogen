@@ -22,33 +22,6 @@ func (UnimplementedHandler) TodosGet(ctx context.Context) (r []Todo, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// TodosIDDelete implements DELETE /todos/{id} operation.
-//
-// Delete a todo item by ID.
-//
-// DELETE /todos/{id}
-func (UnimplementedHandler) TodosIDDelete(ctx context.Context, params TodosIDDeleteParams) (r TodosIDDeleteRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// TodosIDGet implements GET /todos/{id} operation.
-//
-// Get a todo item by ID.
-//
-// GET /todos/{id}
-func (UnimplementedHandler) TodosIDGet(ctx context.Context, params TodosIDGetParams) (r TodosIDGetRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// TodosIDPut implements PUT /todos/{id} operation.
-//
-// Update a todo item by ID.
-//
-// PUT /todos/{id}
-func (UnimplementedHandler) TodosIDPut(ctx context.Context, req *TodoInput, params TodosIDPutParams) (r TodosIDPutRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // TodosPost implements POST /todos operation.
 //
 // Create a new todo item.

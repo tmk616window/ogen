@@ -36,65 +36,65 @@ paths:
               schema:
                 $ref: "#/components/schemas/Todo"
 
-  /todos/{id}:
-    get:
-      summary: Get a todo item by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: The ID of the todo item to retrieve
-      responses:
-        "200":
-          description: A single todo item
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Todo"
-        "404":
-          description: Todo item not found
+  # /todos/{id}:
+  #   get:
+  #     summary: Get a todo item by ID
+  #     parameters:
+  #       - in: path
+  #         name: id
+  #         required: true
+  #         schema:
+  #           type: string
+  #         description: The ID of the todo item to retrieve
+  #     responses:
+  #       "200":
+  #         description: A single todo item
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: "#/components/schemas/Todo"
+  #       "404":
+  #         description: Todo item not found
 
-    put:
-      summary: Update a todo item by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: The ID of the todo item to update
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TodoInput"
-      responses:
-        "200":
-          description: Todo item updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Todo"
-        "404":
-          description: Todo item not found
+  #   put:
+  #     summary: Update a todo item by ID
+  #     parameters:
+  #       - in: path
+  #         name: id
+  #         required: true
+  #         schema:
+  #           type: string
+  #         description: The ID of the todo item to update
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: "#/components/schemas/TodoInput"
+  #     responses:
+  #       "200":
+  #         description: Todo item updated
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: "#/components/schemas/Todo"
+  #       "404":
+  #         description: Todo item not found
 
-    delete:
-      summary: Delete a todo item by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: The ID of the todo item to delete
-      responses:
-        "204":
-          description: Todo item deleted
-        "404":
-          description: Todo item not found
+  #   delete:
+  #     summary: Delete a todo item by ID
+  #     parameters:
+  #       - in: path
+  #         name: id
+  #         required: true
+  #         schema:
+  #           type: string
+  #         description: The ID of the todo item to delete
+  #     responses:
+  #       "204":
+  #         description: Todo item deleted
+  #       "404":
+  #         description: Todo item not found
 
 components:
   schemas:

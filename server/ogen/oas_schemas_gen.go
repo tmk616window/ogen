@@ -142,9 +142,6 @@ func (s *Todo) SetIsCompleted(val OptBool) {
 	s.IsCompleted = val
 }
 
-func (*Todo) todosIDGetRes() {}
-func (*Todo) todosIDPutRes() {}
-
 // Ref: #/components/schemas/TodoInput
 type TodoInput struct {
 	Title       string    `json:"title"`
@@ -181,23 +178,3 @@ func (s *TodoInput) SetDescription(val OptString) {
 func (s *TodoInput) SetIsCompleted(val OptBool) {
 	s.IsCompleted = val
 }
-
-// TodosIDDeleteNoContent is response for TodosIDDelete operation.
-type TodosIDDeleteNoContent struct{}
-
-func (*TodosIDDeleteNoContent) todosIDDeleteRes() {}
-
-// TodosIDDeleteNotFound is response for TodosIDDelete operation.
-type TodosIDDeleteNotFound struct{}
-
-func (*TodosIDDeleteNotFound) todosIDDeleteRes() {}
-
-// TodosIDGetNotFound is response for TodosIDGet operation.
-type TodosIDGetNotFound struct{}
-
-func (*TodosIDGetNotFound) todosIDGetRes() {}
-
-// TodosIDPutNotFound is response for TodosIDPut operation.
-type TodosIDPutNotFound struct{}
-
-func (*TodosIDPutNotFound) todosIDPutRes() {}

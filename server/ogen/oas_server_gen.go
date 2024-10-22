@@ -14,24 +14,6 @@ type Handler interface {
 	//
 	// GET /todos
 	TodosGet(ctx context.Context) ([]Todo, error)
-	// TodosIDDelete implements DELETE /todos/{id} operation.
-	//
-	// Delete a todo item by ID.
-	//
-	// DELETE /todos/{id}
-	TodosIDDelete(ctx context.Context, params TodosIDDeleteParams) (TodosIDDeleteRes, error)
-	// TodosIDGet implements GET /todos/{id} operation.
-	//
-	// Get a todo item by ID.
-	//
-	// GET /todos/{id}
-	TodosIDGet(ctx context.Context, params TodosIDGetParams) (TodosIDGetRes, error)
-	// TodosIDPut implements PUT /todos/{id} operation.
-	//
-	// Update a todo item by ID.
-	//
-	// PUT /todos/{id}
-	TodosIDPut(ctx context.Context, req *TodoInput, params TodosIDPutParams) (TodosIDPutRes, error)
 	// TodosPost implements POST /todos operation.
 	//
 	// Create a new todo item.

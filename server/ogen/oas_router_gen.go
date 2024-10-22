@@ -40,7 +40,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	args := [1]string{}
 
 	// Static code generated router with unwrapped path search.
 	switch {
@@ -58,6 +57,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if len(elem) == 0 {
+				// Leaf node.
 				switch r.Method {
 				case "GET":
 					s.handleTodosGetRequest([0]string{}, elemIsEscaped, w, r)
@@ -68,44 +68,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				}
 
 				return
-			}
-			switch elem[0] {
-			case '/': // Prefix: "/"
-				origElem := elem
-				if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				// Param: "id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "DELETE":
-						s.handleTodosIDDeleteRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					case "GET":
-						s.handleTodosIDGetRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					case "PUT":
-						s.handleTodosIDPutRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "DELETE,GET,PUT")
-					}
-
-					return
-				}
-
-				elem = origElem
 			}
 
 			elem = origElem
@@ -121,7 +83,7 @@ type Route struct {
 	operationID string
 	pathPattern string
 	count       int
-	args        [1]string
+	args        [0]string
 }
 
 // Name returns ogen operation name.
@@ -198,6 +160,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			}
 
 			if len(elem) == 0 {
+				// Leaf node.
 				switch method {
 				case "GET":
 					r.name = "TodosGet"
@@ -218,54 +181,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				default:
 					return
 				}
-			}
-			switch elem[0] {
-			case '/': // Prefix: "/"
-				origElem := elem
-				if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				// Param: "id"
-				// Leaf parameter
-				args[0] = elem
-				elem = ""
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "DELETE":
-						r.name = "TodosIDDelete"
-						r.summary = "Delete a todo item by ID"
-						r.operationID = ""
-						r.pathPattern = "/todos/{id}"
-						r.args = args
-						r.count = 1
-						return r, true
-					case "GET":
-						r.name = "TodosIDGet"
-						r.summary = "Get a todo item by ID"
-						r.operationID = ""
-						r.pathPattern = "/todos/{id}"
-						r.args = args
-						r.count = 1
-						return r, true
-					case "PUT":
-						r.name = "TodosIDPut"
-						r.summary = "Update a todo item by ID"
-						r.operationID = ""
-						r.pathPattern = "/todos/{id}"
-						r.args = args
-						r.count = 1
-						return r, true
-					default:
-						return
-					}
-				}
-
-				elem = origElem
 			}
 
 			elem = origElem
