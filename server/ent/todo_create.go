@@ -39,6 +39,12 @@ func (tc *TodoCreate) SetNillableDescription(s *string) *TodoCreate {
 	return tc
 }
 
+// SetName sets the "name" field.
+func (tc *TodoCreate) SetName(s string) *TodoCreate {
+	tc.mutation.SetName(s)
+	return tc
+}
+
 // SetID sets the "id" field.
 func (tc *TodoCreate) SetID(s string) *TodoCreate {
 	tc.mutation.SetID(s)
@@ -87,6 +93,14 @@ func (tc *TodoCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
 		}
 	}
+	if _, ok := tc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Todo.name"`)}
+	}
+	if v, ok := tc.mutation.Name(); ok {
+		if err := todo.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -129,6 +143,10 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Description(); ok {
 		_spec.SetField(todo.FieldDescription, field.TypeString, value)
 		_node.Description = value
+	}
+	if value, ok := tc.mutation.Name(); ok {
+		_spec.SetField(todo.FieldName, field.TypeString, value)
+		_node.Name = value
 	}
 	return _node, _spec
 }

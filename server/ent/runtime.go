@@ -17,4 +17,8 @@ func init() {
 	todoDescTitle := todoFields[1].Descriptor()
 	// todo.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	todo.TitleValidator = todoDescTitle.Validators[0].(func(string) error)
+	// todoDescName is the schema descriptor for name field.
+	todoDescName := todoFields[3].Descriptor()
+	// todo.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	todo.NameValidator = todoDescName.Validators[0].(func(string) error)
 }

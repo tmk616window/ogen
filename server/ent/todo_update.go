@@ -61,6 +61,20 @@ func (tu *TodoUpdate) ClearDescription() *TodoUpdate {
 	return tu
 }
 
+// SetName sets the "name" field.
+func (tu *TodoUpdate) SetName(s string) *TodoUpdate {
+	tu.mutation.SetName(s)
+	return tu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tu *TodoUpdate) SetNillableName(s *string) *TodoUpdate {
+	if s != nil {
+		tu.SetName(*s)
+	}
+	return tu
+}
+
 // Mutation returns the TodoMutation object of the builder.
 func (tu *TodoUpdate) Mutation() *TodoMutation {
 	return tu.mutation
@@ -100,6 +114,11 @@ func (tu *TodoUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
 		}
 	}
+	if v, ok := tu.mutation.Name(); ok {
+		if err := todo.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -123,6 +142,9 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.DescriptionCleared() {
 		_spec.ClearField(todo.FieldDescription, field.TypeString)
+	}
+	if value, ok := tu.mutation.Name(); ok {
+		_spec.SetField(todo.FieldName, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -178,6 +200,20 @@ func (tuo *TodoUpdateOne) ClearDescription() *TodoUpdateOne {
 	return tuo
 }
 
+// SetName sets the "name" field.
+func (tuo *TodoUpdateOne) SetName(s string) *TodoUpdateOne {
+	tuo.mutation.SetName(s)
+	return tuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (tuo *TodoUpdateOne) SetNillableName(s *string) *TodoUpdateOne {
+	if s != nil {
+		tuo.SetName(*s)
+	}
+	return tuo
+}
+
 // Mutation returns the TodoMutation object of the builder.
 func (tuo *TodoUpdateOne) Mutation() *TodoMutation {
 	return tuo.mutation
@@ -230,6 +266,11 @@ func (tuo *TodoUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
 		}
 	}
+	if v, ok := tuo.mutation.Name(); ok {
+		if err := todo.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -270,6 +311,9 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if tuo.mutation.DescriptionCleared() {
 		_spec.ClearField(todo.FieldDescription, field.TypeString)
+	}
+	if value, ok := tuo.mutation.Name(); ok {
+		_spec.SetField(todo.FieldName, field.TypeString, value)
 	}
 	_node = &Todo{config: tuo.config}
 	_spec.Assign = _node.assignValues

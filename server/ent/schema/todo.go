@@ -16,6 +16,7 @@ func (Todo) Fields() []ent.Field {
 		field.String("id").Unique().Immutable(),
 		field.String("title").NotEmpty(),
 		field.String("description").Optional(),
+		field.String("name").NotEmpty(),
 	}
 }
 

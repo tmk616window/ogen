@@ -34,6 +34,7 @@ type TodoMutation struct {
 	id            *string
 	title         *string
 	description   *string
+	name          *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Todo, error)
@@ -229,6 +230,42 @@ func (m *TodoMutation) ResetDescription() {
 	delete(m.clearedFields, todo.FieldDescription)
 }
 
+// SetName sets the "name" field.
+func (m *TodoMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *TodoMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *TodoMutation) ResetName() {
+	m.name = nil
+}
+
 // Where appends a list predicates to the TodoMutation builder.
 func (m *TodoMutation) Where(ps ...predicate.Todo) {
 	m.predicates = append(m.predicates, ps...)
@@ -263,12 +300,15 @@ func (m *TodoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TodoMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.title != nil {
 		fields = append(fields, todo.FieldTitle)
 	}
 	if m.description != nil {
 		fields = append(fields, todo.FieldDescription)
+	}
+	if m.name != nil {
+		fields = append(fields, todo.FieldName)
 	}
 	return fields
 }
@@ -282,6 +322,8 @@ func (m *TodoMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case todo.FieldDescription:
 		return m.Description()
+	case todo.FieldName:
+		return m.Name()
 	}
 	return nil, false
 }
@@ -295,6 +337,8 @@ func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldTitle(ctx)
 	case todo.FieldDescription:
 		return m.OldDescription(ctx)
+	case todo.FieldName:
+		return m.OldName(ctx)
 	}
 	return nil, fmt.Errorf("unknown Todo field %s", name)
 }
@@ -317,6 +361,13 @@ func (m *TodoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDescription(v)
+		return nil
+	case todo.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
@@ -381,6 +432,9 @@ func (m *TodoMutation) ResetField(name string) error {
 		return nil
 	case todo.FieldDescription:
 		m.ResetDescription()
+		return nil
+	case todo.FieldName:
+		m.ResetName()
 		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
