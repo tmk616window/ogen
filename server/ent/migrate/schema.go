@@ -8,6 +8,17 @@ import (
 )
 
 var (
+	// PrioritiesColumns holds the columns for the "priorities" table.
+	PrioritiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// PrioritiesTable holds the schema information for the "priorities" table.
+	PrioritiesTable = &schema.Table{
+		Name:       "priorities",
+		Columns:    PrioritiesColumns,
+		PrimaryKey: []*schema.Column{PrioritiesColumns[0]},
+	}
 	// TodosColumns holds the columns for the "todos" table.
 	TodosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -21,11 +32,40 @@ var (
 		Columns:    TodosColumns,
 		PrimaryKey: []*schema.Column{TodosColumns[0]},
 	}
+	// PriorityTodosColumns holds the columns for the "priority_todos" table.
+	PriorityTodosColumns = []*schema.Column{
+		{Name: "priority_id", Type: field.TypeString},
+		{Name: "todo_id", Type: field.TypeString},
+	}
+	// PriorityTodosTable holds the schema information for the "priority_todos" table.
+	PriorityTodosTable = &schema.Table{
+		Name:       "priority_todos",
+		Columns:    PriorityTodosColumns,
+		PrimaryKey: []*schema.Column{PriorityTodosColumns[0], PriorityTodosColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "priority_todos_priority_id",
+				Columns:    []*schema.Column{PriorityTodosColumns[0]},
+				RefColumns: []*schema.Column{PrioritiesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "priority_todos_todo_id",
+				Columns:    []*schema.Column{PriorityTodosColumns[1]},
+				RefColumns: []*schema.Column{TodosColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		PrioritiesTable,
 		TodosTable,
+		PriorityTodosTable,
 	}
 )
 
 func init() {
+	PriorityTodosTable.ForeignKeys[0].RefTable = PrioritiesTable
+	PriorityTodosTable.ForeignKeys[1].RefTable = TodosTable
 }

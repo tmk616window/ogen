@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"server/ent/priority"
 	"server/ent/todo"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -49,6 +50,21 @@ func (tc *TodoCreate) SetName(s string) *TodoCreate {
 func (tc *TodoCreate) SetID(s string) *TodoCreate {
 	tc.mutation.SetID(s)
 	return tc
+}
+
+// AddPriorityIDs adds the "priorities" edge to the Priority entity by IDs.
+func (tc *TodoCreate) AddPriorityIDs(ids ...string) *TodoCreate {
+	tc.mutation.AddPriorityIDs(ids...)
+	return tc
+}
+
+// AddPriorities adds the "priorities" edges to the Priority entity.
+func (tc *TodoCreate) AddPriorities(p ...*Priority) *TodoCreate {
+	ids := make([]string, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tc.AddPriorityIDs(ids...)
 }
 
 // Mutation returns the TodoMutation object of the builder.
@@ -147,6 +163,22 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.SetField(todo.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if nodes := tc.mutation.PrioritiesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.PrioritiesTable,
+			Columns: todo.PrioritiesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

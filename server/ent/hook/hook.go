@@ -8,6 +8,18 @@ import (
 	"server/ent"
 )
 
+// The PriorityFunc type is an adapter to allow the use of ordinary
+// function as Priority mutator.
+type PriorityFunc func(context.Context, *ent.PriorityMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PriorityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PriorityMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PriorityMutation", m)
+}
+
 // The TodoFunc type is an adapter to allow the use of ordinary
 // function as Todo mutator.
 type TodoFunc func(context.Context, *ent.TodoMutation) (ent.Value, error)

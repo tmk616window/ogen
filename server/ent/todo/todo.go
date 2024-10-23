@@ -4,6 +4,7 @@ package todo
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -17,8 +18,15 @@ const (
 	FieldDescription = "description"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// EdgePriorities holds the string denoting the priorities edge name in mutations.
+	EdgePriorities = "priorities"
 	// Table holds the table name of the todo in the database.
 	Table = "todos"
+	// PrioritiesTable is the table that holds the priorities relation/edge. The primary key declared below.
+	PrioritiesTable = "priority_todos"
+	// PrioritiesInverseTable is the table name for the Priority entity.
+	// It exists in this package in order to avoid circular dependency with the "priority" package.
+	PrioritiesInverseTable = "priorities"
 )
 
 // Columns holds all SQL columns for todo fields.
@@ -28,6 +36,12 @@ var Columns = []string{
 	FieldDescription,
 	FieldName,
 }
+
+var (
+	// PrioritiesPrimaryKey and PrioritiesColumn2 are the table columns denoting the
+	// primary key for the priorities relation (M2M).
+	PrioritiesPrimaryKey = []string{"priority_id", "todo_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -67,4 +81,25 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByPrioritiesCount orders the results by priorities count.
+func ByPrioritiesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPrioritiesStep(), opts...)
+	}
+}
+
+// ByPriorities orders the results by priorities terms.
+func ByPriorities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPrioritiesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newPrioritiesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PrioritiesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, PrioritiesTable, PrioritiesPrimaryKey...),
+	)
 }

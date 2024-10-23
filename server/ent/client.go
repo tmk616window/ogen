@@ -11,11 +11,13 @@ import (
 
 	"server/ent/migrate"
 
+	"server/ent/priority"
 	"server/ent/todo"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -23,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Priority is the client for interacting with the Priority builders.
+	Priority *PriorityClient
 	// Todo is the client for interacting with the Todo builders.
 	Todo *TodoClient
 }
@@ -36,6 +40,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Priority = NewPriorityClient(c.config)
 	c.Todo = NewTodoClient(c.config)
 }
 
@@ -127,9 +132,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Todo:   NewTodoClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Priority: NewPriorityClient(cfg),
+		Todo:     NewTodoClient(cfg),
 	}, nil
 }
 
@@ -147,16 +153,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Todo:   NewTodoClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Priority: NewPriorityClient(cfg),
+		Todo:     NewTodoClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Todo.
+//		Priority.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -178,22 +185,175 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Priority.Use(hooks...)
 	c.Todo.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Priority.Intercept(interceptors...)
 	c.Todo.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *PriorityMutation:
+		return c.Priority.mutate(ctx, m)
 	case *TodoMutation:
 		return c.Todo.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// PriorityClient is a client for the Priority schema.
+type PriorityClient struct {
+	config
+}
+
+// NewPriorityClient returns a client for the Priority from the given config.
+func NewPriorityClient(c config) *PriorityClient {
+	return &PriorityClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `priority.Hooks(f(g(h())))`.
+func (c *PriorityClient) Use(hooks ...Hook) {
+	c.hooks.Priority = append(c.hooks.Priority, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `priority.Intercept(f(g(h())))`.
+func (c *PriorityClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Priority = append(c.inters.Priority, interceptors...)
+}
+
+// Create returns a builder for creating a Priority entity.
+func (c *PriorityClient) Create() *PriorityCreate {
+	mutation := newPriorityMutation(c.config, OpCreate)
+	return &PriorityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Priority entities.
+func (c *PriorityClient) CreateBulk(builders ...*PriorityCreate) *PriorityCreateBulk {
+	return &PriorityCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PriorityClient) MapCreateBulk(slice any, setFunc func(*PriorityCreate, int)) *PriorityCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PriorityCreateBulk{err: fmt.Errorf("calling to PriorityClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PriorityCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PriorityCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Priority.
+func (c *PriorityClient) Update() *PriorityUpdate {
+	mutation := newPriorityMutation(c.config, OpUpdate)
+	return &PriorityUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PriorityClient) UpdateOne(pr *Priority) *PriorityUpdateOne {
+	mutation := newPriorityMutation(c.config, OpUpdateOne, withPriority(pr))
+	return &PriorityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PriorityClient) UpdateOneID(id string) *PriorityUpdateOne {
+	mutation := newPriorityMutation(c.config, OpUpdateOne, withPriorityID(id))
+	return &PriorityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Priority.
+func (c *PriorityClient) Delete() *PriorityDelete {
+	mutation := newPriorityMutation(c.config, OpDelete)
+	return &PriorityDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PriorityClient) DeleteOne(pr *Priority) *PriorityDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PriorityClient) DeleteOneID(id string) *PriorityDeleteOne {
+	builder := c.Delete().Where(priority.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PriorityDeleteOne{builder}
+}
+
+// Query returns a query builder for Priority.
+func (c *PriorityClient) Query() *PriorityQuery {
+	return &PriorityQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePriority},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Priority entity by its id.
+func (c *PriorityClient) Get(ctx context.Context, id string) (*Priority, error) {
+	return c.Query().Where(priority.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PriorityClient) GetX(ctx context.Context, id string) *Priority {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTodos queries the todos edge of a Priority.
+func (c *PriorityClient) QueryTodos(pr *Priority) *TodoQuery {
+	query := (&TodoClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(priority.Table, priority.FieldID, id),
+			sqlgraph.To(todo.Table, todo.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, priority.TodosTable, priority.TodosPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PriorityClient) Hooks() []Hook {
+	return c.hooks.Priority
+}
+
+// Interceptors returns the client interceptors.
+func (c *PriorityClient) Interceptors() []Interceptor {
+	return c.inters.Priority
+}
+
+func (c *PriorityClient) mutate(ctx context.Context, m *PriorityMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PriorityCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PriorityUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PriorityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PriorityDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Priority mutation op: %q", m.Op())
 	}
 }
 
@@ -305,6 +465,22 @@ func (c *TodoClient) GetX(ctx context.Context, id string) *Todo {
 	return obj
 }
 
+// QueryPriorities queries the priorities edge of a Todo.
+func (c *TodoClient) QueryPriorities(t *Todo) *PriorityQuery {
+	query := (&PriorityClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(todo.Table, todo.FieldID, id),
+			sqlgraph.To(priority.Table, priority.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, todo.PrioritiesTable, todo.PrioritiesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TodoClient) Hooks() []Hook {
 	return c.hooks.Todo
@@ -333,9 +509,9 @@ func (c *TodoClient) mutate(ctx context.Context, m *TodoMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Todo []ent.Hook
+		Priority, Todo []ent.Hook
 	}
 	inters struct {
-		Todo []ent.Interceptor
+		Priority, Todo []ent.Interceptor
 	}
 )

@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"server/ent/priority"
 	"server/ent/schema"
 	"server/ent/todo"
 )
@@ -11,6 +12,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	priorityFields := schema.Priority{}.Fields()
+	_ = priorityFields
+	// priorityDescName is the schema descriptor for name field.
+	priorityDescName := priorityFields[1].Descriptor()
+	// priority.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	priority.NameValidator = priorityDescName.Validators[0].(func(string) error)
 	todoFields := schema.Todo{}.Fields()
 	_ = todoFields
 	// todoDescTitle is the schema descriptor for title field.

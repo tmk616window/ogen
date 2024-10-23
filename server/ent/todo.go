@@ -21,8 +21,29 @@ type Todo struct {
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// Name holds the value of the "name" field.
-	Name         string `json:"name,omitempty"`
+	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the TodoQuery when eager-loading is set.
+	Edges        TodoEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// TodoEdges holds the relations/edges for other nodes in the graph.
+type TodoEdges struct {
+	// Priorities holds the value of the priorities edge.
+	Priorities []*Priority `json:"priorities,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// PrioritiesOrErr returns the Priorities value or an error if the edge
+// was not loaded in eager-loading.
+func (e TodoEdges) PrioritiesOrErr() ([]*Priority, error) {
+	if e.loadedTypes[0] {
+		return e.Priorities, nil
+	}
+	return nil, &NotLoadedError{edge: "priorities"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -82,6 +103,11 @@ func (t *Todo) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (t *Todo) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
+}
+
+// QueryPriorities queries the "priorities" edge of the Todo entity.
+func (t *Todo) QueryPriorities() *PriorityQuery {
+	return NewTodoClient(t.config).QueryPriorities(t)
 }
 
 // Update returns a builder for updating this Todo.
