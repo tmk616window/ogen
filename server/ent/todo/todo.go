@@ -18,15 +18,19 @@ const (
 	FieldDescription = "description"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgePriorities holds the string denoting the priorities edge name in mutations.
-	EdgePriorities = "priorities"
+	// FieldPriorityID holds the string denoting the priority_id field in the database.
+	FieldPriorityID = "priority_id"
+	// EdgePriority holds the string denoting the priority edge name in mutations.
+	EdgePriority = "priority"
 	// Table holds the table name of the todo in the database.
 	Table = "todos"
-	// PrioritiesTable is the table that holds the priorities relation/edge. The primary key declared below.
-	PrioritiesTable = "priority_todos"
-	// PrioritiesInverseTable is the table name for the Priority entity.
+	// PriorityTable is the table that holds the priority relation/edge.
+	PriorityTable = "todos"
+	// PriorityInverseTable is the table name for the Priority entity.
 	// It exists in this package in order to avoid circular dependency with the "priority" package.
-	PrioritiesInverseTable = "priorities"
+	PriorityInverseTable = "priorities"
+	// PriorityColumn is the table column denoting the priority relation/edge.
+	PriorityColumn = "priority_id"
 )
 
 // Columns holds all SQL columns for todo fields.
@@ -35,13 +39,8 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldName,
+	FieldPriorityID,
 }
-
-var (
-	// PrioritiesPrimaryKey and PrioritiesColumn2 are the table columns denoting the
-	// primary key for the priorities relation (M2M).
-	PrioritiesPrimaryKey = []string{"priority_id", "todo_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -83,23 +82,21 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByPrioritiesCount orders the results by priorities count.
-func ByPrioritiesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPrioritiesStep(), opts...)
-	}
+// ByPriorityID orders the results by the priority_id field.
+func ByPriorityID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPriorityID, opts...).ToFunc()
 }
 
-// ByPriorities orders the results by priorities terms.
-func ByPriorities(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPriorityField orders the results by priority field.
+func ByPriorityField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPrioritiesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPriorityStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newPrioritiesStep() *sqlgraph.Step {
+func newPriorityStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PrioritiesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, PrioritiesTable, PrioritiesPrimaryKey...),
+		sqlgraph.To(PriorityInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, PriorityTable, PriorityColumn),
 	)
 }

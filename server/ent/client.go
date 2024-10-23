@@ -316,15 +316,15 @@ func (c *PriorityClient) GetX(ctx context.Context, id int) *Priority {
 	return obj
 }
 
-// QueryTodos queries the todos edge of a Priority.
-func (c *PriorityClient) QueryTodos(pr *Priority) *TodoQuery {
+// QueryTodo queries the todo edge of a Priority.
+func (c *PriorityClient) QueryTodo(pr *Priority) *TodoQuery {
 	query := (&TodoClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(priority.Table, priority.FieldID, id),
 			sqlgraph.To(todo.Table, todo.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, priority.TodosTable, priority.TodosPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, priority.TodoTable, priority.TodoColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -465,15 +465,15 @@ func (c *TodoClient) GetX(ctx context.Context, id int) *Todo {
 	return obj
 }
 
-// QueryPriorities queries the priorities edge of a Todo.
-func (c *TodoClient) QueryPriorities(t *Todo) *PriorityQuery {
+// QueryPriority queries the priority edge of a Todo.
+func (c *TodoClient) QueryPriority(t *Todo) *PriorityQuery {
 	query := (&PriorityClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(todo.Table, todo.FieldID, id),
 			sqlgraph.To(priority.Table, priority.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, todo.PrioritiesTable, todo.PrioritiesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, todo.PriorityTable, todo.PriorityColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil

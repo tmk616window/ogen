@@ -22,6 +22,7 @@ func (Priority) Fields() []ent.Field {
 // Edges of the Priority.
 func (Priority) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("todos", Todo.Type),
+		edge.To("todo", Todo.Type).
+			Unique(),
 	}
 }

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"server/ent/priority"
 	"server/ent/todo"
 	"strings"
 
@@ -22,6 +23,8 @@ type Todo struct {
 	Description string `json:"description,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// PriorityID holds the value of the "priority_id" field.
+	PriorityID int `json:"priority_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TodoQuery when eager-loading is set.
 	Edges        TodoEdges `json:"edges"`
@@ -30,20 +33,22 @@ type Todo struct {
 
 // TodoEdges holds the relations/edges for other nodes in the graph.
 type TodoEdges struct {
-	// Priorities holds the value of the priorities edge.
-	Priorities []*Priority `json:"priorities,omitempty"`
+	// Priority holds the value of the priority edge.
+	Priority *Priority `json:"priority,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PrioritiesOrErr returns the Priorities value or an error if the edge
-// was not loaded in eager-loading.
-func (e TodoEdges) PrioritiesOrErr() ([]*Priority, error) {
-	if e.loadedTypes[0] {
-		return e.Priorities, nil
+// PriorityOrErr returns the Priority value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TodoEdges) PriorityOrErr() (*Priority, error) {
+	if e.Priority != nil {
+		return e.Priority, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: priority.Label}
 	}
-	return nil, &NotLoadedError{edge: "priorities"}
+	return nil, &NotLoadedError{edge: "priority"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -51,7 +56,7 @@ func (*Todo) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case todo.FieldID:
+		case todo.FieldID, todo.FieldPriorityID:
 			values[i] = new(sql.NullInt64)
 		case todo.FieldTitle, todo.FieldDescription, todo.FieldName:
 			values[i] = new(sql.NullString)
@@ -94,6 +99,12 @@ func (t *Todo) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Name = value.String
 			}
+		case todo.FieldPriorityID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field priority_id", values[i])
+			} else if value.Valid {
+				t.PriorityID = int(value.Int64)
+			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
 		}
@@ -107,9 +118,9 @@ func (t *Todo) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
 }
 
-// QueryPriorities queries the "priorities" edge of the Todo entity.
-func (t *Todo) QueryPriorities() *PriorityQuery {
-	return NewTodoClient(t.config).QueryPriorities(t)
+// QueryPriority queries the "priority" edge of the Todo entity.
+func (t *Todo) QueryPriority() *PriorityQuery {
+	return NewTodoClient(t.config).QueryPriority(t)
 }
 
 // Update returns a builder for updating this Todo.
@@ -143,6 +154,9 @@ func (t *Todo) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(t.Name)
+	builder.WriteString(", ")
+	builder.WriteString("priority_id=")
+	builder.WriteString(fmt.Sprintf("%v", t.PriorityID))
 	builder.WriteByte(')')
 	return builder.String()
 }

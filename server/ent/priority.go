@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"server/ent/priority"
+	"server/ent/todo"
 	"strings"
 
 	"entgo.io/ent"
@@ -26,20 +27,22 @@ type Priority struct {
 
 // PriorityEdges holds the relations/edges for other nodes in the graph.
 type PriorityEdges struct {
-	// Todos holds the value of the todos edge.
-	Todos []*Todo `json:"todos,omitempty"`
+	// Todo holds the value of the todo edge.
+	Todo *Todo `json:"todo,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// TodosOrErr returns the Todos value or an error if the edge
-// was not loaded in eager-loading.
-func (e PriorityEdges) TodosOrErr() ([]*Todo, error) {
-	if e.loadedTypes[0] {
-		return e.Todos, nil
+// TodoOrErr returns the Todo value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PriorityEdges) TodoOrErr() (*Todo, error) {
+	if e.Todo != nil {
+		return e.Todo, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: todo.Label}
 	}
-	return nil, &NotLoadedError{edge: "todos"}
+	return nil, &NotLoadedError{edge: "todo"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -91,9 +94,9 @@ func (pr *Priority) Value(name string) (ent.Value, error) {
 	return pr.selectValues.Get(name)
 }
 
-// QueryTodos queries the "todos" edge of the Priority entity.
-func (pr *Priority) QueryTodos() *TodoQuery {
-	return NewPriorityClient(pr.config).QueryTodos(pr)
+// QueryTodo queries the "todo" edge of the Priority entity.
+func (pr *Priority) QueryTodo() *TodoQuery {
+	return NewPriorityClient(pr.config).QueryTodo(pr)
 }
 
 // Update returns a builder for updating this Priority.

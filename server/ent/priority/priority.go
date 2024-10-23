@@ -14,15 +14,17 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeTodos holds the string denoting the todos edge name in mutations.
-	EdgeTodos = "todos"
+	// EdgeTodo holds the string denoting the todo edge name in mutations.
+	EdgeTodo = "todo"
 	// Table holds the table name of the priority in the database.
 	Table = "priorities"
-	// TodosTable is the table that holds the todos relation/edge. The primary key declared below.
-	TodosTable = "priority_todos"
-	// TodosInverseTable is the table name for the Todo entity.
+	// TodoTable is the table that holds the todo relation/edge.
+	TodoTable = "todos"
+	// TodoInverseTable is the table name for the Todo entity.
 	// It exists in this package in order to avoid circular dependency with the "todo" package.
-	TodosInverseTable = "todos"
+	TodoInverseTable = "todos"
+	// TodoColumn is the table column denoting the todo relation/edge.
+	TodoColumn = "priority_id"
 )
 
 // Columns holds all SQL columns for priority fields.
@@ -30,12 +32,6 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 }
-
-var (
-	// TodosPrimaryKey and TodosColumn2 are the table columns denoting the
-	// primary key for the todos relation (M2M).
-	TodosPrimaryKey = []string{"priority_id", "todo_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -65,23 +61,16 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByTodosCount orders the results by todos count.
-func ByTodosCount(opts ...sql.OrderTermOption) OrderOption {
+// ByTodoField orders the results by todo field.
+func ByTodoField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTodosStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newTodoStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByTodos orders the results by todos terms.
-func ByTodos(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTodosStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-func newTodosStep() *sqlgraph.Step {
+func newTodoStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TodosInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, TodosTable, TodosPrimaryKey...),
+		sqlgraph.To(TodoInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, TodoTable, TodoColumn),
 	)
 }

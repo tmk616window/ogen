@@ -24,7 +24,7 @@ type PriorityQuery struct {
 	order      []priority.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Priority
-	withTodos  *TodoQuery
+	withTodo   *TodoQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,8 +61,8 @@ func (pq *PriorityQuery) Order(o ...priority.OrderOption) *PriorityQuery {
 	return pq
 }
 
-// QueryTodos chains the current query on the "todos" edge.
-func (pq *PriorityQuery) QueryTodos() *TodoQuery {
+// QueryTodo chains the current query on the "todo" edge.
+func (pq *PriorityQuery) QueryTodo() *TodoQuery {
 	query := (&TodoClient{config: pq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
@@ -75,7 +75,7 @@ func (pq *PriorityQuery) QueryTodos() *TodoQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(priority.Table, priority.FieldID, selector),
 			sqlgraph.To(todo.Table, todo.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, priority.TodosTable, priority.TodosPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, priority.TodoTable, priority.TodoColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -275,21 +275,21 @@ func (pq *PriorityQuery) Clone() *PriorityQuery {
 		order:      append([]priority.OrderOption{}, pq.order...),
 		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Priority{}, pq.predicates...),
-		withTodos:  pq.withTodos.Clone(),
+		withTodo:   pq.withTodo.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
 	}
 }
 
-// WithTodos tells the query-builder to eager-load the nodes that are connected to
-// the "todos" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PriorityQuery) WithTodos(opts ...func(*TodoQuery)) *PriorityQuery {
+// WithTodo tells the query-builder to eager-load the nodes that are connected to
+// the "todo" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *PriorityQuery) WithTodo(opts ...func(*TodoQuery)) *PriorityQuery {
 	query := (&TodoClient{config: pq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withTodos = query
+	pq.withTodo = query
 	return pq
 }
 
@@ -372,7 +372,7 @@ func (pq *PriorityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pri
 		nodes       = []*Priority{}
 		_spec       = pq.querySpec()
 		loadedTypes = [1]bool{
-			pq.withTodos != nil,
+			pq.withTodo != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -393,74 +393,39 @@ func (pq *PriorityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pri
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := pq.withTodos; query != nil {
-		if err := pq.loadTodos(ctx, query, nodes,
-			func(n *Priority) { n.Edges.Todos = []*Todo{} },
-			func(n *Priority, e *Todo) { n.Edges.Todos = append(n.Edges.Todos, e) }); err != nil {
+	if query := pq.withTodo; query != nil {
+		if err := pq.loadTodo(ctx, query, nodes, nil,
+			func(n *Priority, e *Todo) { n.Edges.Todo = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (pq *PriorityQuery) loadTodos(ctx context.Context, query *TodoQuery, nodes []*Priority, init func(*Priority), assign func(*Priority, *Todo)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Priority)
-	nids := make(map[int]map[*Priority]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
+func (pq *PriorityQuery) loadTodo(ctx context.Context, query *TodoQuery, nodes []*Priority, init func(*Priority), assign func(*Priority, *Todo)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Priority)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(priority.TodosTable)
-		s.Join(joinT).On(s.C(todo.FieldID), joinT.C(priority.TodosPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(priority.TodosPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(priority.TodosPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(todo.FieldPriorityID)
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Priority]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Todo](ctx, query, qr, query.inters)
+	query.Where(predicate.Todo(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(priority.TodoColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		fk := n.PriorityID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected "todos" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "priority_id" returned %v for node %v`, fk, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

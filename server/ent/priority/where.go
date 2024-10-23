@@ -124,21 +124,21 @@ func NameContainsFold(v string) predicate.Priority {
 	return predicate.Priority(sql.FieldContainsFold(FieldName, v))
 }
 
-// HasTodos applies the HasEdge predicate on the "todos" edge.
-func HasTodos() predicate.Priority {
+// HasTodo applies the HasEdge predicate on the "todo" edge.
+func HasTodo() predicate.Priority {
 	return predicate.Priority(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, TodosTable, TodosPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, TodoTable, TodoColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTodosWith applies the HasEdge predicate on the "todos" edge with a given conditions (other predicates).
-func HasTodosWith(preds ...predicate.Todo) predicate.Priority {
+// HasTodoWith applies the HasEdge predicate on the "todo" edge with a given conditions (other predicates).
+func HasTodoWith(preds ...predicate.Todo) predicate.Priority {
 	return predicate.Priority(func(s *sql.Selector) {
-		step := newTodosStep()
+		step := newTodoStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

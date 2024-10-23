@@ -46,25 +46,21 @@ func (tc *TodoCreate) SetName(s string) *TodoCreate {
 	return tc
 }
 
+// SetPriorityID sets the "priority_id" field.
+func (tc *TodoCreate) SetPriorityID(i int) *TodoCreate {
+	tc.mutation.SetPriorityID(i)
+	return tc
+}
+
 // SetID sets the "id" field.
 func (tc *TodoCreate) SetID(i int) *TodoCreate {
 	tc.mutation.SetID(i)
 	return tc
 }
 
-// AddPriorityIDs adds the "priorities" edge to the Priority entity by IDs.
-func (tc *TodoCreate) AddPriorityIDs(ids ...int) *TodoCreate {
-	tc.mutation.AddPriorityIDs(ids...)
-	return tc
-}
-
-// AddPriorities adds the "priorities" edges to the Priority entity.
-func (tc *TodoCreate) AddPriorities(p ...*Priority) *TodoCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tc.AddPriorityIDs(ids...)
+// SetPriority sets the "priority" edge to the Priority entity.
+func (tc *TodoCreate) SetPriority(p *Priority) *TodoCreate {
+	return tc.SetPriorityID(p.ID)
 }
 
 // Mutation returns the TodoMutation object of the builder.
@@ -117,6 +113,12 @@ func (tc *TodoCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
 		}
 	}
+	if _, ok := tc.mutation.PriorityID(); !ok {
+		return &ValidationError{Name: "priority_id", err: errors.New(`ent: missing required field "Todo.priority_id"`)}
+	}
+	if len(tc.mutation.PriorityIDs()) == 0 {
+		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required edge "Todo.priority"`)}
+	}
 	return nil
 }
 
@@ -161,12 +163,12 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 		_spec.SetField(todo.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := tc.mutation.PrioritiesIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.PriorityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
-			Table:   todo.PrioritiesTable,
-			Columns: todo.PrioritiesPrimaryKey,
+			Table:   todo.PriorityTable,
+			Columns: []string{todo.PriorityColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
@@ -175,6 +177,7 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.PriorityID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

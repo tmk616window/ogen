@@ -69,6 +69,11 @@ func Name(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldName, v))
 }
 
+// PriorityID applies equality check predicate on the "priority_id" field. It's identical to PriorityIDEQ.
+func PriorityID(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldPriorityID, v))
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldTitle, v))
@@ -274,21 +279,41 @@ func NameContainsFold(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldContainsFold(FieldName, v))
 }
 
-// HasPriorities applies the HasEdge predicate on the "priorities" edge.
-func HasPriorities() predicate.Todo {
+// PriorityIDEQ applies the EQ predicate on the "priority_id" field.
+func PriorityIDEQ(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldPriorityID, v))
+}
+
+// PriorityIDNEQ applies the NEQ predicate on the "priority_id" field.
+func PriorityIDNEQ(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldNEQ(FieldPriorityID, v))
+}
+
+// PriorityIDIn applies the In predicate on the "priority_id" field.
+func PriorityIDIn(vs ...int) predicate.Todo {
+	return predicate.Todo(sql.FieldIn(FieldPriorityID, vs...))
+}
+
+// PriorityIDNotIn applies the NotIn predicate on the "priority_id" field.
+func PriorityIDNotIn(vs ...int) predicate.Todo {
+	return predicate.Todo(sql.FieldNotIn(FieldPriorityID, vs...))
+}
+
+// HasPriority applies the HasEdge predicate on the "priority" edge.
+func HasPriority() predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, PrioritiesTable, PrioritiesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, true, PriorityTable, PriorityColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPrioritiesWith applies the HasEdge predicate on the "priorities" edge with a given conditions (other predicates).
-func HasPrioritiesWith(preds ...predicate.Priority) predicate.Todo {
+// HasPriorityWith applies the HasEdge predicate on the "priority" edge with a given conditions (other predicates).
+func HasPriorityWith(preds ...predicate.Priority) predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
-		step := newPrioritiesStep()
+		step := newPriorityStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

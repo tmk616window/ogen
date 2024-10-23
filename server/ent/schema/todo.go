@@ -18,13 +18,17 @@ func (Todo) Fields() []ent.Field {
 		field.String("title").NotEmpty(),
 		field.String("description").Optional(),
 		field.String("name").NotEmpty(),
+		field.Int("priority_id"),
 	}
 }
 
 // Edges of the Todo.
 func (Todo) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("priorities", Priority.Type).
-			Ref("todos"),
+		edge.From("priority", Priority.Type).
+			Ref("todo").
+			Required().
+			Unique().
+			Field("priority_id"),
 	}
 }
