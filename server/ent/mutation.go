@@ -33,11 +33,11 @@ type PriorityMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
 	name          *string
 	clearedFields map[string]struct{}
-	todos         map[string]struct{}
-	removedtodos  map[string]struct{}
+	todos         map[int]struct{}
+	removedtodos  map[int]struct{}
 	clearedtodos  bool
 	done          bool
 	oldValue      func(context.Context) (*Priority, error)
@@ -64,7 +64,7 @@ func newPriorityMutation(c config, op Op, opts ...priorityOption) *PriorityMutat
 }
 
 // withPriorityID sets the ID field of the mutation.
-func withPriorityID(id string) priorityOption {
+func withPriorityID(id int) priorityOption {
 	return func(m *PriorityMutation) {
 		var (
 			err   error
@@ -116,13 +116,13 @@ func (m PriorityMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Priority entities.
-func (m *PriorityMutation) SetID(id string) {
+func (m *PriorityMutation) SetID(id int) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *PriorityMutation) ID() (id string, exists bool) {
+func (m *PriorityMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -133,12 +133,12 @@ func (m *PriorityMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *PriorityMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *PriorityMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -185,9 +185,9 @@ func (m *PriorityMutation) ResetName() {
 }
 
 // AddTodoIDs adds the "todos" edge to the Todo entity by ids.
-func (m *PriorityMutation) AddTodoIDs(ids ...string) {
+func (m *PriorityMutation) AddTodoIDs(ids ...int) {
 	if m.todos == nil {
-		m.todos = make(map[string]struct{})
+		m.todos = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.todos[ids[i]] = struct{}{}
@@ -205,9 +205,9 @@ func (m *PriorityMutation) TodosCleared() bool {
 }
 
 // RemoveTodoIDs removes the "todos" edge to the Todo entity by IDs.
-func (m *PriorityMutation) RemoveTodoIDs(ids ...string) {
+func (m *PriorityMutation) RemoveTodoIDs(ids ...int) {
 	if m.removedtodos == nil {
-		m.removedtodos = make(map[string]struct{})
+		m.removedtodos = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.todos, ids[i])
@@ -216,7 +216,7 @@ func (m *PriorityMutation) RemoveTodoIDs(ids ...string) {
 }
 
 // RemovedTodos returns the removed IDs of the "todos" edge to the Todo entity.
-func (m *PriorityMutation) RemovedTodosIDs() (ids []string) {
+func (m *PriorityMutation) RemovedTodosIDs() (ids []int) {
 	for id := range m.removedtodos {
 		ids = append(ids, id)
 	}
@@ -224,7 +224,7 @@ func (m *PriorityMutation) RemovedTodosIDs() (ids []string) {
 }
 
 // TodosIDs returns the "todos" edge IDs in the mutation.
-func (m *PriorityMutation) TodosIDs() (ids []string) {
+func (m *PriorityMutation) TodosIDs() (ids []int) {
 	for id := range m.todos {
 		ids = append(ids, id)
 	}
@@ -458,13 +458,13 @@ type TodoMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *string
+	id                *int
 	title             *string
 	description       *string
 	name              *string
 	clearedFields     map[string]struct{}
-	priorities        map[string]struct{}
-	removedpriorities map[string]struct{}
+	priorities        map[int]struct{}
+	removedpriorities map[int]struct{}
 	clearedpriorities bool
 	done              bool
 	oldValue          func(context.Context) (*Todo, error)
@@ -491,7 +491,7 @@ func newTodoMutation(c config, op Op, opts ...todoOption) *TodoMutation {
 }
 
 // withTodoID sets the ID field of the mutation.
-func withTodoID(id string) todoOption {
+func withTodoID(id int) todoOption {
 	return func(m *TodoMutation) {
 		var (
 			err   error
@@ -543,13 +543,13 @@ func (m TodoMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Todo entities.
-func (m *TodoMutation) SetID(id string) {
+func (m *TodoMutation) SetID(id int) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TodoMutation) ID() (id string, exists bool) {
+func (m *TodoMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -560,12 +560,12 @@ func (m *TodoMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TodoMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *TodoMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -697,9 +697,9 @@ func (m *TodoMutation) ResetName() {
 }
 
 // AddPriorityIDs adds the "priorities" edge to the Priority entity by ids.
-func (m *TodoMutation) AddPriorityIDs(ids ...string) {
+func (m *TodoMutation) AddPriorityIDs(ids ...int) {
 	if m.priorities == nil {
-		m.priorities = make(map[string]struct{})
+		m.priorities = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.priorities[ids[i]] = struct{}{}
@@ -717,9 +717,9 @@ func (m *TodoMutation) PrioritiesCleared() bool {
 }
 
 // RemovePriorityIDs removes the "priorities" edge to the Priority entity by IDs.
-func (m *TodoMutation) RemovePriorityIDs(ids ...string) {
+func (m *TodoMutation) RemovePriorityIDs(ids ...int) {
 	if m.removedpriorities == nil {
-		m.removedpriorities = make(map[string]struct{})
+		m.removedpriorities = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.priorities, ids[i])
@@ -728,7 +728,7 @@ func (m *TodoMutation) RemovePriorityIDs(ids ...string) {
 }
 
 // RemovedPriorities returns the removed IDs of the "priorities" edge to the Priority entity.
-func (m *TodoMutation) RemovedPrioritiesIDs() (ids []string) {
+func (m *TodoMutation) RemovedPrioritiesIDs() (ids []int) {
 	for id := range m.removedpriorities {
 		ids = append(ids, id)
 	}
@@ -736,7 +736,7 @@ func (m *TodoMutation) RemovedPrioritiesIDs() (ids []string) {
 }
 
 // PrioritiesIDs returns the "priorities" edge IDs in the mutation.
-func (m *TodoMutation) PrioritiesIDs() (ids []string) {
+func (m *TodoMutation) PrioritiesIDs() (ids []int) {
 	for id := range m.priorities {
 		ids = append(ids, id)
 	}

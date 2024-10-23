@@ -10,7 +10,7 @@ import (
 var (
 	// PrioritiesColumns holds the columns for the "priorities" table.
 	PrioritiesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 	}
 	// PrioritiesTable holds the schema information for the "priorities" table.
@@ -21,7 +21,7 @@ var (
 	}
 	// TodosColumns holds the columns for the "todos" table.
 	TodosColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString},
@@ -34,8 +34,8 @@ var (
 	}
 	// PriorityTodosColumns holds the columns for the "priority_todos" table.
 	PriorityTodosColumns = []*schema.Column{
-		{Name: "priority_id", Type: field.TypeString},
-		{Name: "todo_id", Type: field.TypeString},
+		{Name: "priority_id", Type: field.TypeInt},
+		{Name: "todo_id", Type: field.TypeInt},
 	}
 	// PriorityTodosTable holds the schema information for the "priority_todos" table.
 	PriorityTodosTable = &schema.Table{

@@ -27,20 +27,20 @@ func (pc *PriorityCreate) SetName(s string) *PriorityCreate {
 }
 
 // SetID sets the "id" field.
-func (pc *PriorityCreate) SetID(s string) *PriorityCreate {
-	pc.mutation.SetID(s)
+func (pc *PriorityCreate) SetID(i int) *PriorityCreate {
+	pc.mutation.SetID(i)
 	return pc
 }
 
 // AddTodoIDs adds the "todos" edge to the Todo entity by IDs.
-func (pc *PriorityCreate) AddTodoIDs(ids ...string) *PriorityCreate {
+func (pc *PriorityCreate) AddTodoIDs(ids ...int) *PriorityCreate {
 	pc.mutation.AddTodoIDs(ids...)
 	return pc
 }
 
 // AddTodos adds the "todos" edges to the Todo entity.
 func (pc *PriorityCreate) AddTodos(t ...*Todo) *PriorityCreate {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -103,12 +103,9 @@ func (pc *PriorityCreate) sqlSave(ctx context.Context) (*Priority, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Priority.ID type: %T", _spec.ID.Value)
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
 	}
 	pc.mutation.id = &_node.ID
 	pc.mutation.done = true
@@ -118,7 +115,7 @@ func (pc *PriorityCreate) sqlSave(ctx context.Context) (*Priority, error) {
 func (pc *PriorityCreate) createSpec() (*Priority, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Priority{config: pc.config}
-		_spec = sqlgraph.NewCreateSpec(priority.Table, sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(priority.Table, sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt))
 	)
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
@@ -136,7 +133,7 @@ func (pc *PriorityCreate) createSpec() (*Priority, *sqlgraph.CreateSpec) {
 			Columns: priority.TodosPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(todo.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -191,6 +188,10 @@ func (pcb *PriorityCreateBulk) Save(ctx context.Context) ([]*Priority, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})

@@ -269,7 +269,7 @@ func (c *PriorityClient) UpdateOne(pr *Priority) *PriorityUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PriorityClient) UpdateOneID(id string) *PriorityUpdateOne {
+func (c *PriorityClient) UpdateOneID(id int) *PriorityUpdateOne {
 	mutation := newPriorityMutation(c.config, OpUpdateOne, withPriorityID(id))
 	return &PriorityUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -286,7 +286,7 @@ func (c *PriorityClient) DeleteOne(pr *Priority) *PriorityDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PriorityClient) DeleteOneID(id string) *PriorityDeleteOne {
+func (c *PriorityClient) DeleteOneID(id int) *PriorityDeleteOne {
 	builder := c.Delete().Where(priority.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -303,12 +303,12 @@ func (c *PriorityClient) Query() *PriorityQuery {
 }
 
 // Get returns a Priority entity by its id.
-func (c *PriorityClient) Get(ctx context.Context, id string) (*Priority, error) {
+func (c *PriorityClient) Get(ctx context.Context, id int) (*Priority, error) {
 	return c.Query().Where(priority.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PriorityClient) GetX(ctx context.Context, id string) *Priority {
+func (c *PriorityClient) GetX(ctx context.Context, id int) *Priority {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -418,7 +418,7 @@ func (c *TodoClient) UpdateOne(t *Todo) *TodoUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TodoClient) UpdateOneID(id string) *TodoUpdateOne {
+func (c *TodoClient) UpdateOneID(id int) *TodoUpdateOne {
 	mutation := newTodoMutation(c.config, OpUpdateOne, withTodoID(id))
 	return &TodoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -435,7 +435,7 @@ func (c *TodoClient) DeleteOne(t *Todo) *TodoDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *TodoClient) DeleteOneID(id string) *TodoDeleteOne {
+func (c *TodoClient) DeleteOneID(id int) *TodoDeleteOne {
 	builder := c.Delete().Where(todo.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -452,12 +452,12 @@ func (c *TodoClient) Query() *TodoQuery {
 }
 
 // Get returns a Todo entity by its id.
-func (c *TodoClient) Get(ctx context.Context, id string) (*Todo, error) {
+func (c *TodoClient) Get(ctx context.Context, id int) (*Todo, error) {
 	return c.Query().Where(todo.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TodoClient) GetX(ctx context.Context, id string) *Todo {
+func (c *TodoClient) GetX(ctx context.Context, id int) *Todo {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

@@ -14,7 +14,7 @@ type Todo struct {
 // Fields of the Todo.
 func (Todo) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").Unique().Immutable(),
+		field.Int("id").Unique().Immutable(),
 		field.String("title").NotEmpty(),
 		field.String("description").Optional(),
 		field.String("name").NotEmpty(),

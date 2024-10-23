@@ -14,7 +14,7 @@ type Priority struct {
 // Fields of the Priority.
 func (Priority) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").Unique().Immutable(),
+		field.Int("id").Unique().Immutable(),
 		field.String("name").NotEmpty(),
 	}
 }

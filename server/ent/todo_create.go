@@ -47,20 +47,20 @@ func (tc *TodoCreate) SetName(s string) *TodoCreate {
 }
 
 // SetID sets the "id" field.
-func (tc *TodoCreate) SetID(s string) *TodoCreate {
-	tc.mutation.SetID(s)
+func (tc *TodoCreate) SetID(i int) *TodoCreate {
+	tc.mutation.SetID(i)
 	return tc
 }
 
 // AddPriorityIDs adds the "priorities" edge to the Priority entity by IDs.
-func (tc *TodoCreate) AddPriorityIDs(ids ...string) *TodoCreate {
+func (tc *TodoCreate) AddPriorityIDs(ids ...int) *TodoCreate {
 	tc.mutation.AddPriorityIDs(ids...)
 	return tc
 }
 
 // AddPriorities adds the "priorities" edges to the Priority entity.
 func (tc *TodoCreate) AddPriorities(p ...*Priority) *TodoCreate {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -131,12 +131,9 @@ func (tc *TodoCreate) sqlSave(ctx context.Context) (*Todo, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Todo.ID type: %T", _spec.ID.Value)
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
 	}
 	tc.mutation.id = &_node.ID
 	tc.mutation.done = true
@@ -146,7 +143,7 @@ func (tc *TodoCreate) sqlSave(ctx context.Context) (*Todo, error) {
 func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Todo{config: tc.config}
-		_spec = sqlgraph.NewCreateSpec(todo.Table, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(todo.Table, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt))
 	)
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
@@ -172,7 +169,7 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 			Columns: todo.PrioritiesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -227,6 +224,10 @@ func (tcb *TodoCreateBulk) Save(ctx context.Context) ([]*Todo, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})

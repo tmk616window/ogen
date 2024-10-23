@@ -10,58 +10,48 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Priority {
+func ID(id int) predicate.Priority {
 	return predicate.Priority(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Priority {
+func IDEQ(id int) predicate.Priority {
 	return predicate.Priority(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Priority {
+func IDNEQ(id int) predicate.Priority {
 	return predicate.Priority(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Priority {
+func IDIn(ids ...int) predicate.Priority {
 	return predicate.Priority(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Priority {
+func IDNotIn(ids ...int) predicate.Priority {
 	return predicate.Priority(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Priority {
+func IDGT(id int) predicate.Priority {
 	return predicate.Priority(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Priority {
+func IDGTE(id int) predicate.Priority {
 	return predicate.Priority(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Priority {
+func IDLT(id int) predicate.Priority {
 	return predicate.Priority(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Priority {
+func IDLTE(id int) predicate.Priority {
 	return predicate.Priority(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Priority {
-	return predicate.Priority(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Priority {
-	return predicate.Priority(sql.FieldContainsFold(FieldID, id))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.

@@ -107,8 +107,8 @@ func (pq *PriorityQuery) FirstX(ctx context.Context) *Priority {
 
 // FirstID returns the first Priority ID from the query.
 // Returns a *NotFoundError when no Priority ID was found.
-func (pq *PriorityQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (pq *PriorityQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -120,7 +120,7 @@ func (pq *PriorityQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *PriorityQuery) FirstIDX(ctx context.Context) string {
+func (pq *PriorityQuery) FirstIDX(ctx context.Context) int {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -158,8 +158,8 @@ func (pq *PriorityQuery) OnlyX(ctx context.Context) *Priority {
 // OnlyID is like Only, but returns the only Priority ID in the query.
 // Returns a *NotSingularError when more than one Priority ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *PriorityQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (pq *PriorityQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -175,7 +175,7 @@ func (pq *PriorityQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *PriorityQuery) OnlyIDX(ctx context.Context) string {
+func (pq *PriorityQuery) OnlyIDX(ctx context.Context) int {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,7 +203,7 @@ func (pq *PriorityQuery) AllX(ctx context.Context) []*Priority {
 }
 
 // IDs executes the query and returns a list of Priority IDs.
-func (pq *PriorityQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (pq *PriorityQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if pq.ctx.Unique == nil && pq.path != nil {
 		pq.Unique(true)
 	}
@@ -215,7 +215,7 @@ func (pq *PriorityQuery) IDs(ctx context.Context) (ids []string, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *PriorityQuery) IDsX(ctx context.Context) []string {
+func (pq *PriorityQuery) IDsX(ctx context.Context) []int {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -405,8 +405,8 @@ func (pq *PriorityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pri
 
 func (pq *PriorityQuery) loadTodos(ctx context.Context, query *TodoQuery, nodes []*Priority, init func(*Priority), assign func(*Priority, *Todo)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Priority)
-	nids := make(map[string]map[*Priority]struct{})
+	byID := make(map[int]*Priority)
+	nids := make(map[int]map[*Priority]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -435,11 +435,11 @@ func (pq *PriorityQuery) loadTodos(ctx context.Context, query *TodoQuery, nodes 
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullString)}, values...), nil
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := values[0].(*sql.NullString).String
-				inValue := values[1].(*sql.NullString).String
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Priority]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -475,7 +475,7 @@ func (pq *PriorityQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *PriorityQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(priority.Table, priority.Columns, sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(priority.Table, priority.Columns, sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt))
 	_spec.From = pq.sql
 	if unique := pq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

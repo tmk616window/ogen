@@ -77,14 +77,14 @@ func (tu *TodoUpdate) SetNillableName(s *string) *TodoUpdate {
 }
 
 // AddPriorityIDs adds the "priorities" edge to the Priority entity by IDs.
-func (tu *TodoUpdate) AddPriorityIDs(ids ...string) *TodoUpdate {
+func (tu *TodoUpdate) AddPriorityIDs(ids ...int) *TodoUpdate {
 	tu.mutation.AddPriorityIDs(ids...)
 	return tu
 }
 
 // AddPriorities adds the "priorities" edges to the Priority entity.
 func (tu *TodoUpdate) AddPriorities(p ...*Priority) *TodoUpdate {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -103,14 +103,14 @@ func (tu *TodoUpdate) ClearPriorities() *TodoUpdate {
 }
 
 // RemovePriorityIDs removes the "priorities" edge to Priority entities by IDs.
-func (tu *TodoUpdate) RemovePriorityIDs(ids ...string) *TodoUpdate {
+func (tu *TodoUpdate) RemovePriorityIDs(ids ...int) *TodoUpdate {
 	tu.mutation.RemovePriorityIDs(ids...)
 	return tu
 }
 
 // RemovePriorities removes "priorities" edges to Priority entities.
 func (tu *TodoUpdate) RemovePriorities(p ...*Priority) *TodoUpdate {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -163,7 +163,7 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := tu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(todo.Table, todo.Columns, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(todo.Table, todo.Columns, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -191,7 +191,7 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: todo.PrioritiesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -204,7 +204,7 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: todo.PrioritiesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -220,7 +220,7 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: todo.PrioritiesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -297,14 +297,14 @@ func (tuo *TodoUpdateOne) SetNillableName(s *string) *TodoUpdateOne {
 }
 
 // AddPriorityIDs adds the "priorities" edge to the Priority entity by IDs.
-func (tuo *TodoUpdateOne) AddPriorityIDs(ids ...string) *TodoUpdateOne {
+func (tuo *TodoUpdateOne) AddPriorityIDs(ids ...int) *TodoUpdateOne {
 	tuo.mutation.AddPriorityIDs(ids...)
 	return tuo
 }
 
 // AddPriorities adds the "priorities" edges to the Priority entity.
 func (tuo *TodoUpdateOne) AddPriorities(p ...*Priority) *TodoUpdateOne {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -323,14 +323,14 @@ func (tuo *TodoUpdateOne) ClearPriorities() *TodoUpdateOne {
 }
 
 // RemovePriorityIDs removes the "priorities" edge to Priority entities by IDs.
-func (tuo *TodoUpdateOne) RemovePriorityIDs(ids ...string) *TodoUpdateOne {
+func (tuo *TodoUpdateOne) RemovePriorityIDs(ids ...int) *TodoUpdateOne {
 	tuo.mutation.RemovePriorityIDs(ids...)
 	return tuo
 }
 
 // RemovePriorities removes "priorities" edges to Priority entities.
 func (tuo *TodoUpdateOne) RemovePriorities(p ...*Priority) *TodoUpdateOne {
-	ids := make([]string, len(p))
+	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
@@ -396,7 +396,7 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	if err := tuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(todo.Table, todo.Columns, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(todo.Table, todo.Columns, sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt))
 	id, ok := tuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Todo.id" for update`)}
@@ -441,7 +441,7 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 			Columns: todo.PrioritiesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -454,7 +454,7 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 			Columns: todo.PrioritiesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -470,7 +470,7 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 			Columns: todo.PrioritiesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
