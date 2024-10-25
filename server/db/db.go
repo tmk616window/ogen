@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
 
 	"server/ent"
 
@@ -22,11 +21,15 @@ type client struct {
 }
 
 func New() (ClientInterface, error) {
-	databaseUrl := fmt.Sprint("postgresql://user:password@127.0.0.1/db")
+	databaseUrl := fmt.Sprint("postgresql://user:password@db/db")
 
 	db, err := sql.Open("pgx", databaseUrl)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+	}
+
+	if db.Ping() != nil {
+		return nil, err
 	}
 
 	drv := entsql.OpenDB(dialect.Postgres, db)

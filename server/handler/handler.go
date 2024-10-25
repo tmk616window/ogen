@@ -4,6 +4,8 @@ import (
 	"context"
 	"server/ogen"
 	"server/usecase"
+
+	"github.com/samber/lo"
 )
 
 type handler struct {
@@ -22,9 +24,11 @@ func (h *handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
 		return nil, err
 	}
 
-	return []ogen.Todo{
-		{
-			ID: todos[0].ID,
-		},
-	}, nil
+	return lo.Map(todos, func(todo *usecase.Todo, _ int) ogen.Todo {
+		return ogen.Todo{
+			ID:          todo.ID,
+			Title:       todo.Title,
+			Description: ogen.OptString{Value: todo.Description},
+		}
+	}), nil
 }
