@@ -27,6 +27,7 @@ func New() (ClientInterface, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer db.Close()
 
 	if db.Ping() != nil {
 		return nil, err
