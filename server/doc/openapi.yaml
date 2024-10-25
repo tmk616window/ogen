@@ -20,81 +20,34 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
-    post:
-      summary: Create a new todo item
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TodoInput"
-      responses:
-        "201":
-          description: Todo item created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Todo"
+        # default: # default エラーレスポンスを追加
+        #   description: Unexpected error
+        #   content:
+        #     application/json:
+        #       schema:
+        #         $ref: "#/components/schemas/ErrorResponse"
 
-  # /todos/{id}:
-  #   get:
-  #     summary: Get a todo item by ID
-  #     parameters:
-  #       - in: path
-  #         name: id
-  #         required: true
-  #         schema:
-  #           type: string
-  #         description: The ID of the todo item to retrieve
-  #     responses:
-  #       "200":
-  #         description: A single todo item
-  #         content:
-  #           application/json:
-  #             schema:
-  #               $ref: "#/components/schemas/Todo"
-  #       "404":
-  #         description: Todo item not found
-
-  #   put:
-  #     summary: Update a todo item by ID
-  #     parameters:
-  #       - in: path
-  #         name: id
-  #         required: true
-  #         schema:
-  #           type: string
-  #         description: The ID of the todo item to update
-  #     requestBody:
-  #       required: true
-  #       content:
-  #         application/json:
-  #           schema:
-  #             $ref: "#/components/schemas/TodoInput"
-  #     responses:
-  #       "200":
-  #         description: Todo item updated
-  #         content:
-  #           application/json:
-  #             schema:
-  #               $ref: "#/components/schemas/Todo"
-  #       "404":
-  #         description: Todo item not found
-
-  #   delete:
-  #     summary: Delete a todo item by ID
-  #     parameters:
-  #       - in: path
-  #         name: id
-  #         required: true
-  #         schema:
-  #           type: string
-  #         description: The ID of the todo item to delete
-  #     responses:
-  #       "204":
-  #         description: Todo item deleted
-  #       "404":
-  #         description: Todo item not found
+    # post:
+    #   summary: Create a new todo item
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: "#/components/schemas/TodoInput"
+    #   responses:
+    #     "201":
+    #       description: Todo item created
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: "#/components/schemas/Todo"
+    #     default: # default エラーレスポンスを追加
+    #       description: Unexpected error
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -102,7 +55,7 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
         title:
           type: string
         description:
@@ -124,3 +77,14 @@ components:
           type: boolean
       required:
         - title
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer
+      required:
+        - error
+        - code

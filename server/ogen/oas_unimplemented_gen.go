@@ -21,12 +21,3 @@ var _ Handler = UnimplementedHandler{}
 func (UnimplementedHandler) TodosGet(ctx context.Context) (r []Todo, _ error) {
 	return r, ht.ErrNotImplemented
 }
-
-// TodosPost implements POST /todos operation.
-//
-// Create a new todo item.
-//
-// POST /todos
-func (UnimplementedHandler) TodosPost(ctx context.Context, req *TodoInput) (r *Todo, _ error) {
-	return r, ht.ErrNotImplemented
-}

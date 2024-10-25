@@ -2,17 +2,17 @@ package usecase
 
 import (
 	"context"
-	"server/repogitory"
+	"server/db"
 )
 
 type usecase struct {
-	Repogitory repogitory.RepogitoryInterface
+	db db.ClientInterface
 }
 
 type UsecaseInterface interface {
-	TodosGet(ctx context.Context) ([]Todo, error)
+	TodosGet(ctx context.Context) ([]*Todo, error)
 }
 
-func NewUsecase() UsecaseInterface {
-	return &usecase{}
+func NewUsecase(dbc db.ClientInterface) UsecaseInterface {
+	return &usecase{dbc}
 }

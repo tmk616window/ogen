@@ -3,15 +3,15 @@ init:
 	docker compose build	
 
 .PHONY: up
-run:
+up:
 	docker compose up
 
-.PHONY: upd
-run:
+.PHONY: up-detached
+upd:
 	docker compose up -d
 
-.PHONY: stop
-stop:
+.PHONY: down
+down:
 	docker compose down
 
 .PHONY: gen

@@ -14,12 +14,6 @@ type Handler interface {
 	//
 	// GET /todos
 	TodosGet(ctx context.Context) ([]Todo, error)
-	// TodosPost implements POST /todos operation.
-	//
-	// Create a new todo item.
-	//
-	// POST /todos
-	TodosPost(ctx context.Context, req *TodoInput) (*Todo, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

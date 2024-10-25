@@ -61,10 +61,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				switch r.Method {
 				case "GET":
 					s.handleTodosGetRequest([0]string{}, elemIsEscaped, w, r)
-				case "POST":
-					s.handleTodosPostRequest([0]string{}, elemIsEscaped, w, r)
 				default:
-					s.notAllowed(w, r, "GET,POST")
+					s.notAllowed(w, r, "GET")
 				}
 
 				return
@@ -165,14 +163,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				case "GET":
 					r.name = "TodosGet"
 					r.summary = "Get all todo items"
-					r.operationID = ""
-					r.pathPattern = "/todos"
-					r.args = args
-					r.count = 0
-					return r, true
-				case "POST":
-					r.name = "TodosPost"
-					r.summary = "Create a new todo item"
 					r.operationID = ""
 					r.pathPattern = "/todos"
 					r.args = args

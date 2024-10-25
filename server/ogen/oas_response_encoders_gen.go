@@ -28,17 +28,3 @@ func encodeTodosGetResponse(response []Todo, w http.ResponseWriter, span trace.S
 
 	return nil
 }
-
-func encodeTodosPostResponse(response *Todo, w http.ResponseWriter, span trace.Span) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(201)
-	span.SetStatus(codes.Ok, http.StatusText(201))
-
-	e := new(jx.Encoder)
-	response.Encode(e)
-	if _, err := e.WriteTo(w); err != nil {
-		return errors.Wrap(err, "write")
-	}
-
-	return nil
-}

@@ -6,15 +6,17 @@ import (
 	"server/usecase"
 )
 
-type Handler struct {
+type handler struct {
 	Usecase usecase.UsecaseInterface
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(u usecase.UsecaseInterface) *handler {
+	return &handler{
+		Usecase: u,
+	}
 }
 
-func (h *Handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
+func (h *handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
 	todos, err := h.Usecase.TodosGet(ctx)
 	if err != nil {
 		return nil, err
@@ -25,8 +27,4 @@ func (h *Handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
 			ID: todos[0].ID,
 		},
 	}, nil
-}
-
-func (h *Handler) TodosPost(ctx context.Context, req *ogen.TodoInput) (*ogen.Todo, error) {
-	return nil, nil
 }

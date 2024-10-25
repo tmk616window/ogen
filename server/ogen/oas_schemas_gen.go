@@ -96,14 +96,14 @@ func (o OptString) Or(d string) string {
 
 // Ref: #/components/schemas/Todo
 type Todo struct {
-	ID          string    `json:"id"`
+	ID          int       `json:"id"`
 	Title       string    `json:"title"`
 	Description OptString `json:"description"`
 	IsCompleted OptBool   `json:"isCompleted"`
 }
 
 // GetID returns the value of ID.
-func (s *Todo) GetID() string {
+func (s *Todo) GetID() int {
 	return s.ID
 }
 
@@ -123,7 +123,7 @@ func (s *Todo) GetIsCompleted() OptBool {
 }
 
 // SetID sets the value of ID.
-func (s *Todo) SetID(val string) {
+func (s *Todo) SetID(val int) {
 	s.ID = val
 }
 
@@ -139,42 +139,5 @@ func (s *Todo) SetDescription(val OptString) {
 
 // SetIsCompleted sets the value of IsCompleted.
 func (s *Todo) SetIsCompleted(val OptBool) {
-	s.IsCompleted = val
-}
-
-// Ref: #/components/schemas/TodoInput
-type TodoInput struct {
-	Title       string    `json:"title"`
-	Description OptString `json:"description"`
-	IsCompleted OptBool   `json:"isCompleted"`
-}
-
-// GetTitle returns the value of Title.
-func (s *TodoInput) GetTitle() string {
-	return s.Title
-}
-
-// GetDescription returns the value of Description.
-func (s *TodoInput) GetDescription() OptString {
-	return s.Description
-}
-
-// GetIsCompleted returns the value of IsCompleted.
-func (s *TodoInput) GetIsCompleted() OptBool {
-	return s.IsCompleted
-}
-
-// SetTitle sets the value of Title.
-func (s *TodoInput) SetTitle(val string) {
-	s.Title = val
-}
-
-// SetDescription sets the value of Description.
-func (s *TodoInput) SetDescription(val OptString) {
-	s.Description = val
-}
-
-// SetIsCompleted sets the value of IsCompleted.
-func (s *TodoInput) SetIsCompleted(val OptBool) {
 	s.IsCompleted = val
 }
