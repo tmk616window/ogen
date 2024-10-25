@@ -51,6 +51,16 @@ paths:
 
 components:
   schemas:
+    Priority:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+        - id
+        - name
     Todo:
       type: object
       properties:
@@ -60,11 +70,12 @@ components:
           type: string
         description:
           type: string
-        isCompleted:
-          type: boolean
+        priority:
+          $ref: "#/components/schemas/Priority"
       required:
         - id
         - title
+        - priority
 
     TodoInput:
       type: object

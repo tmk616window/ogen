@@ -11,6 +11,12 @@ type Todo struct {
 	ID          int
 	Title       string
 	Description string
+	Priority    priority
+}
+
+type priority struct {
+	ID   int
+	Name string
 }
 
 func (u *usecase) TodosGet(ctx context.Context) ([]*Todo, error) {
@@ -24,6 +30,10 @@ func (u *usecase) TodosGet(ctx context.Context) ([]*Todo, error) {
 			ID:          todo.ID,
 			Title:       todo.Title,
 			Description: todo.Description,
+			Priority: priority{
+				ID:   todo.Edges.Priority.ID,
+				Name: todo.Edges.Priority.Name,
+			},
 		}
 	}), nil
 }

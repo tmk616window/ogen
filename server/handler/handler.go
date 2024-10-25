@@ -29,6 +29,10 @@ func (h *handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
 			ID:          todo.ID,
 			Title:       todo.Title,
 			Description: ogen.OptString{Value: todo.Description},
+			Priority: ogen.Priority{
+				ID:   todo.Priority.ID,
+				Name: todo.Priority.Name,
+			},
 		}
 	}), nil
 }

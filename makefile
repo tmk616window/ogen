@@ -24,7 +24,7 @@ down:
 
 .PHONY: gen
 gen:
-	docker compose run -rm server ogen -package ogen -target ogen -clean ./doc/openapi.yaml
+	docker compose run --rm server ogen -package ogen -target ogen -clean ./doc/openapi.yaml
 
 .PHONY: apply
 apply:

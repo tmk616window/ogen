@@ -2,52 +2,6 @@
 
 package ogen
 
-// NewOptBool returns new OptBool with value set to v.
-func NewOptBool(v bool) OptBool {
-	return OptBool{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptBool is optional bool.
-type OptBool struct {
-	Value bool
-	Set   bool
-}
-
-// IsSet returns true if OptBool was set.
-func (o OptBool) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptBool) Reset() {
-	var v bool
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptBool) SetTo(v bool) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptBool) Get() (v bool, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptBool) Or(d bool) bool {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -94,12 +48,38 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
+// Ref: #/components/schemas/Priority
+type Priority struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+// GetID returns the value of ID.
+func (s *Priority) GetID() int {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *Priority) GetName() string {
+	return s.Name
+}
+
+// SetID sets the value of ID.
+func (s *Priority) SetID(val int) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *Priority) SetName(val string) {
+	s.Name = val
+}
+
 // Ref: #/components/schemas/Todo
 type Todo struct {
 	ID          int       `json:"id"`
 	Title       string    `json:"title"`
 	Description OptString `json:"description"`
-	IsCompleted OptBool   `json:"isCompleted"`
+	Priority    Priority  `json:"priority"`
 }
 
 // GetID returns the value of ID.
@@ -117,9 +97,9 @@ func (s *Todo) GetDescription() OptString {
 	return s.Description
 }
 
-// GetIsCompleted returns the value of IsCompleted.
-func (s *Todo) GetIsCompleted() OptBool {
-	return s.IsCompleted
+// GetPriority returns the value of Priority.
+func (s *Todo) GetPriority() Priority {
+	return s.Priority
 }
 
 // SetID sets the value of ID.
@@ -137,7 +117,7 @@ func (s *Todo) SetDescription(val OptString) {
 	s.Description = val
 }
 
-// SetIsCompleted sets the value of IsCompleted.
-func (s *Todo) SetIsCompleted(val OptBool) {
-	s.IsCompleted = val
+// SetPriority sets the value of Priority.
+func (s *Todo) SetPriority(val Priority) {
+	s.Priority = val
 }
