@@ -24,7 +24,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if err := http.ListenAndServe(":8080", s); err != nil {
+	if err := http.ListenAndServe(":8001", s); err != nil {
 		log.Fatalln(err)
 	}
 }

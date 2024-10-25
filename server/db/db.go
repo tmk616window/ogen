@@ -21,13 +21,12 @@ type client struct {
 }
 
 func New() (ClientInterface, error) {
-	databaseUrl := fmt.Sprint("postgresql://user:password@db/db")
+	databaseUrl := fmt.Sprintf("postgresql://%s:%s@db/%s", "user", "password", "db")
 
 	db, err := sql.Open("pgx", databaseUrl)
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
 
 	if db.Ping() != nil {
 		return nil, err
