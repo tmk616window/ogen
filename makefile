@@ -30,7 +30,7 @@ gen:
 apply:
 	@until pg_isready -h localhost -p 5432 -U user; do sleep 1; done
 	atlas migrate apply \
-  --dir "file://server/ent/migrate/migrations" \
+  --dir "file://server/migrations" \
   --url "postgres://user:password@localhost:5432/db?search_path=public&sslmode=disable"
 
 .PHONY: seed
