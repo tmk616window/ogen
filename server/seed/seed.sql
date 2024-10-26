@@ -17,3 +17,12 @@ DO UPDATE SET
     description = EXCLUDED.description,
     name = EXCLUDED.name,
     priority_id = EXCLUDED.priority_id;
+
+INSERT INTO status (id, value)
+VALUES 
+    (1, '未着手'),
+    (2, '着手'),
+    (3, '完了')
+ON CONFLICT (id)
+DO UPDATE SET
+    value = EXCLUDED.value;
