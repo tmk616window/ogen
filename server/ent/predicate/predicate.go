@@ -9,5 +9,8 @@ import (
 // Priority is the predicate function for priority builders.
 type Priority func(*sql.Selector)
 
+// Status is the predicate function for status builders.
+type Status func(*sql.Selector)
+
 // Todo is the predicate function for todo builders.
 type Todo func(*sql.Selector)

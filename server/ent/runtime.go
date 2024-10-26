@@ -5,6 +5,7 @@ package ent
 import (
 	"server/ent/priority"
 	"server/ent/schema"
+	"server/ent/status"
 	"server/ent/todo"
 )
 
@@ -18,6 +19,12 @@ func init() {
 	priorityDescName := priorityFields[1].Descriptor()
 	// priority.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	priority.NameValidator = priorityDescName.Validators[0].(func(string) error)
+	statusFields := schema.Status{}.Fields()
+	_ = statusFields
+	// statusDescValue is the schema descriptor for value field.
+	statusDescValue := statusFields[1].Descriptor()
+	// status.ValueValidator is a validator for the "value" field. It is called by the builders before save.
+	status.ValueValidator = statusDescValue.Validators[0].(func(string) error)
 	todoFields := schema.Todo{}.Fields()
 	_ = todoFields
 	// todoDescTitle is the schema descriptor for title field.

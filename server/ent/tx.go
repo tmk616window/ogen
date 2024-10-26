@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Priority is the client for interacting with the Priority builders.
 	Priority *PriorityClient
+	// Status is the client for interacting with the Status builders.
+	Status *StatusClient
 	// Todo is the client for interacting with the Todo builders.
 	Todo *TodoClient
 
@@ -148,6 +150,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Priority = NewPriorityClient(tx.config)
+	tx.Status = NewStatusClient(tx.config)
 	tx.Todo = NewTodoClient(tx.config)
 }
 

@@ -12,6 +12,7 @@ import (
 	"server/ent/migrate"
 
 	"server/ent/priority"
+	"server/ent/status"
 	"server/ent/todo"
 
 	"entgo.io/ent"
@@ -27,6 +28,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Priority is the client for interacting with the Priority builders.
 	Priority *PriorityClient
+	// Status is the client for interacting with the Status builders.
+	Status *StatusClient
 	// Todo is the client for interacting with the Todo builders.
 	Todo *TodoClient
 }
@@ -41,6 +44,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Priority = NewPriorityClient(c.config)
+	c.Status = NewStatusClient(c.config)
 	c.Todo = NewTodoClient(c.config)
 }
 
@@ -135,6 +139,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:      ctx,
 		config:   cfg,
 		Priority: NewPriorityClient(cfg),
+		Status:   NewStatusClient(cfg),
 		Todo:     NewTodoClient(cfg),
 	}, nil
 }
@@ -156,6 +161,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:      ctx,
 		config:   cfg,
 		Priority: NewPriorityClient(cfg),
+		Status:   NewStatusClient(cfg),
 		Todo:     NewTodoClient(cfg),
 	}, nil
 }
@@ -186,6 +192,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Priority.Use(hooks...)
+	c.Status.Use(hooks...)
 	c.Todo.Use(hooks...)
 }
 
@@ -193,6 +200,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Priority.Intercept(interceptors...)
+	c.Status.Intercept(interceptors...)
 	c.Todo.Intercept(interceptors...)
 }
 
@@ -201,6 +209,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *PriorityMutation:
 		return c.Priority.mutate(ctx, m)
+	case *StatusMutation:
+		return c.Status.mutate(ctx, m)
 	case *TodoMutation:
 		return c.Todo.mutate(ctx, m)
 	default:
@@ -357,6 +367,155 @@ func (c *PriorityClient) mutate(ctx context.Context, m *PriorityMutation) (Value
 	}
 }
 
+// StatusClient is a client for the Status schema.
+type StatusClient struct {
+	config
+}
+
+// NewStatusClient returns a client for the Status from the given config.
+func NewStatusClient(c config) *StatusClient {
+	return &StatusClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `status.Hooks(f(g(h())))`.
+func (c *StatusClient) Use(hooks ...Hook) {
+	c.hooks.Status = append(c.hooks.Status, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `status.Intercept(f(g(h())))`.
+func (c *StatusClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Status = append(c.inters.Status, interceptors...)
+}
+
+// Create returns a builder for creating a Status entity.
+func (c *StatusClient) Create() *StatusCreate {
+	mutation := newStatusMutation(c.config, OpCreate)
+	return &StatusCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Status entities.
+func (c *StatusClient) CreateBulk(builders ...*StatusCreate) *StatusCreateBulk {
+	return &StatusCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StatusClient) MapCreateBulk(slice any, setFunc func(*StatusCreate, int)) *StatusCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StatusCreateBulk{err: fmt.Errorf("calling to StatusClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StatusCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StatusCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Status.
+func (c *StatusClient) Update() *StatusUpdate {
+	mutation := newStatusMutation(c.config, OpUpdate)
+	return &StatusUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StatusClient) UpdateOne(s *Status) *StatusUpdateOne {
+	mutation := newStatusMutation(c.config, OpUpdateOne, withStatus(s))
+	return &StatusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StatusClient) UpdateOneID(id int) *StatusUpdateOne {
+	mutation := newStatusMutation(c.config, OpUpdateOne, withStatusID(id))
+	return &StatusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Status.
+func (c *StatusClient) Delete() *StatusDelete {
+	mutation := newStatusMutation(c.config, OpDelete)
+	return &StatusDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StatusClient) DeleteOne(s *Status) *StatusDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StatusClient) DeleteOneID(id int) *StatusDeleteOne {
+	builder := c.Delete().Where(status.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StatusDeleteOne{builder}
+}
+
+// Query returns a query builder for Status.
+func (c *StatusClient) Query() *StatusQuery {
+	return &StatusQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStatus},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Status entity by its id.
+func (c *StatusClient) Get(ctx context.Context, id int) (*Status, error) {
+	return c.Query().Where(status.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StatusClient) GetX(ctx context.Context, id int) *Status {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTodo queries the todo edge of a Status.
+func (c *StatusClient) QueryTodo(s *Status) *TodoQuery {
+	query := (&TodoClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(status.Table, status.FieldID, id),
+			sqlgraph.To(todo.Table, todo.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, status.TodoTable, status.TodoColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StatusClient) Hooks() []Hook {
+	return c.hooks.Status
+}
+
+// Interceptors returns the client interceptors.
+func (c *StatusClient) Interceptors() []Interceptor {
+	return c.inters.Status
+}
+
+func (c *StatusClient) mutate(ctx context.Context, m *StatusMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StatusCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StatusUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StatusUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StatusDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Status mutation op: %q", m.Op())
+	}
+}
+
 // TodoClient is a client for the Todo schema.
 type TodoClient struct {
 	config
@@ -481,6 +640,22 @@ func (c *TodoClient) QueryPriority(t *Todo) *PriorityQuery {
 	return query
 }
 
+// QueryStatus queries the status edge of a Todo.
+func (c *TodoClient) QueryStatus(t *Todo) *StatusQuery {
+	query := (&StatusClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(todo.Table, todo.FieldID, id),
+			sqlgraph.To(status.Table, status.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, todo.StatusTable, todo.StatusColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TodoClient) Hooks() []Hook {
 	return c.hooks.Todo
@@ -509,9 +684,9 @@ func (c *TodoClient) mutate(ctx context.Context, m *TodoMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Priority, Todo []ent.Hook
+		Priority, Status, Todo []ent.Hook
 	}
 	inters struct {
-		Priority, Todo []ent.Interceptor
+		Priority, Status, Todo []ent.Interceptor
 	}
 )

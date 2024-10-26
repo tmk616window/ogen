@@ -19,13 +19,26 @@ var (
 		Columns:    PrioritiesColumns,
 		PrimaryKey: []*schema.Column{PrioritiesColumns[0]},
 	}
+	// StatusColumns holds the columns for the "status" table.
+	StatusColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "value", Type: field.TypeString},
+	}
+	// StatusTable holds the schema information for the "status" table.
+	StatusTable = &schema.Table{
+		Name:       "status",
+		Columns:    StatusColumns,
+		PrimaryKey: []*schema.Column{StatusColumns[0]},
+	}
 	// TodosColumns holds the columns for the "todos" table.
 	TodosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
 		{Name: "priority_id", Type: field.TypeInt, Unique: true},
+		{Name: "status_id", Type: field.TypeInt, Unique: true},
 	}
 	// TodosTable holds the schema information for the "todos" table.
 	TodosTable = &schema.Table{
@@ -35,8 +48,14 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "todos_priorities_todo",
-				Columns:    []*schema.Column{TodosColumns[4]},
+				Columns:    []*schema.Column{TodosColumns[5]},
 				RefColumns: []*schema.Column{PrioritiesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "todos_status_todo",
+				Columns:    []*schema.Column{TodosColumns[6]},
+				RefColumns: []*schema.Column{StatusColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -44,10 +63,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		PrioritiesTable,
+		StatusTable,
 		TodosTable,
 	}
 )
 
 func init() {
 	TodosTable.ForeignKeys[0].RefTable = PrioritiesTable
+	TodosTable.ForeignKeys[1].RefTable = StatusTable
 }

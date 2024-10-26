@@ -18,10 +18,16 @@ const (
 	FieldDescription = "description"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldFinishedAt holds the string denoting the finished_at field in the database.
+	FieldFinishedAt = "finished_at"
 	// FieldPriorityID holds the string denoting the priority_id field in the database.
 	FieldPriorityID = "priority_id"
+	// FieldStatusID holds the string denoting the status_id field in the database.
+	FieldStatusID = "status_id"
 	// EdgePriority holds the string denoting the priority edge name in mutations.
 	EdgePriority = "priority"
+	// EdgeStatus holds the string denoting the status edge name in mutations.
+	EdgeStatus = "status"
 	// Table holds the table name of the todo in the database.
 	Table = "todos"
 	// PriorityTable is the table that holds the priority relation/edge.
@@ -31,6 +37,13 @@ const (
 	PriorityInverseTable = "priorities"
 	// PriorityColumn is the table column denoting the priority relation/edge.
 	PriorityColumn = "priority_id"
+	// StatusTable is the table that holds the status relation/edge.
+	StatusTable = "todos"
+	// StatusInverseTable is the table name for the Status entity.
+	// It exists in this package in order to avoid circular dependency with the "status" package.
+	StatusInverseTable = "status"
+	// StatusColumn is the table column denoting the status relation/edge.
+	StatusColumn = "status_id"
 )
 
 // Columns holds all SQL columns for todo fields.
@@ -39,7 +52,9 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldName,
+	FieldFinishedAt,
 	FieldPriorityID,
+	FieldStatusID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -82,9 +97,19 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
+// ByFinishedAt orders the results by the finished_at field.
+func ByFinishedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFinishedAt, opts...).ToFunc()
+}
+
 // ByPriorityID orders the results by the priority_id field.
 func ByPriorityID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPriorityID, opts...).ToFunc()
+}
+
+// ByStatusID orders the results by the status_id field.
+func ByStatusID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatusID, opts...).ToFunc()
 }
 
 // ByPriorityField orders the results by priority field.
@@ -93,10 +118,24 @@ func ByPriorityField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newPriorityStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByStatusField orders the results by status field.
+func ByStatusField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStatusStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newPriorityStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PriorityInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, PriorityTable, PriorityColumn),
+	)
+}
+func newStatusStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StatusInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, StatusTable, StatusColumn),
 	)
 }

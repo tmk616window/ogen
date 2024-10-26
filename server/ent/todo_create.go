@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"server/ent/priority"
+	"server/ent/status"
 	"server/ent/todo"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -46,9 +48,29 @@ func (tc *TodoCreate) SetName(s string) *TodoCreate {
 	return tc
 }
 
+// SetFinishedAt sets the "finished_at" field.
+func (tc *TodoCreate) SetFinishedAt(t time.Time) *TodoCreate {
+	tc.mutation.SetFinishedAt(t)
+	return tc
+}
+
+// SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
+func (tc *TodoCreate) SetNillableFinishedAt(t *time.Time) *TodoCreate {
+	if t != nil {
+		tc.SetFinishedAt(*t)
+	}
+	return tc
+}
+
 // SetPriorityID sets the "priority_id" field.
 func (tc *TodoCreate) SetPriorityID(i int) *TodoCreate {
 	tc.mutation.SetPriorityID(i)
+	return tc
+}
+
+// SetStatusID sets the "status_id" field.
+func (tc *TodoCreate) SetStatusID(i int) *TodoCreate {
+	tc.mutation.SetStatusID(i)
 	return tc
 }
 
@@ -61,6 +83,11 @@ func (tc *TodoCreate) SetID(i int) *TodoCreate {
 // SetPriority sets the "priority" edge to the Priority entity.
 func (tc *TodoCreate) SetPriority(p *Priority) *TodoCreate {
 	return tc.SetPriorityID(p.ID)
+}
+
+// SetStatus sets the "status" edge to the Status entity.
+func (tc *TodoCreate) SetStatus(s *Status) *TodoCreate {
+	return tc.SetStatusID(s.ID)
 }
 
 // Mutation returns the TodoMutation object of the builder.
@@ -116,8 +143,14 @@ func (tc *TodoCreate) check() error {
 	if _, ok := tc.mutation.PriorityID(); !ok {
 		return &ValidationError{Name: "priority_id", err: errors.New(`ent: missing required field "Todo.priority_id"`)}
 	}
+	if _, ok := tc.mutation.StatusID(); !ok {
+		return &ValidationError{Name: "status_id", err: errors.New(`ent: missing required field "Todo.status_id"`)}
+	}
 	if len(tc.mutation.PriorityIDs()) == 0 {
 		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required edge "Todo.priority"`)}
+	}
+	if len(tc.mutation.StatusIDs()) == 0 {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required edge "Todo.status"`)}
 	}
 	return nil
 }
@@ -163,6 +196,10 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 		_spec.SetField(todo.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := tc.mutation.FinishedAt(); ok {
+		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
+		_node.FinishedAt = value
+	}
 	if nodes := tc.mutation.PriorityIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -178,6 +215,23 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.PriorityID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.StatusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   todo.StatusTable,
+			Columns: []string{todo.StatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(status.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.StatusID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

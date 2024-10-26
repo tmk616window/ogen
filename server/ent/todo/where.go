@@ -4,6 +4,7 @@ package todo
 
 import (
 	"server/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -69,9 +70,19 @@ func Name(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldName, v))
 }
 
+// FinishedAt applies equality check predicate on the "finished_at" field. It's identical to FinishedAtEQ.
+func FinishedAt(v time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldFinishedAt, v))
+}
+
 // PriorityID applies equality check predicate on the "priority_id" field. It's identical to PriorityIDEQ.
 func PriorityID(v int) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldPriorityID, v))
+}
+
+// StatusID applies equality check predicate on the "status_id" field. It's identical to StatusIDEQ.
+func StatusID(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldStatusID, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
@@ -279,6 +290,56 @@ func NameContainsFold(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldContainsFold(FieldName, v))
 }
 
+// FinishedAtEQ applies the EQ predicate on the "finished_at" field.
+func FinishedAtEQ(v time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldFinishedAt, v))
+}
+
+// FinishedAtNEQ applies the NEQ predicate on the "finished_at" field.
+func FinishedAtNEQ(v time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldNEQ(FieldFinishedAt, v))
+}
+
+// FinishedAtIn applies the In predicate on the "finished_at" field.
+func FinishedAtIn(vs ...time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldIn(FieldFinishedAt, vs...))
+}
+
+// FinishedAtNotIn applies the NotIn predicate on the "finished_at" field.
+func FinishedAtNotIn(vs ...time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldNotIn(FieldFinishedAt, vs...))
+}
+
+// FinishedAtGT applies the GT predicate on the "finished_at" field.
+func FinishedAtGT(v time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldGT(FieldFinishedAt, v))
+}
+
+// FinishedAtGTE applies the GTE predicate on the "finished_at" field.
+func FinishedAtGTE(v time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldGTE(FieldFinishedAt, v))
+}
+
+// FinishedAtLT applies the LT predicate on the "finished_at" field.
+func FinishedAtLT(v time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldLT(FieldFinishedAt, v))
+}
+
+// FinishedAtLTE applies the LTE predicate on the "finished_at" field.
+func FinishedAtLTE(v time.Time) predicate.Todo {
+	return predicate.Todo(sql.FieldLTE(FieldFinishedAt, v))
+}
+
+// FinishedAtIsNil applies the IsNil predicate on the "finished_at" field.
+func FinishedAtIsNil() predicate.Todo {
+	return predicate.Todo(sql.FieldIsNull(FieldFinishedAt))
+}
+
+// FinishedAtNotNil applies the NotNil predicate on the "finished_at" field.
+func FinishedAtNotNil() predicate.Todo {
+	return predicate.Todo(sql.FieldNotNull(FieldFinishedAt))
+}
+
 // PriorityIDEQ applies the EQ predicate on the "priority_id" field.
 func PriorityIDEQ(v int) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldPriorityID, v))
@@ -299,6 +360,26 @@ func PriorityIDNotIn(vs ...int) predicate.Todo {
 	return predicate.Todo(sql.FieldNotIn(FieldPriorityID, vs...))
 }
 
+// StatusIDEQ applies the EQ predicate on the "status_id" field.
+func StatusIDEQ(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldStatusID, v))
+}
+
+// StatusIDNEQ applies the NEQ predicate on the "status_id" field.
+func StatusIDNEQ(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldNEQ(FieldStatusID, v))
+}
+
+// StatusIDIn applies the In predicate on the "status_id" field.
+func StatusIDIn(vs ...int) predicate.Todo {
+	return predicate.Todo(sql.FieldIn(FieldStatusID, vs...))
+}
+
+// StatusIDNotIn applies the NotIn predicate on the "status_id" field.
+func StatusIDNotIn(vs ...int) predicate.Todo {
+	return predicate.Todo(sql.FieldNotIn(FieldStatusID, vs...))
+}
+
 // HasPriority applies the HasEdge predicate on the "priority" edge.
 func HasPriority() predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
@@ -314,6 +395,29 @@ func HasPriority() predicate.Todo {
 func HasPriorityWith(preds ...predicate.Priority) predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
 		step := newPriorityStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStatus applies the HasEdge predicate on the "status" edge.
+func HasStatus() predicate.Todo {
+	return predicate.Todo(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, StatusTable, StatusColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStatusWith applies the HasEdge predicate on the "status" edge with a given conditions (other predicates).
+func HasStatusWith(preds ...predicate.Status) predicate.Todo {
+	return predicate.Todo(func(s *sql.Selector) {
+		step := newStatusStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

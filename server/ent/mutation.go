@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"server/ent/predicate"
 	"server/ent/priority"
+	"server/ent/status"
 	"server/ent/todo"
 	"sync"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -25,6 +27,7 @@ const (
 
 	// Node types.
 	TypePriority = "Priority"
+	TypeStatus   = "Status"
 	TypeTodo     = "Todo"
 )
 
@@ -427,6 +430,405 @@ func (m *PriorityMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Priority edge %s", name)
 }
 
+// StatusMutation represents an operation that mutates the Status nodes in the graph.
+type StatusMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	value         *string
+	clearedFields map[string]struct{}
+	todo          *int
+	clearedtodo   bool
+	done          bool
+	oldValue      func(context.Context) (*Status, error)
+	predicates    []predicate.Status
+}
+
+var _ ent.Mutation = (*StatusMutation)(nil)
+
+// statusOption allows management of the mutation configuration using functional options.
+type statusOption func(*StatusMutation)
+
+// newStatusMutation creates new mutation for the Status entity.
+func newStatusMutation(c config, op Op, opts ...statusOption) *StatusMutation {
+	m := &StatusMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeStatus,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withStatusID sets the ID field of the mutation.
+func withStatusID(id int) statusOption {
+	return func(m *StatusMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Status
+		)
+		m.oldValue = func(ctx context.Context) (*Status, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Status.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withStatus sets the old Status of the mutation.
+func withStatus(node *Status) statusOption {
+	return func(m *StatusMutation) {
+		m.oldValue = func(context.Context) (*Status, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m StatusMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m StatusMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Status entities.
+func (m *StatusMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *StatusMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *StatusMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Status.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetValue sets the "value" field.
+func (m *StatusMutation) SetValue(s string) {
+	m.value = &s
+}
+
+// Value returns the value of the "value" field in the mutation.
+func (m *StatusMutation) Value() (r string, exists bool) {
+	v := m.value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "value" field's value of the Status entity.
+// If the Status object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StatusMutation) OldValue(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// ResetValue resets all changes to the "value" field.
+func (m *StatusMutation) ResetValue() {
+	m.value = nil
+}
+
+// SetTodoID sets the "todo" edge to the Todo entity by id.
+func (m *StatusMutation) SetTodoID(id int) {
+	m.todo = &id
+}
+
+// ClearTodo clears the "todo" edge to the Todo entity.
+func (m *StatusMutation) ClearTodo() {
+	m.clearedtodo = true
+}
+
+// TodoCleared reports if the "todo" edge to the Todo entity was cleared.
+func (m *StatusMutation) TodoCleared() bool {
+	return m.clearedtodo
+}
+
+// TodoID returns the "todo" edge ID in the mutation.
+func (m *StatusMutation) TodoID() (id int, exists bool) {
+	if m.todo != nil {
+		return *m.todo, true
+	}
+	return
+}
+
+// TodoIDs returns the "todo" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TodoID instead. It exists only for internal usage by the builders.
+func (m *StatusMutation) TodoIDs() (ids []int) {
+	if id := m.todo; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTodo resets all changes to the "todo" edge.
+func (m *StatusMutation) ResetTodo() {
+	m.todo = nil
+	m.clearedtodo = false
+}
+
+// Where appends a list predicates to the StatusMutation builder.
+func (m *StatusMutation) Where(ps ...predicate.Status) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the StatusMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *StatusMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Status, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *StatusMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *StatusMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Status).
+func (m *StatusMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *StatusMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.value != nil {
+		fields = append(fields, status.FieldValue)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *StatusMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case status.FieldValue:
+		return m.Value()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *StatusMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case status.FieldValue:
+		return m.OldValue(ctx)
+	}
+	return nil, fmt.Errorf("unknown Status field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StatusMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case status.FieldValue:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Status field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *StatusMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *StatusMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *StatusMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Status numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *StatusMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *StatusMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *StatusMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Status nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *StatusMutation) ResetField(name string) error {
+	switch name {
+	case status.FieldValue:
+		m.ResetValue()
+		return nil
+	}
+	return fmt.Errorf("unknown Status field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *StatusMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.todo != nil {
+		edges = append(edges, status.EdgeTodo)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *StatusMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case status.EdgeTodo:
+		if id := m.todo; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *StatusMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *StatusMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *StatusMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedtodo {
+		edges = append(edges, status.EdgeTodo)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *StatusMutation) EdgeCleared(name string) bool {
+	switch name {
+	case status.EdgeTodo:
+		return m.clearedtodo
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *StatusMutation) ClearEdge(name string) error {
+	switch name {
+	case status.EdgeTodo:
+		m.ClearTodo()
+		return nil
+	}
+	return fmt.Errorf("unknown Status unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *StatusMutation) ResetEdge(name string) error {
+	switch name {
+	case status.EdgeTodo:
+		m.ResetTodo()
+		return nil
+	}
+	return fmt.Errorf("unknown Status edge %s", name)
+}
+
 // TodoMutation represents an operation that mutates the Todo nodes in the graph.
 type TodoMutation struct {
 	config
@@ -436,9 +838,12 @@ type TodoMutation struct {
 	title           *string
 	description     *string
 	name            *string
+	finished_at     *time.Time
 	clearedFields   map[string]struct{}
 	priority        *int
 	clearedpriority bool
+	status          *int
+	clearedstatus   bool
 	done            bool
 	oldValue        func(context.Context) (*Todo, error)
 	predicates      []predicate.Todo
@@ -669,6 +1074,55 @@ func (m *TodoMutation) ResetName() {
 	m.name = nil
 }
 
+// SetFinishedAt sets the "finished_at" field.
+func (m *TodoMutation) SetFinishedAt(t time.Time) {
+	m.finished_at = &t
+}
+
+// FinishedAt returns the value of the "finished_at" field in the mutation.
+func (m *TodoMutation) FinishedAt() (r time.Time, exists bool) {
+	v := m.finished_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFinishedAt returns the old "finished_at" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldFinishedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFinishedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFinishedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFinishedAt: %w", err)
+	}
+	return oldValue.FinishedAt, nil
+}
+
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (m *TodoMutation) ClearFinishedAt() {
+	m.finished_at = nil
+	m.clearedFields[todo.FieldFinishedAt] = struct{}{}
+}
+
+// FinishedAtCleared returns if the "finished_at" field was cleared in this mutation.
+func (m *TodoMutation) FinishedAtCleared() bool {
+	_, ok := m.clearedFields[todo.FieldFinishedAt]
+	return ok
+}
+
+// ResetFinishedAt resets all changes to the "finished_at" field.
+func (m *TodoMutation) ResetFinishedAt() {
+	m.finished_at = nil
+	delete(m.clearedFields, todo.FieldFinishedAt)
+}
+
 // SetPriorityID sets the "priority_id" field.
 func (m *TodoMutation) SetPriorityID(i int) {
 	m.priority = &i
@@ -705,6 +1159,42 @@ func (m *TodoMutation) ResetPriorityID() {
 	m.priority = nil
 }
 
+// SetStatusID sets the "status_id" field.
+func (m *TodoMutation) SetStatusID(i int) {
+	m.status = &i
+}
+
+// StatusID returns the value of the "status_id" field in the mutation.
+func (m *TodoMutation) StatusID() (r int, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatusID returns the old "status_id" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldStatusID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatusID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatusID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatusID: %w", err)
+	}
+	return oldValue.StatusID, nil
+}
+
+// ResetStatusID resets all changes to the "status_id" field.
+func (m *TodoMutation) ResetStatusID() {
+	m.status = nil
+}
+
 // ClearPriority clears the "priority" edge to the Priority entity.
 func (m *TodoMutation) ClearPriority() {
 	m.clearedpriority = true
@@ -730,6 +1220,33 @@ func (m *TodoMutation) PriorityIDs() (ids []int) {
 func (m *TodoMutation) ResetPriority() {
 	m.priority = nil
 	m.clearedpriority = false
+}
+
+// ClearStatus clears the "status" edge to the Status entity.
+func (m *TodoMutation) ClearStatus() {
+	m.clearedstatus = true
+	m.clearedFields[todo.FieldStatusID] = struct{}{}
+}
+
+// StatusCleared reports if the "status" edge to the Status entity was cleared.
+func (m *TodoMutation) StatusCleared() bool {
+	return m.clearedstatus
+}
+
+// StatusIDs returns the "status" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// StatusID instead. It exists only for internal usage by the builders.
+func (m *TodoMutation) StatusIDs() (ids []int) {
+	if id := m.status; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetStatus resets all changes to the "status" edge.
+func (m *TodoMutation) ResetStatus() {
+	m.status = nil
+	m.clearedstatus = false
 }
 
 // Where appends a list predicates to the TodoMutation builder.
@@ -766,7 +1283,7 @@ func (m *TodoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TodoMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
 	if m.title != nil {
 		fields = append(fields, todo.FieldTitle)
 	}
@@ -776,8 +1293,14 @@ func (m *TodoMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, todo.FieldName)
 	}
+	if m.finished_at != nil {
+		fields = append(fields, todo.FieldFinishedAt)
+	}
 	if m.priority != nil {
 		fields = append(fields, todo.FieldPriorityID)
+	}
+	if m.status != nil {
+		fields = append(fields, todo.FieldStatusID)
 	}
 	return fields
 }
@@ -793,8 +1316,12 @@ func (m *TodoMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case todo.FieldName:
 		return m.Name()
+	case todo.FieldFinishedAt:
+		return m.FinishedAt()
 	case todo.FieldPriorityID:
 		return m.PriorityID()
+	case todo.FieldStatusID:
+		return m.StatusID()
 	}
 	return nil, false
 }
@@ -810,8 +1337,12 @@ func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldDescription(ctx)
 	case todo.FieldName:
 		return m.OldName(ctx)
+	case todo.FieldFinishedAt:
+		return m.OldFinishedAt(ctx)
 	case todo.FieldPriorityID:
 		return m.OldPriorityID(ctx)
+	case todo.FieldStatusID:
+		return m.OldStatusID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Todo field %s", name)
 }
@@ -842,12 +1373,26 @@ func (m *TodoMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case todo.FieldFinishedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFinishedAt(v)
+		return nil
 	case todo.FieldPriorityID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPriorityID(v)
+		return nil
+	case todo.FieldStatusID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatusID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
@@ -885,6 +1430,9 @@ func (m *TodoMutation) ClearedFields() []string {
 	if m.FieldCleared(todo.FieldDescription) {
 		fields = append(fields, todo.FieldDescription)
 	}
+	if m.FieldCleared(todo.FieldFinishedAt) {
+		fields = append(fields, todo.FieldFinishedAt)
+	}
 	return fields
 }
 
@@ -901,6 +1449,9 @@ func (m *TodoMutation) ClearField(name string) error {
 	switch name {
 	case todo.FieldDescription:
 		m.ClearDescription()
+		return nil
+	case todo.FieldFinishedAt:
+		m.ClearFinishedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Todo nullable field %s", name)
@@ -919,8 +1470,14 @@ func (m *TodoMutation) ResetField(name string) error {
 	case todo.FieldName:
 		m.ResetName()
 		return nil
+	case todo.FieldFinishedAt:
+		m.ResetFinishedAt()
+		return nil
 	case todo.FieldPriorityID:
 		m.ResetPriorityID()
+		return nil
+	case todo.FieldStatusID:
+		m.ResetStatusID()
 		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
@@ -928,9 +1485,12 @@ func (m *TodoMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TodoMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.priority != nil {
 		edges = append(edges, todo.EdgePriority)
+	}
+	if m.status != nil {
+		edges = append(edges, todo.EdgeStatus)
 	}
 	return edges
 }
@@ -943,13 +1503,17 @@ func (m *TodoMutation) AddedIDs(name string) []ent.Value {
 		if id := m.priority; id != nil {
 			return []ent.Value{*id}
 		}
+	case todo.EdgeStatus:
+		if id := m.status; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TodoMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -961,9 +1525,12 @@ func (m *TodoMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TodoMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedpriority {
 		edges = append(edges, todo.EdgePriority)
+	}
+	if m.clearedstatus {
+		edges = append(edges, todo.EdgeStatus)
 	}
 	return edges
 }
@@ -974,6 +1541,8 @@ func (m *TodoMutation) EdgeCleared(name string) bool {
 	switch name {
 	case todo.EdgePriority:
 		return m.clearedpriority
+	case todo.EdgeStatus:
+		return m.clearedstatus
 	}
 	return false
 }
@@ -985,6 +1554,9 @@ func (m *TodoMutation) ClearEdge(name string) error {
 	case todo.EdgePriority:
 		m.ClearPriority()
 		return nil
+	case todo.EdgeStatus:
+		m.ClearStatus()
+		return nil
 	}
 	return fmt.Errorf("unknown Todo unique edge %s", name)
 }
@@ -995,6 +1567,9 @@ func (m *TodoMutation) ResetEdge(name string) error {
 	switch name {
 	case todo.EdgePriority:
 		m.ResetPriority()
+		return nil
+	case todo.EdgeStatus:
+		m.ResetStatus()
 		return nil
 	}
 	return fmt.Errorf("unknown Todo edge %s", name)
