@@ -140,6 +140,20 @@ func (tu *TodoUpdate) SetNillableCreatedAt(t *time.Time) *TodoUpdate {
 	return tu
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (tu *TodoUpdate) SetCreatedBy(s string) *TodoUpdate {
+	tu.mutation.SetCreatedBy(s)
+	return tu
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (tu *TodoUpdate) SetNillableCreatedBy(s *string) *TodoUpdate {
+	if s != nil {
+		tu.SetCreatedBy(*s)
+	}
+	return tu
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (tu *TodoUpdate) SetUpdatedAt(t time.Time) *TodoUpdate {
 	tu.mutation.SetUpdatedAt(t)
@@ -262,6 +276,9 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := tu.mutation.CreatedBy(); ok {
+		_spec.SetField(todo.FieldCreatedBy, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.UpdatedAt(); ok {
 		_spec.SetField(todo.FieldUpdatedAt, field.TypeTime, value)
@@ -454,6 +471,20 @@ func (tuo *TodoUpdateOne) SetNillableCreatedAt(t *time.Time) *TodoUpdateOne {
 	return tuo
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (tuo *TodoUpdateOne) SetCreatedBy(s string) *TodoUpdateOne {
+	tuo.mutation.SetCreatedBy(s)
+	return tuo
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (tuo *TodoUpdateOne) SetNillableCreatedBy(s *string) *TodoUpdateOne {
+	if s != nil {
+		tuo.SetCreatedBy(*s)
+	}
+	return tuo
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (tuo *TodoUpdateOne) SetUpdatedAt(t time.Time) *TodoUpdateOne {
 	tuo.mutation.SetUpdatedAt(t)
@@ -606,6 +637,9 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if value, ok := tuo.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := tuo.mutation.CreatedBy(); ok {
+		_spec.SetField(todo.FieldCreatedBy, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(todo.FieldUpdatedAt, field.TypeTime, value)

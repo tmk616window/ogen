@@ -96,6 +96,20 @@ func (tc *TodoCreate) SetNillableCreatedAt(t *time.Time) *TodoCreate {
 	return tc
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (tc *TodoCreate) SetCreatedBy(s string) *TodoCreate {
+	tc.mutation.SetCreatedBy(s)
+	return tc
+}
+
+// SetNillableCreatedBy sets the "created_by" field if the given value is not nil.
+func (tc *TodoCreate) SetNillableCreatedBy(s *string) *TodoCreate {
+	if s != nil {
+		tc.SetCreatedBy(*s)
+	}
+	return tc
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (tc *TodoCreate) SetUpdatedAt(t time.Time) *TodoCreate {
 	tc.mutation.SetUpdatedAt(t)
@@ -169,6 +183,10 @@ func (tc *TodoCreate) defaults() {
 		v := todo.DefaultCreatedAt
 		tc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := tc.mutation.CreatedBy(); !ok {
+		v := todo.DefaultCreatedBy
+		tc.mutation.SetCreatedBy(v)
+	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
 		v := todo.DefaultUpdatedAt
 		tc.mutation.SetUpdatedAt(v)
@@ -201,6 +219,9 @@ func (tc *TodoCreate) check() error {
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Todo.created_at"`)}
+	}
+	if _, ok := tc.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`ent: missing required field "Todo.created_by"`)}
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Todo.updated_at"`)}
@@ -262,6 +283,10 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := tc.mutation.CreatedBy(); ok {
+		_spec.SetField(todo.FieldCreatedBy, field.TypeString, value)
+		_node.CreatedBy = value
 	}
 	if value, ok := tc.mutation.UpdatedAt(); ok {
 		_spec.SetField(todo.FieldUpdatedAt, field.TypeTime, value)

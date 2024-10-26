@@ -1108,6 +1108,7 @@ type TodoMutation struct {
 	name            *string
 	finished_at     *time.Time
 	created_at      *time.Time
+	created_by      *string
 	updated_at      *time.Time
 	clearedFields   map[string]struct{}
 	priority        *int
@@ -1501,6 +1502,42 @@ func (m *TodoMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetCreatedBy sets the "created_by" field.
+func (m *TodoMutation) SetCreatedBy(s string) {
+	m.created_by = &s
+}
+
+// CreatedBy returns the value of the "created_by" field in the mutation.
+func (m *TodoMutation) CreatedBy() (r string, exists bool) {
+	v := m.created_by
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedBy returns the old "created_by" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldCreatedBy(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
+	}
+	return oldValue.CreatedBy, nil
+}
+
+// ResetCreatedBy resets all changes to the "created_by" field.
+func (m *TodoMutation) ResetCreatedBy() {
+	m.created_by = nil
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (m *TodoMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
@@ -1625,7 +1662,7 @@ func (m *TodoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TodoMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.title != nil {
 		fields = append(fields, todo.FieldTitle)
 	}
@@ -1646,6 +1683,9 @@ func (m *TodoMutation) Fields() []string {
 	}
 	if m.created_at != nil {
 		fields = append(fields, todo.FieldCreatedAt)
+	}
+	if m.created_by != nil {
+		fields = append(fields, todo.FieldCreatedBy)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, todo.FieldUpdatedAt)
@@ -1672,6 +1712,8 @@ func (m *TodoMutation) Field(name string) (ent.Value, bool) {
 		return m.StatusID()
 	case todo.FieldCreatedAt:
 		return m.CreatedAt()
+	case todo.FieldCreatedBy:
+		return m.CreatedBy()
 	case todo.FieldUpdatedAt:
 		return m.UpdatedAt()
 	}
@@ -1697,6 +1739,8 @@ func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStatusID(ctx)
 	case todo.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case todo.FieldCreatedBy:
+		return m.OldCreatedBy(ctx)
 	case todo.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
 	}
@@ -1756,6 +1800,13 @@ func (m *TodoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case todo.FieldCreatedBy:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedBy(v)
 		return nil
 	case todo.FieldUpdatedAt:
 		v, ok := value.(time.Time)
@@ -1851,6 +1902,9 @@ func (m *TodoMutation) ResetField(name string) error {
 		return nil
 	case todo.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case todo.FieldCreatedBy:
+		m.ResetCreatedBy()
 		return nil
 	case todo.FieldUpdatedAt:
 		m.ResetUpdatedAt()

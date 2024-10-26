@@ -18,8 +18,8 @@ func (Status) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Unique().Immutable(),
 		field.String("value").NotEmpty(),
-		field.Time("created_at").Default(time.Now()),
-		field.Time("updated_at").Default(time.Now()).UpdateDefault(time.Now()),
+		field.Time("created_at").Default(time.Now),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
