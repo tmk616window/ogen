@@ -74,6 +74,14 @@ func (tc *TodoCreate) SetStatusID(i int) *TodoCreate {
 	return tc
 }
 
+// SetNillableStatusID sets the "status_id" field if the given value is not nil.
+func (tc *TodoCreate) SetNillableStatusID(i *int) *TodoCreate {
+	if i != nil {
+		tc.SetStatusID(*i)
+	}
+	return tc
+}
+
 // SetID sets the "id" field.
 func (tc *TodoCreate) SetID(i int) *TodoCreate {
 	tc.mutation.SetID(i)
@@ -97,6 +105,7 @@ func (tc *TodoCreate) Mutation() *TodoMutation {
 
 // Save creates the Todo in the database.
 func (tc *TodoCreate) Save(ctx context.Context) (*Todo, error) {
+	tc.defaults()
 	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
@@ -119,6 +128,14 @@ func (tc *TodoCreate) Exec(ctx context.Context) error {
 func (tc *TodoCreate) ExecX(ctx context.Context) {
 	if err := tc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (tc *TodoCreate) defaults() {
+	if _, ok := tc.mutation.StatusID(); !ok {
+		v := todo.DefaultStatusID
+		tc.mutation.SetStatusID(v)
 	}
 }
 
@@ -255,6 +272,7 @@ func (tcb *TodoCreateBulk) Save(ctx context.Context) ([]*Todo, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TodoMutation)
 				if !ok {

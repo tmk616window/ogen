@@ -35,4 +35,8 @@ func init() {
 	todoDescName := todoFields[3].Descriptor()
 	// todo.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	todo.NameValidator = todoDescName.Validators[0].(func(string) error)
+	// todoDescStatusID is the schema descriptor for status_id field.
+	todoDescStatusID := todoFields[6].Descriptor()
+	// todo.DefaultStatusID holds the default value on creation for the status_id field.
+	todo.DefaultStatusID = todoDescStatusID.Default.(int)
 }

@@ -37,11 +37,11 @@ apply:
 migrate_diff:
 	@until pg_isready -h $(DB_HOST) -p 5432 -U $(DB_USER); do sleep 1; done
 	atlas migrate diff migration_name \
-	  --dir "file://server/migrations" \
-		--to "ent://server/ent/schema" \
+	  --dir "file://migrations" \
+		--to "ent://ent/schema" \
 		--dev-url "docker://postgres/15/test?search_path=public"
 
 .PHONY: seed
 seed:
 	@until pg_isready -h $(DB_HOST) -p 5432 -U $(DB_USER); do sleep 1; done
-	PGPASSWORD=$(DB_PASSWORD) psql -f ./server/seed/seed.sql -U $(DB_USER) -d $(DB_NAME) -h $(DB_HOST)
+	PGPASSWORD=$(DB_PASSWORD) psql -f ./seed/seed.sql -U $(DB_USER) -d $(DB_NAME) -h $(DB_HOST)

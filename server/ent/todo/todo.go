@@ -72,6 +72,8 @@ var (
 	TitleValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultStatusID holds the default value on creation for the "status_id" field.
+	DefaultStatusID int
 )
 
 // OrderOption defines the ordering options for the Todo queries.
