@@ -8,7 +8,6 @@ import (
 	"math"
 	"server/ent/predicate"
 	"server/ent/priority"
-	"server/ent/status"
 	"server/ent/todo"
 
 	"entgo.io/ent"
@@ -25,7 +24,6 @@ type TodoQuery struct {
 	inters       []Interceptor
 	predicates   []predicate.Todo
 	withPriority *PriorityQuery
-	withStatus   *StatusQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,28 +75,6 @@ func (tq *TodoQuery) QueryPriority() *PriorityQuery {
 			sqlgraph.From(todo.Table, todo.FieldID, selector),
 			sqlgraph.To(priority.Table, priority.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, todo.PriorityTable, todo.PriorityColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryStatus chains the current query on the "status" edge.
-func (tq *TodoQuery) QueryStatus() *StatusQuery {
-	query := (&StatusClient{config: tq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(todo.Table, todo.FieldID, selector),
-			sqlgraph.To(status.Table, status.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, todo.StatusTable, todo.StatusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -299,7 +275,6 @@ func (tq *TodoQuery) Clone() *TodoQuery {
 		inters:       append([]Interceptor{}, tq.inters...),
 		predicates:   append([]predicate.Todo{}, tq.predicates...),
 		withPriority: tq.withPriority.Clone(),
-		withStatus:   tq.withStatus.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -314,17 +289,6 @@ func (tq *TodoQuery) WithPriority(opts ...func(*PriorityQuery)) *TodoQuery {
 		opt(query)
 	}
 	tq.withPriority = query
-	return tq
-}
-
-// WithStatus tells the query-builder to eager-load the nodes that are connected to
-// the "status" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TodoQuery) WithStatus(opts ...func(*StatusQuery)) *TodoQuery {
-	query := (&StatusClient{config: tq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withStatus = query
 	return tq
 }
 
@@ -406,9 +370,8 @@ func (tq *TodoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Todo, e
 	var (
 		nodes       = []*Todo{}
 		_spec       = tq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			tq.withPriority != nil,
-			tq.withStatus != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -432,12 +395,6 @@ func (tq *TodoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Todo, e
 	if query := tq.withPriority; query != nil {
 		if err := tq.loadPriority(ctx, query, nodes, nil,
 			func(n *Todo, e *Priority) { n.Edges.Priority = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := tq.withStatus; query != nil {
-		if err := tq.loadStatus(ctx, query, nodes, nil,
-			func(n *Todo, e *Status) { n.Edges.Status = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -473,35 +430,6 @@ func (tq *TodoQuery) loadPriority(ctx context.Context, query *PriorityQuery, nod
 	}
 	return nil
 }
-func (tq *TodoQuery) loadStatus(ctx context.Context, query *StatusQuery, nodes []*Todo, init func(*Todo), assign func(*Todo, *Status)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Todo)
-	for i := range nodes {
-		fk := nodes[i].StatusID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(status.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "status_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 
 func (tq *TodoQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tq.querySpec()
@@ -530,9 +458,6 @@ func (tq *TodoQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if tq.withPriority != nil {
 			_spec.Node.AddColumnOnce(todo.FieldPriorityID)
-		}
-		if tq.withStatus != nil {
-			_spec.Node.AddColumnOnce(todo.FieldStatusID)
 		}
 	}
 	if ps := tq.predicates; len(ps) > 0 {

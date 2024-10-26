@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"server/ent/priority"
-	"server/ent/status"
 	"server/ent/todo"
 	"time"
 
@@ -68,20 +67,6 @@ func (tc *TodoCreate) SetPriorityID(i int) *TodoCreate {
 	return tc
 }
 
-// SetStatusID sets the "status_id" field.
-func (tc *TodoCreate) SetStatusID(i int) *TodoCreate {
-	tc.mutation.SetStatusID(i)
-	return tc
-}
-
-// SetNillableStatusID sets the "status_id" field if the given value is not nil.
-func (tc *TodoCreate) SetNillableStatusID(i *int) *TodoCreate {
-	if i != nil {
-		tc.SetStatusID(*i)
-	}
-	return tc
-}
-
 // SetID sets the "id" field.
 func (tc *TodoCreate) SetID(i int) *TodoCreate {
 	tc.mutation.SetID(i)
@@ -93,11 +78,6 @@ func (tc *TodoCreate) SetPriority(p *Priority) *TodoCreate {
 	return tc.SetPriorityID(p.ID)
 }
 
-// SetStatus sets the "status" edge to the Status entity.
-func (tc *TodoCreate) SetStatus(s *Status) *TodoCreate {
-	return tc.SetStatusID(s.ID)
-}
-
 // Mutation returns the TodoMutation object of the builder.
 func (tc *TodoCreate) Mutation() *TodoMutation {
 	return tc.mutation
@@ -105,7 +85,6 @@ func (tc *TodoCreate) Mutation() *TodoMutation {
 
 // Save creates the Todo in the database.
 func (tc *TodoCreate) Save(ctx context.Context) (*Todo, error) {
-	tc.defaults()
 	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
@@ -131,14 +110,6 @@ func (tc *TodoCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (tc *TodoCreate) defaults() {
-	if _, ok := tc.mutation.StatusID(); !ok {
-		v := todo.DefaultStatusID
-		tc.mutation.SetStatusID(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (tc *TodoCreate) check() error {
 	if _, ok := tc.mutation.Title(); !ok {
@@ -160,14 +131,8 @@ func (tc *TodoCreate) check() error {
 	if _, ok := tc.mutation.PriorityID(); !ok {
 		return &ValidationError{Name: "priority_id", err: errors.New(`ent: missing required field "Todo.priority_id"`)}
 	}
-	if _, ok := tc.mutation.StatusID(); !ok {
-		return &ValidationError{Name: "status_id", err: errors.New(`ent: missing required field "Todo.status_id"`)}
-	}
 	if len(tc.mutation.PriorityIDs()) == 0 {
 		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required edge "Todo.priority"`)}
-	}
-	if len(tc.mutation.StatusIDs()) == 0 {
-		return &ValidationError{Name: "status", err: errors.New(`ent: missing required edge "Todo.status"`)}
 	}
 	return nil
 }
@@ -234,23 +199,6 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 		_node.PriorityID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.StatusIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   todo.StatusTable,
-			Columns: []string{todo.StatusColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(status.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.StatusID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	return _node, _spec
 }
 
@@ -272,7 +220,6 @@ func (tcb *TodoCreateBulk) Save(ctx context.Context) ([]*Todo, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TodoMutation)
 				if !ok {

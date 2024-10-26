@@ -38,7 +38,6 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
 		{Name: "priority_id", Type: field.TypeInt, Unique: true},
-		{Name: "status_id", Type: field.TypeInt, Unique: true, Default: 1},
 	}
 	// TodosTable holds the schema information for the "todos" table.
 	TodosTable = &schema.Table{
@@ -50,12 +49,6 @@ var (
 				Symbol:     "todos_priorities_todo",
 				Columns:    []*schema.Column{TodosColumns[5]},
 				RefColumns: []*schema.Column{PrioritiesColumns[0]},
-				OnDelete:   schema.NoAction,
-			},
-			{
-				Symbol:     "todos_status_todo",
-				Columns:    []*schema.Column{TodosColumns[6]},
-				RefColumns: []*schema.Column{StatusColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -70,5 +63,4 @@ var (
 
 func init() {
 	TodosTable.ForeignKeys[0].RefTable = PrioritiesTable
-	TodosTable.ForeignKeys[1].RefTable = StatusTable
 }

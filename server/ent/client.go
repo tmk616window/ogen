@@ -475,22 +475,6 @@ func (c *StatusClient) GetX(ctx context.Context, id int) *Status {
 	return obj
 }
 
-// QueryTodo queries the todo edge of a Status.
-func (c *StatusClient) QueryTodo(s *Status) *TodoQuery {
-	query := (&TodoClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(status.Table, status.FieldID, id),
-			sqlgraph.To(todo.Table, todo.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, status.TodoTable, status.TodoColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *StatusClient) Hooks() []Hook {
 	return c.hooks.Status
@@ -633,22 +617,6 @@ func (c *TodoClient) QueryPriority(t *Todo) *PriorityQuery {
 			sqlgraph.From(todo.Table, todo.FieldID, id),
 			sqlgraph.To(priority.Table, priority.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, todo.PriorityTable, todo.PriorityColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryStatus queries the status edge of a Todo.
-func (c *TodoClient) QueryStatus(t *Todo) *StatusQuery {
-	query := (&StatusClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(todo.Table, todo.FieldID, id),
-			sqlgraph.To(status.Table, status.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, todo.StatusTable, todo.StatusColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
