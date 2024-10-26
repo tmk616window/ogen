@@ -20,6 +20,8 @@ const (
 	FieldDescription = "description"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldFinishedAt holds the string denoting the finished_at field in the database.
+	FieldFinishedAt = "finished_at"
 	// FieldPriorityID holds the string denoting the priority_id field in the database.
 	FieldPriorityID = "priority_id"
 	// FieldStatusID holds the string denoting the status_id field in the database.
@@ -56,6 +58,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldName,
+	FieldFinishedAt,
 	FieldPriorityID,
 	FieldStatusID,
 	FieldCreatedAt,
@@ -108,6 +111,11 @@ func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByFinishedAt orders the results by the finished_at field.
+func ByFinishedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFinishedAt, opts...).ToFunc()
 }
 
 // ByPriorityID orders the results by the priority_id field.
