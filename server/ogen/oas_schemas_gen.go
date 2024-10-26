@@ -2,6 +2,56 @@
 
 package ogen
 
+import (
+	"time"
+)
+
+// NewOptDateTime returns new OptDateTime with value set to v.
+func NewOptDateTime(v time.Time) OptDateTime {
+	return OptDateTime{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDateTime is optional time.Time.
+type OptDateTime struct {
+	Value time.Time
+	Set   bool
+}
+
+// IsSet returns true if OptDateTime was set.
+func (o OptDateTime) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDateTime) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDateTime) SetTo(v time.Time) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDateTime) Get() (v time.Time, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -102,11 +152,13 @@ func (s *Status) SetValue(val string) {
 
 // Ref: #/components/schemas/Todo
 type Todo struct {
-	ID          int       `json:"id"`
-	Title       string    `json:"title"`
-	Description OptString `json:"description"`
-	Priority    Priority  `json:"priority"`
-	Status      Status    `json:"status"`
+	ID          int         `json:"id"`
+	Title       string      `json:"title"`
+	Description OptString   `json:"description"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	FinishedAt  OptDateTime `json:"finishedAt"`
+	Priority    Priority    `json:"priority"`
+	Status      Status      `json:"status"`
 }
 
 // GetID returns the value of ID.
@@ -122,6 +174,16 @@ func (s *Todo) GetTitle() string {
 // GetDescription returns the value of Description.
 func (s *Todo) GetDescription() OptString {
 	return s.Description
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Todo) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetFinishedAt returns the value of FinishedAt.
+func (s *Todo) GetFinishedAt() OptDateTime {
+	return s.FinishedAt
 }
 
 // GetPriority returns the value of Priority.
@@ -147,6 +209,16 @@ func (s *Todo) SetTitle(val string) {
 // SetDescription sets the value of Description.
 func (s *Todo) SetDescription(val OptString) {
 	s.Description = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Todo) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetFinishedAt sets the value of FinishedAt.
+func (s *Todo) SetFinishedAt(val OptDateTime) {
+	s.FinishedAt = val
 }
 
 // SetPriority sets the value of Priority.

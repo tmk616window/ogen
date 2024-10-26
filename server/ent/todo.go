@@ -26,15 +26,13 @@ type Todo struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// FinishedAt holds the value of the "finished_at" field.
-	FinishedAt time.Time `json:"finished_at,omitempty"`
+	FinishedAt *time.Time `json:"finished_at,omitempty"`
 	// PriorityID holds the value of the "priority_id" field.
 	PriorityID int `json:"priority_id,omitempty"`
 	// StatusID holds the value of the "status_id" field.
 	StatusID int `json:"status_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// CreatedBy holds the value of the "created_by" field.
-	CreatedBy string `json:"created_by,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -83,7 +81,7 @@ func (*Todo) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case todo.FieldID, todo.FieldPriorityID, todo.FieldStatusID:
 			values[i] = new(sql.NullInt64)
-		case todo.FieldTitle, todo.FieldDescription, todo.FieldName, todo.FieldCreatedBy:
+		case todo.FieldTitle, todo.FieldDescription, todo.FieldName:
 			values[i] = new(sql.NullString)
 		case todo.FieldFinishedAt, todo.FieldCreatedAt, todo.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -130,7 +128,8 @@ func (t *Todo) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field finished_at", values[i])
 			} else if value.Valid {
-				t.FinishedAt = value.Time
+				t.FinishedAt = new(time.Time)
+				*t.FinishedAt = value.Time
 			}
 		case todo.FieldPriorityID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -149,12 +148,6 @@ func (t *Todo) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				t.CreatedAt = value.Time
-			}
-		case todo.FieldCreatedBy:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field created_by", values[i])
-			} else if value.Valid {
-				t.CreatedBy = value.String
 			}
 		case todo.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -217,8 +210,10 @@ func (t *Todo) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(t.Name)
 	builder.WriteString(", ")
-	builder.WriteString("finished_at=")
-	builder.WriteString(t.FinishedAt.Format(time.ANSIC))
+	if v := t.FinishedAt; v != nil {
+		builder.WriteString("finished_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("priority_id=")
 	builder.WriteString(fmt.Sprintf("%v", t.PriorityID))
@@ -228,9 +223,6 @@ func (t *Todo) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("created_by=")
-	builder.WriteString(t.CreatedBy)
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(t.UpdatedAt.Format(time.ANSIC))

@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"server/ent"
+	"time"
 
 	"github.com/samber/lo"
 )
@@ -11,6 +12,8 @@ type Todo struct {
 	ID          int
 	Title       string
 	Description string
+	CreatedAt   time.Time
+	FinishedAt  time.Time
 	Priority    priority
 	Status      status
 }
@@ -36,6 +39,8 @@ func (u *usecase) TodosGet(ctx context.Context) ([]*Todo, error) {
 			ID:          todo.ID,
 			Title:       todo.Title,
 			Description: todo.Description,
+			CreatedAt:   todo.CreatedAt,
+			FinishedAt:  todo.FinishedAt,
 			Priority: priority{
 				ID:   todo.Edges.Priority.ID,
 				Name: todo.Edges.Priority.Name,

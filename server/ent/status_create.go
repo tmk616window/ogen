@@ -112,11 +112,11 @@ func (sc *StatusCreate) ExecX(ctx context.Context) {
 // defaults sets the default values of the builder before save.
 func (sc *StatusCreate) defaults() {
 	if _, ok := sc.mutation.CreatedAt(); !ok {
-		v := status.DefaultCreatedAt
+		v := status.DefaultCreatedAt()
 		sc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := sc.mutation.UpdatedAt(); !ok {
-		v := status.DefaultUpdatedAt
+		v := status.DefaultUpdatedAt()
 		sc.mutation.SetUpdatedAt(v)
 	}
 }

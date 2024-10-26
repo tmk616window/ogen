@@ -23,11 +23,11 @@ func init() {
 	// priorityDescCreatedAt is the schema descriptor for created_at field.
 	priorityDescCreatedAt := priorityFields[2].Descriptor()
 	// priority.DefaultCreatedAt holds the default value on creation for the created_at field.
-	priority.DefaultCreatedAt = priorityDescCreatedAt.Default.(time.Time)
+	priority.DefaultCreatedAt = priorityDescCreatedAt.Default.(func() time.Time)
 	// priorityDescUpdatedAt is the schema descriptor for updated_at field.
 	priorityDescUpdatedAt := priorityFields[3].Descriptor()
 	// priority.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	priority.DefaultUpdatedAt = priorityDescUpdatedAt.Default.(time.Time)
+	priority.DefaultUpdatedAt = priorityDescUpdatedAt.Default.(func() time.Time)
 	// priority.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	priority.UpdateDefaultUpdatedAt = priorityDescUpdatedAt.UpdateDefault.(func() time.Time)
 	statusFields := schema.Status{}.Fields()
@@ -39,11 +39,11 @@ func init() {
 	// statusDescCreatedAt is the schema descriptor for created_at field.
 	statusDescCreatedAt := statusFields[2].Descriptor()
 	// status.DefaultCreatedAt holds the default value on creation for the created_at field.
-	status.DefaultCreatedAt = statusDescCreatedAt.Default.(time.Time)
+	status.DefaultCreatedAt = statusDescCreatedAt.Default.(func() time.Time)
 	// statusDescUpdatedAt is the schema descriptor for updated_at field.
 	statusDescUpdatedAt := statusFields[3].Descriptor()
 	// status.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	status.DefaultUpdatedAt = statusDescUpdatedAt.Default.(time.Time)
+	status.DefaultUpdatedAt = statusDescUpdatedAt.Default.(func() time.Time)
 	// status.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	status.UpdateDefaultUpdatedAt = statusDescUpdatedAt.UpdateDefault.(func() time.Time)
 	todoFields := schema.Todo{}.Fields()
@@ -63,15 +63,11 @@ func init() {
 	// todoDescCreatedAt is the schema descriptor for created_at field.
 	todoDescCreatedAt := todoFields[7].Descriptor()
 	// todo.DefaultCreatedAt holds the default value on creation for the created_at field.
-	todo.DefaultCreatedAt = todoDescCreatedAt.Default.(time.Time)
-	// todoDescCreatedBy is the schema descriptor for created_by field.
-	todoDescCreatedBy := todoFields[8].Descriptor()
-	// todo.DefaultCreatedBy holds the default value on creation for the created_by field.
-	todo.DefaultCreatedBy = todoDescCreatedBy.Default.(string)
+	todo.DefaultCreatedAt = todoDescCreatedAt.Default.(func() time.Time)
 	// todoDescUpdatedAt is the schema descriptor for updated_at field.
-	todoDescUpdatedAt := todoFields[9].Descriptor()
+	todoDescUpdatedAt := todoFields[8].Descriptor()
 	// todo.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	todo.DefaultUpdatedAt = todoDescUpdatedAt.Default.(time.Time)
+	todo.DefaultUpdatedAt = todoDescUpdatedAt.Default.(func() time.Time)
 	// todo.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	todo.UpdateDefaultUpdatedAt = todoDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

@@ -29,6 +29,8 @@ func (h *handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
 			ID:          todo.ID,
 			Title:       todo.Title,
 			Description: ogen.OptString{Value: todo.Description},
+			CreatedAt:   todo.CreatedAt,
+			FinishedAt:  ogen.OptDateTime{Value: todo.FinishedAt},
 			Priority: ogen.Priority{
 				ID:   todo.Priority.ID,
 				Name: todo.Priority.Name,

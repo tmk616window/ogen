@@ -112,11 +112,11 @@ func (pc *PriorityCreate) ExecX(ctx context.Context) {
 // defaults sets the default values of the builder before save.
 func (pc *PriorityCreate) defaults() {
 	if _, ok := pc.mutation.CreatedAt(); !ok {
-		v := priority.DefaultCreatedAt
+		v := priority.DefaultCreatedAt()
 		pc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := pc.mutation.UpdatedAt(); !ok {
-		v := priority.DefaultUpdatedAt
+		v := priority.DefaultUpdatedAt()
 		pc.mutation.SetUpdatedAt(v)
 	}
 }

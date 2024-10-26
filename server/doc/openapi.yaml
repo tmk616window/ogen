@@ -80,6 +80,12 @@ components:
           type: string
         description:
           type: string
+        createdAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
         priority:
           $ref: "#/components/schemas/Priority"
         status:
@@ -89,6 +95,7 @@ components:
         - title
         - priority
         - status
+        - createdAt
 
     TodoInput:
       type: object
