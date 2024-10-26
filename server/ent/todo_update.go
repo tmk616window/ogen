@@ -78,20 +78,6 @@ func (tu *TodoUpdate) SetNillableName(s *string) *TodoUpdate {
 	return tu
 }
 
-// SetFinishedAt sets the "finished_at" field.
-func (tu *TodoUpdate) SetFinishedAt(t time.Time) *TodoUpdate {
-	tu.mutation.SetFinishedAt(t)
-	return tu
-}
-
-// SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
-func (tu *TodoUpdate) SetNillableFinishedAt(t *time.Time) *TodoUpdate {
-	if t != nil {
-		tu.SetFinishedAt(*t)
-	}
-	return tu
-}
-
 // SetPriorityID sets the "priority_id" field.
 func (tu *TodoUpdate) SetPriorityID(i int) *TodoUpdate {
 	tu.mutation.SetPriorityID(i)
@@ -248,9 +234,6 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.Name(); ok {
 		_spec.SetField(todo.FieldName, field.TypeString, value)
 	}
-	if value, ok := tu.mutation.FinishedAt(); ok {
-		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
-	}
 	if value, ok := tu.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)
 	}
@@ -379,20 +362,6 @@ func (tuo *TodoUpdateOne) SetName(s string) *TodoUpdateOne {
 func (tuo *TodoUpdateOne) SetNillableName(s *string) *TodoUpdateOne {
 	if s != nil {
 		tuo.SetName(*s)
-	}
-	return tuo
-}
-
-// SetFinishedAt sets the "finished_at" field.
-func (tuo *TodoUpdateOne) SetFinishedAt(t time.Time) *TodoUpdateOne {
-	tuo.mutation.SetFinishedAt(t)
-	return tuo
-}
-
-// SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
-func (tuo *TodoUpdateOne) SetNillableFinishedAt(t *time.Time) *TodoUpdateOne {
-	if t != nil {
-		tuo.SetFinishedAt(*t)
 	}
 	return tuo
 }
@@ -582,9 +551,6 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if value, ok := tuo.mutation.Name(); ok {
 		_spec.SetField(todo.FieldName, field.TypeString, value)
-	}
-	if value, ok := tuo.mutation.FinishedAt(); ok {
-		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)

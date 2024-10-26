@@ -70,11 +70,6 @@ func Name(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldName, v))
 }
 
-// FinishedAt applies equality check predicate on the "finished_at" field. It's identical to FinishedAtEQ.
-func FinishedAt(v time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldEQ(FieldFinishedAt, v))
-}
-
 // PriorityID applies equality check predicate on the "priority_id" field. It's identical to PriorityIDEQ.
 func PriorityID(v int) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldPriorityID, v))
@@ -298,46 +293,6 @@ func NameEqualFold(v string) predicate.Todo {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldContainsFold(FieldName, v))
-}
-
-// FinishedAtEQ applies the EQ predicate on the "finished_at" field.
-func FinishedAtEQ(v time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldEQ(FieldFinishedAt, v))
-}
-
-// FinishedAtNEQ applies the NEQ predicate on the "finished_at" field.
-func FinishedAtNEQ(v time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldNEQ(FieldFinishedAt, v))
-}
-
-// FinishedAtIn applies the In predicate on the "finished_at" field.
-func FinishedAtIn(vs ...time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldIn(FieldFinishedAt, vs...))
-}
-
-// FinishedAtNotIn applies the NotIn predicate on the "finished_at" field.
-func FinishedAtNotIn(vs ...time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldNotIn(FieldFinishedAt, vs...))
-}
-
-// FinishedAtGT applies the GT predicate on the "finished_at" field.
-func FinishedAtGT(v time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldGT(FieldFinishedAt, v))
-}
-
-// FinishedAtGTE applies the GTE predicate on the "finished_at" field.
-func FinishedAtGTE(v time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldGTE(FieldFinishedAt, v))
-}
-
-// FinishedAtLT applies the LT predicate on the "finished_at" field.
-func FinishedAtLT(v time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldLT(FieldFinishedAt, v))
-}
-
-// FinishedAtLTE applies the LTE predicate on the "finished_at" field.
-func FinishedAtLTE(v time.Time) predicate.Todo {
-	return predicate.Todo(sql.FieldLTE(FieldFinishedAt, v))
 }
 
 // PriorityIDEQ applies the EQ predicate on the "priority_id" field.

@@ -1106,7 +1106,6 @@ type TodoMutation struct {
 	title           *string
 	description     *string
 	name            *string
-	finished_at     *time.Time
 	created_at      *time.Time
 	updated_at      *time.Time
 	clearedFields   map[string]struct{}
@@ -1344,42 +1343,6 @@ func (m *TodoMutation) ResetName() {
 	m.name = nil
 }
 
-// SetFinishedAt sets the "finished_at" field.
-func (m *TodoMutation) SetFinishedAt(t time.Time) {
-	m.finished_at = &t
-}
-
-// FinishedAt returns the value of the "finished_at" field in the mutation.
-func (m *TodoMutation) FinishedAt() (r time.Time, exists bool) {
-	v := m.finished_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFinishedAt returns the old "finished_at" field's value of the Todo entity.
-// If the Todo object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TodoMutation) OldFinishedAt(ctx context.Context) (v *time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFinishedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFinishedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFinishedAt: %w", err)
-	}
-	return oldValue.FinishedAt, nil
-}
-
-// ResetFinishedAt resets all changes to the "finished_at" field.
-func (m *TodoMutation) ResetFinishedAt() {
-	m.finished_at = nil
-}
-
 // SetPriorityID sets the "priority_id" field.
 func (m *TodoMutation) SetPriorityID(i int) {
 	m.priority = &i
@@ -1612,7 +1575,7 @@ func (m *TodoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TodoMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 7)
 	if m.title != nil {
 		fields = append(fields, todo.FieldTitle)
 	}
@@ -1621,9 +1584,6 @@ func (m *TodoMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, todo.FieldName)
-	}
-	if m.finished_at != nil {
-		fields = append(fields, todo.FieldFinishedAt)
 	}
 	if m.priority != nil {
 		fields = append(fields, todo.FieldPriorityID)
@@ -1651,8 +1611,6 @@ func (m *TodoMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case todo.FieldName:
 		return m.Name()
-	case todo.FieldFinishedAt:
-		return m.FinishedAt()
 	case todo.FieldPriorityID:
 		return m.PriorityID()
 	case todo.FieldStatusID:
@@ -1676,8 +1634,6 @@ func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldDescription(ctx)
 	case todo.FieldName:
 		return m.OldName(ctx)
-	case todo.FieldFinishedAt:
-		return m.OldFinishedAt(ctx)
 	case todo.FieldPriorityID:
 		return m.OldPriorityID(ctx)
 	case todo.FieldStatusID:
@@ -1715,13 +1671,6 @@ func (m *TodoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
-		return nil
-	case todo.FieldFinishedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFinishedAt(v)
 		return nil
 	case todo.FieldPriorityID:
 		v, ok := value.(int)
@@ -1820,9 +1769,6 @@ func (m *TodoMutation) ResetField(name string) error {
 		return nil
 	case todo.FieldName:
 		m.ResetName()
-		return nil
-	case todo.FieldFinishedAt:
-		m.ResetFinishedAt()
 		return nil
 	case todo.FieldPriorityID:
 		m.ResetPriorityID()

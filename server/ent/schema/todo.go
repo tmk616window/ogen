@@ -20,7 +20,6 @@ func (Todo) Fields() []ent.Field {
 		field.String("title").NotEmpty(),
 		field.String("description").Optional(),
 		field.String("name").NotEmpty(),
-		field.Time("finished_at").Nillable(),
 		field.Int("priority_id"),
 		field.Int("status_id").Default(1),
 		field.Time("created_at").Default(time.Now),
