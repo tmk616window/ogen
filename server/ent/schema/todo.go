@@ -20,7 +20,7 @@ func (Todo) Fields() []ent.Field {
 		field.String("name").NotEmpty(),
 		field.Time("finished_at").Optional(),
 		field.Int("priority_id"),
-		// field.Int("status_id").Default(1),
+		field.Int("status_id").Default(1),
 	}
 }
 
@@ -32,10 +32,10 @@ func (Todo) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("priority_id"),
-		// edge.From("status", Status.Type).
-		// 	Ref("todo").
-		// 	Required().
-		// 	Unique().
-		// 	Field("status_id"),
+		edge.From("status", Status.Type).
+			Ref("todo").
+			Required().
+			Unique().
+			Field("status_id"),
 	}
 }

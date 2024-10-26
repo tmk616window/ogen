@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"server/ent/status"
+	"server/ent/todo"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -29,6 +30,25 @@ func (sc *StatusCreate) SetValue(s string) *StatusCreate {
 func (sc *StatusCreate) SetID(i int) *StatusCreate {
 	sc.mutation.SetID(i)
 	return sc
+}
+
+// SetTodoID sets the "todo" edge to the Todo entity by ID.
+func (sc *StatusCreate) SetTodoID(id int) *StatusCreate {
+	sc.mutation.SetTodoID(id)
+	return sc
+}
+
+// SetNillableTodoID sets the "todo" edge to the Todo entity by ID if the given value is not nil.
+func (sc *StatusCreate) SetNillableTodoID(id *int) *StatusCreate {
+	if id != nil {
+		sc = sc.SetTodoID(*id)
+	}
+	return sc
+}
+
+// SetTodo sets the "todo" edge to the Todo entity.
+func (sc *StatusCreate) SetTodo(t *Todo) *StatusCreate {
+	return sc.SetTodoID(t.ID)
 }
 
 // Mutation returns the StatusMutation object of the builder.
@@ -108,6 +128,22 @@ func (sc *StatusCreate) createSpec() (*Status, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Value(); ok {
 		_spec.SetField(status.FieldValue, field.TypeString, value)
 		_node.Value = value
+	}
+	if nodes := sc.mutation.TodoIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   status.TodoTable,
+			Columns: []string{status.TodoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

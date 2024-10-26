@@ -438,6 +438,8 @@ type StatusMutation struct {
 	id            *int
 	value         *string
 	clearedFields map[string]struct{}
+	todo          *int
+	clearedtodo   bool
 	done          bool
 	oldValue      func(context.Context) (*Status, error)
 	predicates    []predicate.Status
@@ -583,6 +585,45 @@ func (m *StatusMutation) ResetValue() {
 	m.value = nil
 }
 
+// SetTodoID sets the "todo" edge to the Todo entity by id.
+func (m *StatusMutation) SetTodoID(id int) {
+	m.todo = &id
+}
+
+// ClearTodo clears the "todo" edge to the Todo entity.
+func (m *StatusMutation) ClearTodo() {
+	m.clearedtodo = true
+}
+
+// TodoCleared reports if the "todo" edge to the Todo entity was cleared.
+func (m *StatusMutation) TodoCleared() bool {
+	return m.clearedtodo
+}
+
+// TodoID returns the "todo" edge ID in the mutation.
+func (m *StatusMutation) TodoID() (id int, exists bool) {
+	if m.todo != nil {
+		return *m.todo, true
+	}
+	return
+}
+
+// TodoIDs returns the "todo" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TodoID instead. It exists only for internal usage by the builders.
+func (m *StatusMutation) TodoIDs() (ids []int) {
+	if id := m.todo; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTodo resets all changes to the "todo" edge.
+func (m *StatusMutation) ResetTodo() {
+	m.todo = nil
+	m.clearedtodo = false
+}
+
 // Where appends a list predicates to the StatusMutation builder.
 func (m *StatusMutation) Where(ps ...predicate.Status) {
 	m.predicates = append(m.predicates, ps...)
@@ -716,19 +757,28 @@ func (m *StatusMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *StatusMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.todo != nil {
+		edges = append(edges, status.EdgeTodo)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *StatusMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case status.EdgeTodo:
+		if id := m.todo; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *StatusMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -740,25 +790,42 @@ func (m *StatusMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *StatusMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedtodo {
+		edges = append(edges, status.EdgeTodo)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *StatusMutation) EdgeCleared(name string) bool {
+	switch name {
+	case status.EdgeTodo:
+		return m.clearedtodo
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *StatusMutation) ClearEdge(name string) error {
+	switch name {
+	case status.EdgeTodo:
+		m.ClearTodo()
+		return nil
+	}
 	return fmt.Errorf("unknown Status unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *StatusMutation) ResetEdge(name string) error {
+	switch name {
+	case status.EdgeTodo:
+		m.ResetTodo()
+		return nil
+	}
 	return fmt.Errorf("unknown Status edge %s", name)
 }
 
@@ -775,6 +842,8 @@ type TodoMutation struct {
 	clearedFields   map[string]struct{}
 	priority        *int
 	clearedpriority bool
+	status          *int
+	clearedstatus   bool
 	done            bool
 	oldValue        func(context.Context) (*Todo, error)
 	predicates      []predicate.Todo
@@ -1090,6 +1159,42 @@ func (m *TodoMutation) ResetPriorityID() {
 	m.priority = nil
 }
 
+// SetStatusID sets the "status_id" field.
+func (m *TodoMutation) SetStatusID(i int) {
+	m.status = &i
+}
+
+// StatusID returns the value of the "status_id" field in the mutation.
+func (m *TodoMutation) StatusID() (r int, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatusID returns the old "status_id" field's value of the Todo entity.
+// If the Todo object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TodoMutation) OldStatusID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatusID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatusID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatusID: %w", err)
+	}
+	return oldValue.StatusID, nil
+}
+
+// ResetStatusID resets all changes to the "status_id" field.
+func (m *TodoMutation) ResetStatusID() {
+	m.status = nil
+}
+
 // ClearPriority clears the "priority" edge to the Priority entity.
 func (m *TodoMutation) ClearPriority() {
 	m.clearedpriority = true
@@ -1115,6 +1220,33 @@ func (m *TodoMutation) PriorityIDs() (ids []int) {
 func (m *TodoMutation) ResetPriority() {
 	m.priority = nil
 	m.clearedpriority = false
+}
+
+// ClearStatus clears the "status" edge to the Status entity.
+func (m *TodoMutation) ClearStatus() {
+	m.clearedstatus = true
+	m.clearedFields[todo.FieldStatusID] = struct{}{}
+}
+
+// StatusCleared reports if the "status" edge to the Status entity was cleared.
+func (m *TodoMutation) StatusCleared() bool {
+	return m.clearedstatus
+}
+
+// StatusIDs returns the "status" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// StatusID instead. It exists only for internal usage by the builders.
+func (m *TodoMutation) StatusIDs() (ids []int) {
+	if id := m.status; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetStatus resets all changes to the "status" edge.
+func (m *TodoMutation) ResetStatus() {
+	m.status = nil
+	m.clearedstatus = false
 }
 
 // Where appends a list predicates to the TodoMutation builder.
@@ -1151,7 +1283,7 @@ func (m *TodoMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TodoMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.title != nil {
 		fields = append(fields, todo.FieldTitle)
 	}
@@ -1166,6 +1298,9 @@ func (m *TodoMutation) Fields() []string {
 	}
 	if m.priority != nil {
 		fields = append(fields, todo.FieldPriorityID)
+	}
+	if m.status != nil {
+		fields = append(fields, todo.FieldStatusID)
 	}
 	return fields
 }
@@ -1185,6 +1320,8 @@ func (m *TodoMutation) Field(name string) (ent.Value, bool) {
 		return m.FinishedAt()
 	case todo.FieldPriorityID:
 		return m.PriorityID()
+	case todo.FieldStatusID:
+		return m.StatusID()
 	}
 	return nil, false
 }
@@ -1204,6 +1341,8 @@ func (m *TodoMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldFinishedAt(ctx)
 	case todo.FieldPriorityID:
 		return m.OldPriorityID(ctx)
+	case todo.FieldStatusID:
+		return m.OldStatusID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Todo field %s", name)
 }
@@ -1247,6 +1386,13 @@ func (m *TodoMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPriorityID(v)
+		return nil
+	case todo.FieldStatusID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatusID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
@@ -1330,15 +1476,21 @@ func (m *TodoMutation) ResetField(name string) error {
 	case todo.FieldPriorityID:
 		m.ResetPriorityID()
 		return nil
+	case todo.FieldStatusID:
+		m.ResetStatusID()
+		return nil
 	}
 	return fmt.Errorf("unknown Todo field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TodoMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.priority != nil {
 		edges = append(edges, todo.EdgePriority)
+	}
+	if m.status != nil {
+		edges = append(edges, todo.EdgeStatus)
 	}
 	return edges
 }
@@ -1351,13 +1503,17 @@ func (m *TodoMutation) AddedIDs(name string) []ent.Value {
 		if id := m.priority; id != nil {
 			return []ent.Value{*id}
 		}
+	case todo.EdgeStatus:
+		if id := m.status; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TodoMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -1369,9 +1525,12 @@ func (m *TodoMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TodoMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedpriority {
 		edges = append(edges, todo.EdgePriority)
+	}
+	if m.clearedstatus {
+		edges = append(edges, todo.EdgeStatus)
 	}
 	return edges
 }
@@ -1382,6 +1541,8 @@ func (m *TodoMutation) EdgeCleared(name string) bool {
 	switch name {
 	case todo.EdgePriority:
 		return m.clearedpriority
+	case todo.EdgeStatus:
+		return m.clearedstatus
 	}
 	return false
 }
@@ -1393,6 +1554,9 @@ func (m *TodoMutation) ClearEdge(name string) error {
 	case todo.EdgePriority:
 		m.ClearPriority()
 		return nil
+	case todo.EdgeStatus:
+		m.ClearStatus()
+		return nil
 	}
 	return fmt.Errorf("unknown Todo unique edge %s", name)
 }
@@ -1403,6 +1567,9 @@ func (m *TodoMutation) ResetEdge(name string) error {
 	switch name {
 	case todo.EdgePriority:
 		m.ResetPriority()
+		return nil
+	case todo.EdgeStatus:
+		m.ResetStatus()
 		return nil
 	}
 	return fmt.Errorf("unknown Todo edge %s", name)

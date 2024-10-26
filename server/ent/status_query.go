@@ -4,10 +4,12 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 	"server/ent/predicate"
 	"server/ent/status"
+	"server/ent/todo"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +24,7 @@ type StatusQuery struct {
 	order      []status.OrderOption
 	inters     []Interceptor
 	predicates []predicate.Status
+	withTodo   *TodoQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +59,28 @@ func (sq *StatusQuery) Unique(unique bool) *StatusQuery {
 func (sq *StatusQuery) Order(o ...status.OrderOption) *StatusQuery {
 	sq.order = append(sq.order, o...)
 	return sq
+}
+
+// QueryTodo chains the current query on the "todo" edge.
+func (sq *StatusQuery) QueryTodo() *TodoQuery {
+	query := (&TodoClient{config: sq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(status.Table, status.FieldID, selector),
+			sqlgraph.To(todo.Table, todo.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, status.TodoTable, status.TodoColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Status entity from the query.
@@ -250,10 +275,22 @@ func (sq *StatusQuery) Clone() *StatusQuery {
 		order:      append([]status.OrderOption{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Status{}, sq.predicates...),
+		withTodo:   sq.withTodo.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
 	}
+}
+
+// WithTodo tells the query-builder to eager-load the nodes that are connected to
+// the "todo" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *StatusQuery) WithTodo(opts ...func(*TodoQuery)) *StatusQuery {
+	query := (&TodoClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withTodo = query
+	return sq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +369,11 @@ func (sq *StatusQuery) prepareQuery(ctx context.Context) error {
 
 func (sq *StatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Status, error) {
 	var (
-		nodes = []*Status{}
-		_spec = sq.querySpec()
+		nodes       = []*Status{}
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withTodo != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Status).scanValues(nil, columns)
@@ -341,6 +381,7 @@ func (sq *StatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Statu
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Status{config: sq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +393,41 @@ func (sq *StatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Statu
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := sq.withTodo; query != nil {
+		if err := sq.loadTodo(ctx, query, nodes, nil,
+			func(n *Status, e *Todo) { n.Edges.Todo = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (sq *StatusQuery) loadTodo(ctx context.Context, query *TodoQuery, nodes []*Status, init func(*Status), assign func(*Status, *Todo)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Status)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(todo.FieldStatusID)
+	}
+	query.Where(predicate.Todo(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(status.TodoColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.StatusID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "status_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (sq *StatusQuery) sqlCount(ctx context.Context) (int, error) {

@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -20,5 +21,8 @@ func (Status) Fields() []ent.Field {
 
 // Edges of the Status.
 func (Status) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("todo", Todo.Type).
+			Unique(),
+	}
 }

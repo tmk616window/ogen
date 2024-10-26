@@ -80,6 +80,11 @@ func PriorityID(v int) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldPriorityID, v))
 }
 
+// StatusID applies equality check predicate on the "status_id" field. It's identical to StatusIDEQ.
+func StatusID(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldStatusID, v))
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldTitle, v))
@@ -355,6 +360,26 @@ func PriorityIDNotIn(vs ...int) predicate.Todo {
 	return predicate.Todo(sql.FieldNotIn(FieldPriorityID, vs...))
 }
 
+// StatusIDEQ applies the EQ predicate on the "status_id" field.
+func StatusIDEQ(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldEQ(FieldStatusID, v))
+}
+
+// StatusIDNEQ applies the NEQ predicate on the "status_id" field.
+func StatusIDNEQ(v int) predicate.Todo {
+	return predicate.Todo(sql.FieldNEQ(FieldStatusID, v))
+}
+
+// StatusIDIn applies the In predicate on the "status_id" field.
+func StatusIDIn(vs ...int) predicate.Todo {
+	return predicate.Todo(sql.FieldIn(FieldStatusID, vs...))
+}
+
+// StatusIDNotIn applies the NotIn predicate on the "status_id" field.
+func StatusIDNotIn(vs ...int) predicate.Todo {
+	return predicate.Todo(sql.FieldNotIn(FieldStatusID, vs...))
+}
+
 // HasPriority applies the HasEdge predicate on the "priority" edge.
 func HasPriority() predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
@@ -370,6 +395,29 @@ func HasPriority() predicate.Todo {
 func HasPriorityWith(preds ...predicate.Priority) predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
 		step := newPriorityStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStatus applies the HasEdge predicate on the "status" edge.
+func HasStatus() predicate.Todo {
+	return predicate.Todo(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, StatusTable, StatusColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStatusWith applies the HasEdge predicate on the "status" edge with a given conditions (other predicates).
+func HasStatusWith(preds ...predicate.Status) predicate.Todo {
+	return predicate.Todo(func(s *sql.Selector) {
+		step := newStatusStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

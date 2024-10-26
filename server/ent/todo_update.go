@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"server/ent/predicate"
 	"server/ent/priority"
+	"server/ent/status"
 	"server/ent/todo"
 	"time"
 
@@ -111,9 +112,28 @@ func (tu *TodoUpdate) SetNillablePriorityID(i *int) *TodoUpdate {
 	return tu
 }
 
+// SetStatusID sets the "status_id" field.
+func (tu *TodoUpdate) SetStatusID(i int) *TodoUpdate {
+	tu.mutation.SetStatusID(i)
+	return tu
+}
+
+// SetNillableStatusID sets the "status_id" field if the given value is not nil.
+func (tu *TodoUpdate) SetNillableStatusID(i *int) *TodoUpdate {
+	if i != nil {
+		tu.SetStatusID(*i)
+	}
+	return tu
+}
+
 // SetPriority sets the "priority" edge to the Priority entity.
 func (tu *TodoUpdate) SetPriority(p *Priority) *TodoUpdate {
 	return tu.SetPriorityID(p.ID)
+}
+
+// SetStatus sets the "status" edge to the Status entity.
+func (tu *TodoUpdate) SetStatus(s *Status) *TodoUpdate {
+	return tu.SetStatusID(s.ID)
 }
 
 // Mutation returns the TodoMutation object of the builder.
@@ -124,6 +144,12 @@ func (tu *TodoUpdate) Mutation() *TodoMutation {
 // ClearPriority clears the "priority" edge to the Priority entity.
 func (tu *TodoUpdate) ClearPriority() *TodoUpdate {
 	tu.mutation.ClearPriority()
+	return tu
+}
+
+// ClearStatus clears the "status" edge to the Status entity.
+func (tu *TodoUpdate) ClearStatus() *TodoUpdate {
+	tu.mutation.ClearStatus()
 	return tu
 }
 
@@ -168,6 +194,9 @@ func (tu *TodoUpdate) check() error {
 	}
 	if tu.mutation.PriorityCleared() && len(tu.mutation.PriorityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Todo.priority"`)
+	}
+	if tu.mutation.StatusCleared() && len(tu.mutation.StatusIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Todo.status"`)
 	}
 	return nil
 }
@@ -224,6 +253,35 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.StatusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   todo.StatusTable,
+			Columns: []string{todo.StatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(status.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.StatusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   todo.StatusTable,
+			Columns: []string{todo.StatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(status.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -333,9 +391,28 @@ func (tuo *TodoUpdateOne) SetNillablePriorityID(i *int) *TodoUpdateOne {
 	return tuo
 }
 
+// SetStatusID sets the "status_id" field.
+func (tuo *TodoUpdateOne) SetStatusID(i int) *TodoUpdateOne {
+	tuo.mutation.SetStatusID(i)
+	return tuo
+}
+
+// SetNillableStatusID sets the "status_id" field if the given value is not nil.
+func (tuo *TodoUpdateOne) SetNillableStatusID(i *int) *TodoUpdateOne {
+	if i != nil {
+		tuo.SetStatusID(*i)
+	}
+	return tuo
+}
+
 // SetPriority sets the "priority" edge to the Priority entity.
 func (tuo *TodoUpdateOne) SetPriority(p *Priority) *TodoUpdateOne {
 	return tuo.SetPriorityID(p.ID)
+}
+
+// SetStatus sets the "status" edge to the Status entity.
+func (tuo *TodoUpdateOne) SetStatus(s *Status) *TodoUpdateOne {
+	return tuo.SetStatusID(s.ID)
 }
 
 // Mutation returns the TodoMutation object of the builder.
@@ -346,6 +423,12 @@ func (tuo *TodoUpdateOne) Mutation() *TodoMutation {
 // ClearPriority clears the "priority" edge to the Priority entity.
 func (tuo *TodoUpdateOne) ClearPriority() *TodoUpdateOne {
 	tuo.mutation.ClearPriority()
+	return tuo
+}
+
+// ClearStatus clears the "status" edge to the Status entity.
+func (tuo *TodoUpdateOne) ClearStatus() *TodoUpdateOne {
+	tuo.mutation.ClearStatus()
 	return tuo
 }
 
@@ -403,6 +486,9 @@ func (tuo *TodoUpdateOne) check() error {
 	}
 	if tuo.mutation.PriorityCleared() && len(tuo.mutation.PriorityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Todo.priority"`)
+	}
+	if tuo.mutation.StatusCleared() && len(tuo.mutation.StatusIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Todo.status"`)
 	}
 	return nil
 }
@@ -476,6 +562,35 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(priority.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.StatusCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   todo.StatusTable,
+			Columns: []string{todo.StatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(status.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.StatusIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   todo.StatusTable,
+			Columns: []string{todo.StatusColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(status.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

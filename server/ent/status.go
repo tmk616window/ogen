@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"server/ent/status"
+	"server/ent/todo"
 	"strings"
 
 	"entgo.io/ent"
@@ -17,8 +18,31 @@ type Status struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Value holds the value of the "value" field.
-	Value        string `json:"value,omitempty"`
+	Value string `json:"value,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the StatusQuery when eager-loading is set.
+	Edges        StatusEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// StatusEdges holds the relations/edges for other nodes in the graph.
+type StatusEdges struct {
+	// Todo holds the value of the todo edge.
+	Todo *Todo `json:"todo,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// TodoOrErr returns the Todo value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e StatusEdges) TodoOrErr() (*Todo, error) {
+	if e.Todo != nil {
+		return e.Todo, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: todo.Label}
+	}
+	return nil, &NotLoadedError{edge: "todo"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -68,6 +92,11 @@ func (s *Status) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (s *Status) GetValue(name string) (ent.Value, error) {
 	return s.selectValues.Get(name)
+}
+
+// QueryTodo queries the "todo" edge of the Status entity.
+func (s *Status) QueryTodo() *TodoQuery {
+	return NewStatusClient(s.config).QueryTodo(s)
 }
 
 // Update returns a builder for updating this Status.
