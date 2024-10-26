@@ -54,6 +54,14 @@ func (tc *TodoCreate) SetFinishedAt(t time.Time) *TodoCreate {
 	return tc
 }
 
+// SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
+func (tc *TodoCreate) SetNillableFinishedAt(t *time.Time) *TodoCreate {
+	if t != nil {
+		tc.SetFinishedAt(*t)
+	}
+	return tc
+}
+
 // SetPriorityID sets the "priority_id" field.
 func (tc *TodoCreate) SetPriorityID(i int) *TodoCreate {
 	tc.mutation.SetPriorityID(i)
@@ -185,9 +193,6 @@ func (tc *TodoCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.FinishedAt(); !ok {
-		return &ValidationError{Name: "finished_at", err: errors.New(`ent: missing required field "Todo.finished_at"`)}
-	}
 	if _, ok := tc.mutation.PriorityID(); !ok {
 		return &ValidationError{Name: "priority_id", err: errors.New(`ent: missing required field "Todo.priority_id"`)}
 	}
@@ -252,7 +257,7 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := tc.mutation.FinishedAt(); ok {
 		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
-		_node.FinishedAt = &value
+		_node.FinishedAt = value
 	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)

@@ -1361,7 +1361,7 @@ func (m *TodoMutation) FinishedAt() (r time.Time, exists bool) {
 // OldFinishedAt returns the old "finished_at" field's value of the Todo entity.
 // If the Todo object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TodoMutation) OldFinishedAt(ctx context.Context) (v *time.Time, err error) {
+func (m *TodoMutation) OldFinishedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldFinishedAt is only allowed on UpdateOne operations")
 	}
@@ -1375,9 +1375,22 @@ func (m *TodoMutation) OldFinishedAt(ctx context.Context) (v *time.Time, err err
 	return oldValue.FinishedAt, nil
 }
 
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (m *TodoMutation) ClearFinishedAt() {
+	m.finished_at = nil
+	m.clearedFields[todo.FieldFinishedAt] = struct{}{}
+}
+
+// FinishedAtCleared returns if the "finished_at" field was cleared in this mutation.
+func (m *TodoMutation) FinishedAtCleared() bool {
+	_, ok := m.clearedFields[todo.FieldFinishedAt]
+	return ok
+}
+
 // ResetFinishedAt resets all changes to the "finished_at" field.
 func (m *TodoMutation) ResetFinishedAt() {
 	m.finished_at = nil
+	delete(m.clearedFields, todo.FieldFinishedAt)
 }
 
 // SetPriorityID sets the "priority_id" field.
@@ -1787,6 +1800,9 @@ func (m *TodoMutation) ClearedFields() []string {
 	if m.FieldCleared(todo.FieldDescription) {
 		fields = append(fields, todo.FieldDescription)
 	}
+	if m.FieldCleared(todo.FieldFinishedAt) {
+		fields = append(fields, todo.FieldFinishedAt)
+	}
 	return fields
 }
 
@@ -1803,6 +1819,9 @@ func (m *TodoMutation) ClearField(name string) error {
 	switch name {
 	case todo.FieldDescription:
 		m.ClearDescription()
+		return nil
+	case todo.FieldFinishedAt:
+		m.ClearFinishedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Todo nullable field %s", name)

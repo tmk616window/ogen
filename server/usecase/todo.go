@@ -13,7 +13,7 @@ type Todo struct {
 	Title       string
 	Description string
 	CreatedAt   time.Time
-	// FinishedAt  time.Time
+	FinishedAt  time.Time
 	Priority    priority
 	Status      status
 }
@@ -40,7 +40,7 @@ func (u *usecase) TodosGet(ctx context.Context) ([]*Todo, error) {
 			Title:       todo.Title,
 			Description: todo.Description,
 			CreatedAt:   todo.CreatedAt,
-			// FinishedAt:  todo.FinishedAt,
+			FinishedAt:  todo.FinishedAt,
 			Priority: priority{
 				ID:   todo.Edges.Priority.ID,
 				Name: todo.Edges.Priority.Name,

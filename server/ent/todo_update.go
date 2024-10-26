@@ -92,6 +92,12 @@ func (tu *TodoUpdate) SetNillableFinishedAt(t *time.Time) *TodoUpdate {
 	return tu
 }
 
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (tu *TodoUpdate) ClearFinishedAt() *TodoUpdate {
+	tu.mutation.ClearFinishedAt()
+	return tu
+}
+
 // SetPriorityID sets the "priority_id" field.
 func (tu *TodoUpdate) SetPriorityID(i int) *TodoUpdate {
 	tu.mutation.SetPriorityID(i)
@@ -251,6 +257,9 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.FinishedAt(); ok {
 		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
 	}
+	if tu.mutation.FinishedAtCleared() {
+		_spec.ClearField(todo.FieldFinishedAt, field.TypeTime)
+	}
 	if value, ok := tu.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)
 	}
@@ -394,6 +403,12 @@ func (tuo *TodoUpdateOne) SetNillableFinishedAt(t *time.Time) *TodoUpdateOne {
 	if t != nil {
 		tuo.SetFinishedAt(*t)
 	}
+	return tuo
+}
+
+// ClearFinishedAt clears the value of the "finished_at" field.
+func (tuo *TodoUpdateOne) ClearFinishedAt() *TodoUpdateOne {
+	tuo.mutation.ClearFinishedAt()
 	return tuo
 }
 
@@ -585,6 +600,9 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if value, ok := tuo.mutation.FinishedAt(); ok {
 		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
+	}
+	if tuo.mutation.FinishedAtCleared() {
+		_spec.ClearField(todo.FieldFinishedAt, field.TypeTime)
 	}
 	if value, ok := tuo.mutation.CreatedAt(); ok {
 		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)

@@ -26,7 +26,7 @@ type Todo struct {
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// FinishedAt holds the value of the "finished_at" field.
-	FinishedAt *time.Time `json:"finished_at,omitempty"`
+	FinishedAt time.Time `json:"finished_at,omitempty"`
 	// PriorityID holds the value of the "priority_id" field.
 	PriorityID int `json:"priority_id,omitempty"`
 	// StatusID holds the value of the "status_id" field.
@@ -128,8 +128,7 @@ func (t *Todo) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field finished_at", values[i])
 			} else if value.Valid {
-				t.FinishedAt = new(time.Time)
-				*t.FinishedAt = value.Time
+				t.FinishedAt = value.Time
 			}
 		case todo.FieldPriorityID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -210,10 +209,8 @@ func (t *Todo) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(t.Name)
 	builder.WriteString(", ")
-	if v := t.FinishedAt; v != nil {
-		builder.WriteString("finished_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString("finished_at=")
+	builder.WriteString(t.FinishedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("priority_id=")
 	builder.WriteString(fmt.Sprintf("%v", t.PriorityID))

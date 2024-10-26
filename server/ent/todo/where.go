@@ -340,6 +340,16 @@ func FinishedAtLTE(v time.Time) predicate.Todo {
 	return predicate.Todo(sql.FieldLTE(FieldFinishedAt, v))
 }
 
+// FinishedAtIsNil applies the IsNil predicate on the "finished_at" field.
+func FinishedAtIsNil() predicate.Todo {
+	return predicate.Todo(sql.FieldIsNull(FieldFinishedAt))
+}
+
+// FinishedAtNotNil applies the NotNil predicate on the "finished_at" field.
+func FinishedAtNotNil() predicate.Todo {
+	return predicate.Todo(sql.FieldNotNull(FieldFinishedAt))
+}
+
 // PriorityIDEQ applies the EQ predicate on the "priority_id" field.
 func PriorityIDEQ(v int) predicate.Todo {
 	return predicate.Todo(sql.FieldEQ(FieldPriorityID, v))
