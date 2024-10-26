@@ -31,6 +31,10 @@ type Todo struct {
 	PriorityID int `json:"priority_id,omitempty"`
 	// StatusID holds the value of the "status_id" field.
 	StatusID int `json:"status_id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TodoQuery when eager-loading is set.
 	Edges        TodoEdges `json:"edges"`
@@ -79,7 +83,7 @@ func (*Todo) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case todo.FieldTitle, todo.FieldDescription, todo.FieldName:
 			values[i] = new(sql.NullString)
-		case todo.FieldFinishedAt:
+		case todo.FieldFinishedAt, todo.FieldCreatedAt, todo.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -137,6 +141,18 @@ func (t *Todo) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status_id", values[i])
 			} else if value.Valid {
 				t.StatusID = int(value.Int64)
+			}
+		case todo.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				t.CreatedAt = value.Time
+			}
+		case todo.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				t.UpdatedAt = value.Time
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -201,6 +217,12 @@ func (t *Todo) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status_id=")
 	builder.WriteString(fmt.Sprintf("%v", t.StatusID))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(t.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

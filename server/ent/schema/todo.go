@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -21,6 +23,8 @@ func (Todo) Fields() []ent.Field {
 		field.Time("finished_at").Optional(),
 		field.Int("priority_id"),
 		field.Int("status_id").Default(1),
+		field.Time("created_at").Default(time.Now),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

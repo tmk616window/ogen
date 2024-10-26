@@ -7,6 +7,7 @@ import (
 	"server/ent/schema"
 	"server/ent/status"
 	"server/ent/todo"
+	"time"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -39,4 +40,14 @@ func init() {
 	todoDescStatusID := todoFields[6].Descriptor()
 	// todo.DefaultStatusID holds the default value on creation for the status_id field.
 	todo.DefaultStatusID = todoDescStatusID.Default.(int)
+	// todoDescCreatedAt is the schema descriptor for created_at field.
+	todoDescCreatedAt := todoFields[7].Descriptor()
+	// todo.DefaultCreatedAt holds the default value on creation for the created_at field.
+	todo.DefaultCreatedAt = todoDescCreatedAt.Default.(func() time.Time)
+	// todoDescUpdatedAt is the schema descriptor for updated_at field.
+	todoDescUpdatedAt := todoFields[8].Descriptor()
+	// todo.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	todo.DefaultUpdatedAt = todoDescUpdatedAt.Default.(func() time.Time)
+	// todo.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	todo.UpdateDefaultUpdatedAt = todoDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

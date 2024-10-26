@@ -126,6 +126,26 @@ func (tu *TodoUpdate) SetNillableStatusID(i *int) *TodoUpdate {
 	return tu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (tu *TodoUpdate) SetCreatedAt(t time.Time) *TodoUpdate {
+	tu.mutation.SetCreatedAt(t)
+	return tu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tu *TodoUpdate) SetNillableCreatedAt(t *time.Time) *TodoUpdate {
+	if t != nil {
+		tu.SetCreatedAt(*t)
+	}
+	return tu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (tu *TodoUpdate) SetUpdatedAt(t time.Time) *TodoUpdate {
+	tu.mutation.SetUpdatedAt(t)
+	return tu
+}
+
 // SetPriority sets the "priority" edge to the Priority entity.
 func (tu *TodoUpdate) SetPriority(p *Priority) *TodoUpdate {
 	return tu.SetPriorityID(p.ID)
@@ -155,6 +175,7 @@ func (tu *TodoUpdate) ClearStatus() *TodoUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TodoUpdate) Save(ctx context.Context) (int, error) {
+	tu.defaults()
 	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
@@ -177,6 +198,14 @@ func (tu *TodoUpdate) Exec(ctx context.Context) error {
 func (tu *TodoUpdate) ExecX(ctx context.Context) {
 	if err := tu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (tu *TodoUpdate) defaults() {
+	if _, ok := tu.mutation.UpdatedAt(); !ok {
+		v := todo.UpdateDefaultUpdatedAt()
+		tu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -230,6 +259,12 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.FinishedAtCleared() {
 		_spec.ClearField(todo.FieldFinishedAt, field.TypeTime)
+	}
+	if value, ok := tu.mutation.CreatedAt(); ok {
+		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := tu.mutation.UpdatedAt(); ok {
+		_spec.SetField(todo.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if tu.mutation.PriorityCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -405,6 +440,26 @@ func (tuo *TodoUpdateOne) SetNillableStatusID(i *int) *TodoUpdateOne {
 	return tuo
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (tuo *TodoUpdateOne) SetCreatedAt(t time.Time) *TodoUpdateOne {
+	tuo.mutation.SetCreatedAt(t)
+	return tuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (tuo *TodoUpdateOne) SetNillableCreatedAt(t *time.Time) *TodoUpdateOne {
+	if t != nil {
+		tuo.SetCreatedAt(*t)
+	}
+	return tuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (tuo *TodoUpdateOne) SetUpdatedAt(t time.Time) *TodoUpdateOne {
+	tuo.mutation.SetUpdatedAt(t)
+	return tuo
+}
+
 // SetPriority sets the "priority" edge to the Priority entity.
 func (tuo *TodoUpdateOne) SetPriority(p *Priority) *TodoUpdateOne {
 	return tuo.SetPriorityID(p.ID)
@@ -447,6 +502,7 @@ func (tuo *TodoUpdateOne) Select(field string, fields ...string) *TodoUpdateOne 
 
 // Save executes the query and returns the updated Todo entity.
 func (tuo *TodoUpdateOne) Save(ctx context.Context) (*Todo, error) {
+	tuo.defaults()
 	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
@@ -469,6 +525,14 @@ func (tuo *TodoUpdateOne) Exec(ctx context.Context) error {
 func (tuo *TodoUpdateOne) ExecX(ctx context.Context) {
 	if err := tuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (tuo *TodoUpdateOne) defaults() {
+	if _, ok := tuo.mutation.UpdatedAt(); !ok {
+		v := todo.UpdateDefaultUpdatedAt()
+		tuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -539,6 +603,12 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if tuo.mutation.FinishedAtCleared() {
 		_spec.ClearField(todo.FieldFinishedAt, field.TypeTime)
+	}
+	if value, ok := tuo.mutation.CreatedAt(); ok {
+		_spec.SetField(todo.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := tuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(todo.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if tuo.mutation.PriorityCleared() {
 		edge := &sqlgraph.EdgeSpec{

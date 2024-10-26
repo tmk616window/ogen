@@ -37,6 +37,8 @@ var (
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "priority_id", Type: field.TypeInt},
 		{Name: "status_id", Type: field.TypeInt, Default: 1},
 	}
@@ -48,13 +50,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "todos_priorities_todo",
-				Columns:    []*schema.Column{TodosColumns[5]},
+				Columns:    []*schema.Column{TodosColumns[7]},
 				RefColumns: []*schema.Column{PrioritiesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "todos_status_todo",
-				Columns:    []*schema.Column{TodosColumns[6]},
+				Columns:    []*schema.Column{TodosColumns[8]},
 				RefColumns: []*schema.Column{StatusColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
