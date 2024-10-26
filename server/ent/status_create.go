@@ -32,23 +32,19 @@ func (sc *StatusCreate) SetID(i int) *StatusCreate {
 	return sc
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by ID.
-func (sc *StatusCreate) SetTodoID(id int) *StatusCreate {
-	sc.mutation.SetTodoID(id)
+// AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
+func (sc *StatusCreate) AddTodoIDs(ids ...int) *StatusCreate {
+	sc.mutation.AddTodoIDs(ids...)
 	return sc
 }
 
-// SetNillableTodoID sets the "todo" edge to the Todo entity by ID if the given value is not nil.
-func (sc *StatusCreate) SetNillableTodoID(id *int) *StatusCreate {
-	if id != nil {
-		sc = sc.SetTodoID(*id)
+// AddTodo adds the "todo" edges to the Todo entity.
+func (sc *StatusCreate) AddTodo(t ...*Todo) *StatusCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return sc
-}
-
-// SetTodo sets the "todo" edge to the Todo entity.
-func (sc *StatusCreate) SetTodo(t *Todo) *StatusCreate {
-	return sc.SetTodoID(t.ID)
+	return sc.AddTodoIDs(ids...)
 }
 
 // Mutation returns the StatusMutation object of the builder.
@@ -131,7 +127,7 @@ func (sc *StatusCreate) createSpec() (*Status, *sqlgraph.CreateSpec) {
 	}
 	if nodes := sc.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   status.TodoTable,
 			Columns: []string{status.TodoColumn},

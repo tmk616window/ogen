@@ -22,7 +22,6 @@ func (Status) Fields() []ent.Field {
 // Edges of the Status.
 func (Status) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("todo", Todo.Type).
-			Unique(),
+		edge.To("todo", Todo.Type),
 	}
 }

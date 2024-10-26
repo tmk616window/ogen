@@ -131,13 +131,13 @@ func newPriorityStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PriorityInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, PriorityTable, PriorityColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, PriorityTable, PriorityColumn),
 	)
 }
 func newStatusStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StatusInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, StatusTable, StatusColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, StatusTable, StatusColumn),
 	)
 }

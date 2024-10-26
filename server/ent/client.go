@@ -334,7 +334,7 @@ func (c *PriorityClient) QueryTodo(pr *Priority) *TodoQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(priority.Table, priority.FieldID, id),
 			sqlgraph.To(todo.Table, todo.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, priority.TodoTable, priority.TodoColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, priority.TodoTable, priority.TodoColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -483,7 +483,7 @@ func (c *StatusClient) QueryTodo(s *Status) *TodoQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(status.Table, status.FieldID, id),
 			sqlgraph.To(todo.Table, todo.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, status.TodoTable, status.TodoColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, status.TodoTable, status.TodoColumn),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil
@@ -632,7 +632,7 @@ func (c *TodoClient) QueryPriority(t *Todo) *PriorityQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(todo.Table, todo.FieldID, id),
 			sqlgraph.To(priority.Table, priority.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, todo.PriorityTable, todo.PriorityColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, todo.PriorityTable, todo.PriorityColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -648,7 +648,7 @@ func (c *TodoClient) QueryStatus(t *Todo) *StatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(todo.Table, todo.FieldID, id),
 			sqlgraph.To(status.Table, status.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, todo.StatusTable, todo.StatusColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, todo.StatusTable, todo.StatusColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil

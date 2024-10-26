@@ -61,16 +61,23 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByTodoField orders the results by todo field.
-func ByTodoField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByTodoCount orders the results by todo count.
+func ByTodoCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTodoStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newTodoStep(), opts...)
+	}
+}
+
+// ByTodo orders the results by todo terms.
+func ByTodo(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTodoStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newTodoStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TodoInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, TodoTable, TodoColumn),
+		sqlgraph.Edge(sqlgraph.O2M, false, TodoTable, TodoColumn),
 	)
 }

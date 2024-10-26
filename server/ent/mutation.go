@@ -39,7 +39,8 @@ type PriorityMutation struct {
 	id            *int
 	name          *string
 	clearedFields map[string]struct{}
-	todo          *int
+	todo          map[int]struct{}
+	removedtodo   map[int]struct{}
 	clearedtodo   bool
 	done          bool
 	oldValue      func(context.Context) (*Priority, error)
@@ -186,9 +187,14 @@ func (m *PriorityMutation) ResetName() {
 	m.name = nil
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by id.
-func (m *PriorityMutation) SetTodoID(id int) {
-	m.todo = &id
+// AddTodoIDs adds the "todo" edge to the Todo entity by ids.
+func (m *PriorityMutation) AddTodoIDs(ids ...int) {
+	if m.todo == nil {
+		m.todo = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.todo[ids[i]] = struct{}{}
+	}
 }
 
 // ClearTodo clears the "todo" edge to the Todo entity.
@@ -201,20 +207,29 @@ func (m *PriorityMutation) TodoCleared() bool {
 	return m.clearedtodo
 }
 
-// TodoID returns the "todo" edge ID in the mutation.
-func (m *PriorityMutation) TodoID() (id int, exists bool) {
-	if m.todo != nil {
-		return *m.todo, true
+// RemoveTodoIDs removes the "todo" edge to the Todo entity by IDs.
+func (m *PriorityMutation) RemoveTodoIDs(ids ...int) {
+	if m.removedtodo == nil {
+		m.removedtodo = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.todo, ids[i])
+		m.removedtodo[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTodo returns the removed IDs of the "todo" edge to the Todo entity.
+func (m *PriorityMutation) RemovedTodoIDs() (ids []int) {
+	for id := range m.removedtodo {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // TodoIDs returns the "todo" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TodoID instead. It exists only for internal usage by the builders.
 func (m *PriorityMutation) TodoIDs() (ids []int) {
-	if id := m.todo; id != nil {
-		ids = append(ids, *id)
+	for id := range m.todo {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -223,6 +238,7 @@ func (m *PriorityMutation) TodoIDs() (ids []int) {
 func (m *PriorityMutation) ResetTodo() {
 	m.todo = nil
 	m.clearedtodo = false
+	m.removedtodo = nil
 }
 
 // Where appends a list predicates to the PriorityMutation builder.
@@ -370,9 +386,11 @@ func (m *PriorityMutation) AddedEdges() []string {
 func (m *PriorityMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case priority.EdgeTodo:
-		if id := m.todo; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.todo))
+		for id := range m.todo {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -380,12 +398,23 @@ func (m *PriorityMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PriorityMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedtodo != nil {
+		edges = append(edges, priority.EdgeTodo)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PriorityMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case priority.EdgeTodo:
+		ids := make([]ent.Value, 0, len(m.removedtodo))
+		for id := range m.removedtodo {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
@@ -412,9 +441,6 @@ func (m *PriorityMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PriorityMutation) ClearEdge(name string) error {
 	switch name {
-	case priority.EdgeTodo:
-		m.ClearTodo()
-		return nil
 	}
 	return fmt.Errorf("unknown Priority unique edge %s", name)
 }
@@ -438,7 +464,8 @@ type StatusMutation struct {
 	id            *int
 	value         *string
 	clearedFields map[string]struct{}
-	todo          *int
+	todo          map[int]struct{}
+	removedtodo   map[int]struct{}
 	clearedtodo   bool
 	done          bool
 	oldValue      func(context.Context) (*Status, error)
@@ -585,9 +612,14 @@ func (m *StatusMutation) ResetValue() {
 	m.value = nil
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by id.
-func (m *StatusMutation) SetTodoID(id int) {
-	m.todo = &id
+// AddTodoIDs adds the "todo" edge to the Todo entity by ids.
+func (m *StatusMutation) AddTodoIDs(ids ...int) {
+	if m.todo == nil {
+		m.todo = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.todo[ids[i]] = struct{}{}
+	}
 }
 
 // ClearTodo clears the "todo" edge to the Todo entity.
@@ -600,20 +632,29 @@ func (m *StatusMutation) TodoCleared() bool {
 	return m.clearedtodo
 }
 
-// TodoID returns the "todo" edge ID in the mutation.
-func (m *StatusMutation) TodoID() (id int, exists bool) {
-	if m.todo != nil {
-		return *m.todo, true
+// RemoveTodoIDs removes the "todo" edge to the Todo entity by IDs.
+func (m *StatusMutation) RemoveTodoIDs(ids ...int) {
+	if m.removedtodo == nil {
+		m.removedtodo = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.todo, ids[i])
+		m.removedtodo[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTodo returns the removed IDs of the "todo" edge to the Todo entity.
+func (m *StatusMutation) RemovedTodoIDs() (ids []int) {
+	for id := range m.removedtodo {
+		ids = append(ids, id)
 	}
 	return
 }
 
 // TodoIDs returns the "todo" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TodoID instead. It exists only for internal usage by the builders.
 func (m *StatusMutation) TodoIDs() (ids []int) {
-	if id := m.todo; id != nil {
-		ids = append(ids, *id)
+	for id := range m.todo {
+		ids = append(ids, id)
 	}
 	return
 }
@@ -622,6 +663,7 @@ func (m *StatusMutation) TodoIDs() (ids []int) {
 func (m *StatusMutation) ResetTodo() {
 	m.todo = nil
 	m.clearedtodo = false
+	m.removedtodo = nil
 }
 
 // Where appends a list predicates to the StatusMutation builder.
@@ -769,9 +811,11 @@ func (m *StatusMutation) AddedEdges() []string {
 func (m *StatusMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case status.EdgeTodo:
-		if id := m.todo; id != nil {
-			return []ent.Value{*id}
+		ids := make([]ent.Value, 0, len(m.todo))
+		for id := range m.todo {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -779,12 +823,23 @@ func (m *StatusMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *StatusMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedtodo != nil {
+		edges = append(edges, status.EdgeTodo)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *StatusMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case status.EdgeTodo:
+		ids := make([]ent.Value, 0, len(m.removedtodo))
+		for id := range m.removedtodo {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
@@ -811,9 +866,6 @@ func (m *StatusMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *StatusMutation) ClearEdge(name string) error {
 	switch name {
-	case status.EdgeTodo:
-		m.ClearTodo()
-		return nil
 	}
 	return fmt.Errorf("unknown Status unique edge %s", name)
 }

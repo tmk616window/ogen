@@ -32,23 +32,19 @@ func (pc *PriorityCreate) SetID(i int) *PriorityCreate {
 	return pc
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by ID.
-func (pc *PriorityCreate) SetTodoID(id int) *PriorityCreate {
-	pc.mutation.SetTodoID(id)
+// AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
+func (pc *PriorityCreate) AddTodoIDs(ids ...int) *PriorityCreate {
+	pc.mutation.AddTodoIDs(ids...)
 	return pc
 }
 
-// SetNillableTodoID sets the "todo" edge to the Todo entity by ID if the given value is not nil.
-func (pc *PriorityCreate) SetNillableTodoID(id *int) *PriorityCreate {
-	if id != nil {
-		pc = pc.SetTodoID(*id)
+// AddTodo adds the "todo" edges to the Todo entity.
+func (pc *PriorityCreate) AddTodo(t ...*Todo) *PriorityCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return pc
-}
-
-// SetTodo sets the "todo" edge to the Todo entity.
-func (pc *PriorityCreate) SetTodo(t *Todo) *PriorityCreate {
-	return pc.SetTodoID(t.ID)
+	return pc.AddTodoIDs(ids...)
 }
 
 // Mutation returns the PriorityMutation object of the builder.
@@ -131,7 +127,7 @@ func (pc *PriorityCreate) createSpec() (*Priority, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pc.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   priority.TodoTable,
 			Columns: []string{priority.TodoColumn},

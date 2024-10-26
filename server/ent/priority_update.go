@@ -42,23 +42,19 @@ func (pu *PriorityUpdate) SetNillableName(s *string) *PriorityUpdate {
 	return pu
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by ID.
-func (pu *PriorityUpdate) SetTodoID(id int) *PriorityUpdate {
-	pu.mutation.SetTodoID(id)
+// AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
+func (pu *PriorityUpdate) AddTodoIDs(ids ...int) *PriorityUpdate {
+	pu.mutation.AddTodoIDs(ids...)
 	return pu
 }
 
-// SetNillableTodoID sets the "todo" edge to the Todo entity by ID if the given value is not nil.
-func (pu *PriorityUpdate) SetNillableTodoID(id *int) *PriorityUpdate {
-	if id != nil {
-		pu = pu.SetTodoID(*id)
+// AddTodo adds the "todo" edges to the Todo entity.
+func (pu *PriorityUpdate) AddTodo(t ...*Todo) *PriorityUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return pu
-}
-
-// SetTodo sets the "todo" edge to the Todo entity.
-func (pu *PriorityUpdate) SetTodo(t *Todo) *PriorityUpdate {
-	return pu.SetTodoID(t.ID)
+	return pu.AddTodoIDs(ids...)
 }
 
 // Mutation returns the PriorityMutation object of the builder.
@@ -66,10 +62,25 @@ func (pu *PriorityUpdate) Mutation() *PriorityMutation {
 	return pu.mutation
 }
 
-// ClearTodo clears the "todo" edge to the Todo entity.
+// ClearTodo clears all "todo" edges to the Todo entity.
 func (pu *PriorityUpdate) ClearTodo() *PriorityUpdate {
 	pu.mutation.ClearTodo()
 	return pu
+}
+
+// RemoveTodoIDs removes the "todo" edge to Todo entities by IDs.
+func (pu *PriorityUpdate) RemoveTodoIDs(ids ...int) *PriorityUpdate {
+	pu.mutation.RemoveTodoIDs(ids...)
+	return pu
+}
+
+// RemoveTodo removes "todo" edges to Todo entities.
+func (pu *PriorityUpdate) RemoveTodo(t ...*Todo) *PriorityUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return pu.RemoveTodoIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -126,7 +137,7 @@ func (pu *PriorityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pu.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   priority.TodoTable,
 			Columns: []string{priority.TodoColumn},
@@ -137,9 +148,25 @@ func (pu *PriorityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := pu.mutation.RemovedTodoIDs(); len(nodes) > 0 && !pu.mutation.TodoCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   priority.TodoTable,
+			Columns: []string{priority.TodoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := pu.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   priority.TodoTable,
 			Columns: []string{priority.TodoColumn},
@@ -187,23 +214,19 @@ func (puo *PriorityUpdateOne) SetNillableName(s *string) *PriorityUpdateOne {
 	return puo
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by ID.
-func (puo *PriorityUpdateOne) SetTodoID(id int) *PriorityUpdateOne {
-	puo.mutation.SetTodoID(id)
+// AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
+func (puo *PriorityUpdateOne) AddTodoIDs(ids ...int) *PriorityUpdateOne {
+	puo.mutation.AddTodoIDs(ids...)
 	return puo
 }
 
-// SetNillableTodoID sets the "todo" edge to the Todo entity by ID if the given value is not nil.
-func (puo *PriorityUpdateOne) SetNillableTodoID(id *int) *PriorityUpdateOne {
-	if id != nil {
-		puo = puo.SetTodoID(*id)
+// AddTodo adds the "todo" edges to the Todo entity.
+func (puo *PriorityUpdateOne) AddTodo(t ...*Todo) *PriorityUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return puo
-}
-
-// SetTodo sets the "todo" edge to the Todo entity.
-func (puo *PriorityUpdateOne) SetTodo(t *Todo) *PriorityUpdateOne {
-	return puo.SetTodoID(t.ID)
+	return puo.AddTodoIDs(ids...)
 }
 
 // Mutation returns the PriorityMutation object of the builder.
@@ -211,10 +234,25 @@ func (puo *PriorityUpdateOne) Mutation() *PriorityMutation {
 	return puo.mutation
 }
 
-// ClearTodo clears the "todo" edge to the Todo entity.
+// ClearTodo clears all "todo" edges to the Todo entity.
 func (puo *PriorityUpdateOne) ClearTodo() *PriorityUpdateOne {
 	puo.mutation.ClearTodo()
 	return puo
+}
+
+// RemoveTodoIDs removes the "todo" edge to Todo entities by IDs.
+func (puo *PriorityUpdateOne) RemoveTodoIDs(ids ...int) *PriorityUpdateOne {
+	puo.mutation.RemoveTodoIDs(ids...)
+	return puo
+}
+
+// RemoveTodo removes "todo" edges to Todo entities.
+func (puo *PriorityUpdateOne) RemoveTodo(t ...*Todo) *PriorityUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return puo.RemoveTodoIDs(ids...)
 }
 
 // Where appends a list predicates to the PriorityUpdate builder.
@@ -301,7 +339,7 @@ func (puo *PriorityUpdateOne) sqlSave(ctx context.Context) (_node *Priority, err
 	}
 	if puo.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   priority.TodoTable,
 			Columns: []string{priority.TodoColumn},
@@ -312,9 +350,25 @@ func (puo *PriorityUpdateOne) sqlSave(ctx context.Context) (_node *Priority, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := puo.mutation.RemovedTodoIDs(); len(nodes) > 0 && !puo.mutation.TodoCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   priority.TodoTable,
+			Columns: []string{priority.TodoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := puo.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   priority.TodoTable,
 			Columns: []string{priority.TodoColumn},

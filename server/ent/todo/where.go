@@ -385,7 +385,7 @@ func HasPriority() predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, PriorityTable, PriorityColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, PriorityTable, PriorityColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -408,7 +408,7 @@ func HasStatus() predicate.Todo {
 	return predicate.Todo(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, StatusTable, StatusColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, StatusTable, StatusColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

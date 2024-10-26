@@ -37,8 +37,8 @@ var (
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
-		{Name: "priority_id", Type: field.TypeInt, Unique: true},
-		{Name: "status_id", Type: field.TypeInt, Unique: true, Default: 1},
+		{Name: "priority_id", Type: field.TypeInt},
+		{Name: "status_id", Type: field.TypeInt, Default: 1},
 	}
 	// TodosTable holds the schema information for the "todos" table.
 	TodosTable = &schema.Table{

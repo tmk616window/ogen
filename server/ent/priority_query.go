@@ -75,7 +75,7 @@ func (pq *PriorityQuery) QueryTodo() *TodoQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(priority.Table, priority.FieldID, selector),
 			sqlgraph.To(todo.Table, todo.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, priority.TodoTable, priority.TodoColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, priority.TodoTable, priority.TodoColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -394,8 +394,9 @@ func (pq *PriorityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pri
 		return nodes, nil
 	}
 	if query := pq.withTodo; query != nil {
-		if err := pq.loadTodo(ctx, query, nodes, nil,
-			func(n *Priority, e *Todo) { n.Edges.Todo = e }); err != nil {
+		if err := pq.loadTodo(ctx, query, nodes,
+			func(n *Priority) { n.Edges.Todo = []*Todo{} },
+			func(n *Priority, e *Todo) { n.Edges.Todo = append(n.Edges.Todo, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -408,6 +409,9 @@ func (pq *PriorityQuery) loadTodo(ctx context.Context, query *TodoQuery, nodes [
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(todo.FieldPriorityID)

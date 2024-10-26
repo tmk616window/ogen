@@ -76,7 +76,7 @@ func (tq *TodoQuery) QueryPriority() *PriorityQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(todo.Table, todo.FieldID, selector),
 			sqlgraph.To(priority.Table, priority.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, todo.PriorityTable, todo.PriorityColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, todo.PriorityTable, todo.PriorityColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -98,7 +98,7 @@ func (tq *TodoQuery) QueryStatus() *StatusQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(todo.Table, todo.FieldID, selector),
 			sqlgraph.To(status.Table, status.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, todo.StatusTable, todo.StatusColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, todo.StatusTable, todo.StatusColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil

@@ -42,23 +42,19 @@ func (su *StatusUpdate) SetNillableValue(s *string) *StatusUpdate {
 	return su
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by ID.
-func (su *StatusUpdate) SetTodoID(id int) *StatusUpdate {
-	su.mutation.SetTodoID(id)
+// AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
+func (su *StatusUpdate) AddTodoIDs(ids ...int) *StatusUpdate {
+	su.mutation.AddTodoIDs(ids...)
 	return su
 }
 
-// SetNillableTodoID sets the "todo" edge to the Todo entity by ID if the given value is not nil.
-func (su *StatusUpdate) SetNillableTodoID(id *int) *StatusUpdate {
-	if id != nil {
-		su = su.SetTodoID(*id)
+// AddTodo adds the "todo" edges to the Todo entity.
+func (su *StatusUpdate) AddTodo(t ...*Todo) *StatusUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return su
-}
-
-// SetTodo sets the "todo" edge to the Todo entity.
-func (su *StatusUpdate) SetTodo(t *Todo) *StatusUpdate {
-	return su.SetTodoID(t.ID)
+	return su.AddTodoIDs(ids...)
 }
 
 // Mutation returns the StatusMutation object of the builder.
@@ -66,10 +62,25 @@ func (su *StatusUpdate) Mutation() *StatusMutation {
 	return su.mutation
 }
 
-// ClearTodo clears the "todo" edge to the Todo entity.
+// ClearTodo clears all "todo" edges to the Todo entity.
 func (su *StatusUpdate) ClearTodo() *StatusUpdate {
 	su.mutation.ClearTodo()
 	return su
+}
+
+// RemoveTodoIDs removes the "todo" edge to Todo entities by IDs.
+func (su *StatusUpdate) RemoveTodoIDs(ids ...int) *StatusUpdate {
+	su.mutation.RemoveTodoIDs(ids...)
+	return su
+}
+
+// RemoveTodo removes "todo" edges to Todo entities.
+func (su *StatusUpdate) RemoveTodo(t ...*Todo) *StatusUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return su.RemoveTodoIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -126,7 +137,7 @@ func (su *StatusUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if su.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   status.TodoTable,
 			Columns: []string{status.TodoColumn},
@@ -137,9 +148,25 @@ func (su *StatusUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := su.mutation.RemovedTodoIDs(); len(nodes) > 0 && !su.mutation.TodoCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   status.TodoTable,
+			Columns: []string{status.TodoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := su.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   status.TodoTable,
 			Columns: []string{status.TodoColumn},
@@ -187,23 +214,19 @@ func (suo *StatusUpdateOne) SetNillableValue(s *string) *StatusUpdateOne {
 	return suo
 }
 
-// SetTodoID sets the "todo" edge to the Todo entity by ID.
-func (suo *StatusUpdateOne) SetTodoID(id int) *StatusUpdateOne {
-	suo.mutation.SetTodoID(id)
+// AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
+func (suo *StatusUpdateOne) AddTodoIDs(ids ...int) *StatusUpdateOne {
+	suo.mutation.AddTodoIDs(ids...)
 	return suo
 }
 
-// SetNillableTodoID sets the "todo" edge to the Todo entity by ID if the given value is not nil.
-func (suo *StatusUpdateOne) SetNillableTodoID(id *int) *StatusUpdateOne {
-	if id != nil {
-		suo = suo.SetTodoID(*id)
+// AddTodo adds the "todo" edges to the Todo entity.
+func (suo *StatusUpdateOne) AddTodo(t ...*Todo) *StatusUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return suo
-}
-
-// SetTodo sets the "todo" edge to the Todo entity.
-func (suo *StatusUpdateOne) SetTodo(t *Todo) *StatusUpdateOne {
-	return suo.SetTodoID(t.ID)
+	return suo.AddTodoIDs(ids...)
 }
 
 // Mutation returns the StatusMutation object of the builder.
@@ -211,10 +234,25 @@ func (suo *StatusUpdateOne) Mutation() *StatusMutation {
 	return suo.mutation
 }
 
-// ClearTodo clears the "todo" edge to the Todo entity.
+// ClearTodo clears all "todo" edges to the Todo entity.
 func (suo *StatusUpdateOne) ClearTodo() *StatusUpdateOne {
 	suo.mutation.ClearTodo()
 	return suo
+}
+
+// RemoveTodoIDs removes the "todo" edge to Todo entities by IDs.
+func (suo *StatusUpdateOne) RemoveTodoIDs(ids ...int) *StatusUpdateOne {
+	suo.mutation.RemoveTodoIDs(ids...)
+	return suo
+}
+
+// RemoveTodo removes "todo" edges to Todo entities.
+func (suo *StatusUpdateOne) RemoveTodo(t ...*Todo) *StatusUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return suo.RemoveTodoIDs(ids...)
 }
 
 // Where appends a list predicates to the StatusUpdate builder.
@@ -301,7 +339,7 @@ func (suo *StatusUpdateOne) sqlSave(ctx context.Context) (_node *Status, err err
 	}
 	if suo.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   status.TodoTable,
 			Columns: []string{status.TodoColumn},
@@ -312,9 +350,25 @@ func (suo *StatusUpdateOne) sqlSave(ctx context.Context) (_node *Status, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := suo.mutation.RemovedTodoIDs(); len(nodes) > 0 && !suo.mutation.TodoCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   status.TodoTable,
+			Columns: []string{status.TodoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(todo.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := suo.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   status.TodoTable,
 			Columns: []string{status.TodoColumn},

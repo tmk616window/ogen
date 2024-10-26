@@ -75,7 +75,7 @@ func (sq *StatusQuery) QueryTodo() *TodoQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(status.Table, status.FieldID, selector),
 			sqlgraph.To(todo.Table, todo.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, status.TodoTable, status.TodoColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, status.TodoTable, status.TodoColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -394,8 +394,9 @@ func (sq *StatusQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Statu
 		return nodes, nil
 	}
 	if query := sq.withTodo; query != nil {
-		if err := sq.loadTodo(ctx, query, nodes, nil,
-			func(n *Status, e *Todo) { n.Edges.Todo = e }); err != nil {
+		if err := sq.loadTodo(ctx, query, nodes,
+			func(n *Status) { n.Edges.Todo = []*Todo{} },
+			func(n *Status, e *Todo) { n.Edges.Todo = append(n.Edges.Todo, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -408,6 +409,9 @@ func (sq *StatusQuery) loadTodo(ctx context.Context, query *TodoQuery, nodes []*
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
 	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(todo.FieldStatusID)

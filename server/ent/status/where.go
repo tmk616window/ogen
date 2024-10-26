@@ -129,7 +129,7 @@ func HasTodo() predicate.Status {
 	return predicate.Status(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, TodoTable, TodoColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TodoTable, TodoColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

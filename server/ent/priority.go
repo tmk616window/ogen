@@ -5,7 +5,6 @@ package ent
 import (
 	"fmt"
 	"server/ent/priority"
-	"server/ent/todo"
 	"strings"
 
 	"entgo.io/ent"
@@ -28,19 +27,17 @@ type Priority struct {
 // PriorityEdges holds the relations/edges for other nodes in the graph.
 type PriorityEdges struct {
 	// Todo holds the value of the todo edge.
-	Todo *Todo `json:"todo,omitempty"`
+	Todo []*Todo `json:"todo,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // TodoOrErr returns the Todo value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PriorityEdges) TodoOrErr() (*Todo, error) {
-	if e.Todo != nil {
+// was not loaded in eager-loading.
+func (e PriorityEdges) TodoOrErr() ([]*Todo, error) {
+	if e.loadedTypes[0] {
 		return e.Todo, nil
-	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: todo.Label}
 	}
 	return nil, &NotLoadedError{edge: "todo"}
 }
