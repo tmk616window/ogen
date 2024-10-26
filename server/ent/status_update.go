@@ -9,6 +9,7 @@ import (
 	"server/ent/predicate"
 	"server/ent/status"
 	"server/ent/todo"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -39,6 +40,26 @@ func (su *StatusUpdate) SetNillableValue(s *string) *StatusUpdate {
 	if s != nil {
 		su.SetValue(*s)
 	}
+	return su
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (su *StatusUpdate) SetCreatedAt(t time.Time) *StatusUpdate {
+	su.mutation.SetCreatedAt(t)
+	return su
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (su *StatusUpdate) SetNillableCreatedAt(t *time.Time) *StatusUpdate {
+	if t != nil {
+		su.SetCreatedAt(*t)
+	}
+	return su
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (su *StatusUpdate) SetUpdatedAt(t time.Time) *StatusUpdate {
+	su.mutation.SetUpdatedAt(t)
 	return su
 }
 
@@ -85,6 +106,7 @@ func (su *StatusUpdate) RemoveTodo(t ...*Todo) *StatusUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *StatusUpdate) Save(ctx context.Context) (int, error) {
+	su.defaults()
 	return withHooks(ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
@@ -107,6 +129,14 @@ func (su *StatusUpdate) Exec(ctx context.Context) error {
 func (su *StatusUpdate) ExecX(ctx context.Context) {
 	if err := su.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (su *StatusUpdate) defaults() {
+	if _, ok := su.mutation.UpdatedAt(); !ok {
+		v := status.UpdateDefaultUpdatedAt()
+		su.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -134,6 +164,12 @@ func (su *StatusUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.Value(); ok {
 		_spec.SetField(status.FieldValue, field.TypeString, value)
+	}
+	if value, ok := su.mutation.CreatedAt(); ok {
+		_spec.SetField(status.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := su.mutation.UpdatedAt(); ok {
+		_spec.SetField(status.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if su.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -214,6 +250,26 @@ func (suo *StatusUpdateOne) SetNillableValue(s *string) *StatusUpdateOne {
 	return suo
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (suo *StatusUpdateOne) SetCreatedAt(t time.Time) *StatusUpdateOne {
+	suo.mutation.SetCreatedAt(t)
+	return suo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (suo *StatusUpdateOne) SetNillableCreatedAt(t *time.Time) *StatusUpdateOne {
+	if t != nil {
+		suo.SetCreatedAt(*t)
+	}
+	return suo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (suo *StatusUpdateOne) SetUpdatedAt(t time.Time) *StatusUpdateOne {
+	suo.mutation.SetUpdatedAt(t)
+	return suo
+}
+
 // AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
 func (suo *StatusUpdateOne) AddTodoIDs(ids ...int) *StatusUpdateOne {
 	suo.mutation.AddTodoIDs(ids...)
@@ -270,6 +326,7 @@ func (suo *StatusUpdateOne) Select(field string, fields ...string) *StatusUpdate
 
 // Save executes the query and returns the updated Status entity.
 func (suo *StatusUpdateOne) Save(ctx context.Context) (*Status, error) {
+	suo.defaults()
 	return withHooks(ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
@@ -292,6 +349,14 @@ func (suo *StatusUpdateOne) Exec(ctx context.Context) error {
 func (suo *StatusUpdateOne) ExecX(ctx context.Context) {
 	if err := suo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (suo *StatusUpdateOne) defaults() {
+	if _, ok := suo.mutation.UpdatedAt(); !ok {
+		v := status.UpdateDefaultUpdatedAt()
+		suo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -336,6 +401,12 @@ func (suo *StatusUpdateOne) sqlSave(ctx context.Context) (_node *Status, err err
 	}
 	if value, ok := suo.mutation.Value(); ok {
 		_spec.SetField(status.FieldValue, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.CreatedAt(); ok {
+		_spec.SetField(status.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := suo.mutation.UpdatedAt(); ok {
+		_spec.SetField(status.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if suo.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{

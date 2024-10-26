@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"server/ent/status"
 	"server/ent/todo"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -23,6 +24,34 @@ type StatusCreate struct {
 // SetValue sets the "value" field.
 func (sc *StatusCreate) SetValue(s string) *StatusCreate {
 	sc.mutation.SetValue(s)
+	return sc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (sc *StatusCreate) SetCreatedAt(t time.Time) *StatusCreate {
+	sc.mutation.SetCreatedAt(t)
+	return sc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (sc *StatusCreate) SetNillableCreatedAt(t *time.Time) *StatusCreate {
+	if t != nil {
+		sc.SetCreatedAt(*t)
+	}
+	return sc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (sc *StatusCreate) SetUpdatedAt(t time.Time) *StatusCreate {
+	sc.mutation.SetUpdatedAt(t)
+	return sc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (sc *StatusCreate) SetNillableUpdatedAt(t *time.Time) *StatusCreate {
+	if t != nil {
+		sc.SetUpdatedAt(*t)
+	}
 	return sc
 }
 
@@ -54,6 +83,7 @@ func (sc *StatusCreate) Mutation() *StatusMutation {
 
 // Save creates the Status in the database.
 func (sc *StatusCreate) Save(ctx context.Context) (*Status, error) {
+	sc.defaults()
 	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -79,6 +109,18 @@ func (sc *StatusCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (sc *StatusCreate) defaults() {
+	if _, ok := sc.mutation.CreatedAt(); !ok {
+		v := status.DefaultCreatedAt
+		sc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		v := status.DefaultUpdatedAt
+		sc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (sc *StatusCreate) check() error {
 	if _, ok := sc.mutation.Value(); !ok {
@@ -88,6 +130,12 @@ func (sc *StatusCreate) check() error {
 		if err := status.ValueValidator(v); err != nil {
 			return &ValidationError{Name: "value", err: fmt.Errorf(`ent: validator failed for field "Status.value": %w`, err)}
 		}
+	}
+	if _, ok := sc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Status.created_at"`)}
+	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Status.updated_at"`)}
 	}
 	return nil
 }
@@ -124,6 +172,14 @@ func (sc *StatusCreate) createSpec() (*Status, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Value(); ok {
 		_spec.SetField(status.FieldValue, field.TypeString, value)
 		_node.Value = value
+	}
+	if value, ok := sc.mutation.CreatedAt(); ok {
+		_spec.SetField(status.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := sc.mutation.UpdatedAt(); ok {
+		_spec.SetField(status.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if nodes := sc.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -162,6 +218,7 @@ func (scb *StatusCreateBulk) Save(ctx context.Context) ([]*Status, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*StatusMutation)
 				if !ok {

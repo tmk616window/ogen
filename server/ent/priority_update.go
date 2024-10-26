@@ -9,6 +9,7 @@ import (
 	"server/ent/predicate"
 	"server/ent/priority"
 	"server/ent/todo"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -39,6 +40,26 @@ func (pu *PriorityUpdate) SetNillableName(s *string) *PriorityUpdate {
 	if s != nil {
 		pu.SetName(*s)
 	}
+	return pu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pu *PriorityUpdate) SetCreatedAt(t time.Time) *PriorityUpdate {
+	pu.mutation.SetCreatedAt(t)
+	return pu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pu *PriorityUpdate) SetNillableCreatedAt(t *time.Time) *PriorityUpdate {
+	if t != nil {
+		pu.SetCreatedAt(*t)
+	}
+	return pu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pu *PriorityUpdate) SetUpdatedAt(t time.Time) *PriorityUpdate {
+	pu.mutation.SetUpdatedAt(t)
 	return pu
 }
 
@@ -85,6 +106,7 @@ func (pu *PriorityUpdate) RemoveTodo(t ...*Todo) *PriorityUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PriorityUpdate) Save(ctx context.Context) (int, error) {
+	pu.defaults()
 	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
@@ -107,6 +129,14 @@ func (pu *PriorityUpdate) Exec(ctx context.Context) error {
 func (pu *PriorityUpdate) ExecX(ctx context.Context) {
 	if err := pu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pu *PriorityUpdate) defaults() {
+	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		v := priority.UpdateDefaultUpdatedAt()
+		pu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -134,6 +164,12 @@ func (pu *PriorityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.SetField(priority.FieldName, field.TypeString, value)
+	}
+	if value, ok := pu.mutation.CreatedAt(); ok {
+		_spec.SetField(priority.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := pu.mutation.UpdatedAt(); ok {
+		_spec.SetField(priority.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if pu.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -214,6 +250,26 @@ func (puo *PriorityUpdateOne) SetNillableName(s *string) *PriorityUpdateOne {
 	return puo
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (puo *PriorityUpdateOne) SetCreatedAt(t time.Time) *PriorityUpdateOne {
+	puo.mutation.SetCreatedAt(t)
+	return puo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (puo *PriorityUpdateOne) SetNillableCreatedAt(t *time.Time) *PriorityUpdateOne {
+	if t != nil {
+		puo.SetCreatedAt(*t)
+	}
+	return puo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (puo *PriorityUpdateOne) SetUpdatedAt(t time.Time) *PriorityUpdateOne {
+	puo.mutation.SetUpdatedAt(t)
+	return puo
+}
+
 // AddTodoIDs adds the "todo" edge to the Todo entity by IDs.
 func (puo *PriorityUpdateOne) AddTodoIDs(ids ...int) *PriorityUpdateOne {
 	puo.mutation.AddTodoIDs(ids...)
@@ -270,6 +326,7 @@ func (puo *PriorityUpdateOne) Select(field string, fields ...string) *PriorityUp
 
 // Save executes the query and returns the updated Priority entity.
 func (puo *PriorityUpdateOne) Save(ctx context.Context) (*Priority, error) {
+	puo.defaults()
 	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
@@ -292,6 +349,14 @@ func (puo *PriorityUpdateOne) Exec(ctx context.Context) error {
 func (puo *PriorityUpdateOne) ExecX(ctx context.Context) {
 	if err := puo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (puo *PriorityUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		v := priority.UpdateDefaultUpdatedAt()
+		puo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -336,6 +401,12 @@ func (puo *PriorityUpdateOne) sqlSave(ctx context.Context) (_node *Priority, err
 	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.SetField(priority.FieldName, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.CreatedAt(); ok {
+		_spec.SetField(priority.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := puo.mutation.UpdatedAt(); ok {
+		_spec.SetField(priority.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if puo.mutation.TodoCleared() {
 		edge := &sqlgraph.EdgeSpec{

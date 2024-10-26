@@ -20,12 +20,32 @@ func init() {
 	priorityDescName := priorityFields[1].Descriptor()
 	// priority.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	priority.NameValidator = priorityDescName.Validators[0].(func(string) error)
+	// priorityDescCreatedAt is the schema descriptor for created_at field.
+	priorityDescCreatedAt := priorityFields[2].Descriptor()
+	// priority.DefaultCreatedAt holds the default value on creation for the created_at field.
+	priority.DefaultCreatedAt = priorityDescCreatedAt.Default.(time.Time)
+	// priorityDescUpdatedAt is the schema descriptor for updated_at field.
+	priorityDescUpdatedAt := priorityFields[3].Descriptor()
+	// priority.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	priority.DefaultUpdatedAt = priorityDescUpdatedAt.Default.(time.Time)
+	// priority.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	priority.UpdateDefaultUpdatedAt = priorityDescUpdatedAt.UpdateDefault.(func() time.Time)
 	statusFields := schema.Status{}.Fields()
 	_ = statusFields
 	// statusDescValue is the schema descriptor for value field.
 	statusDescValue := statusFields[1].Descriptor()
 	// status.ValueValidator is a validator for the "value" field. It is called by the builders before save.
 	status.ValueValidator = statusDescValue.Validators[0].(func(string) error)
+	// statusDescCreatedAt is the schema descriptor for created_at field.
+	statusDescCreatedAt := statusFields[2].Descriptor()
+	// status.DefaultCreatedAt holds the default value on creation for the created_at field.
+	status.DefaultCreatedAt = statusDescCreatedAt.Default.(time.Time)
+	// statusDescUpdatedAt is the schema descriptor for updated_at field.
+	statusDescUpdatedAt := statusFields[3].Descriptor()
+	// status.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	status.DefaultUpdatedAt = statusDescUpdatedAt.Default.(time.Time)
+	// status.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	status.UpdateDefaultUpdatedAt = statusDescUpdatedAt.UpdateDefault.(func() time.Time)
 	todoFields := schema.Todo{}.Fields()
 	_ = todoFields
 	// todoDescTitle is the schema descriptor for title field.

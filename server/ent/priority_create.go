@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"server/ent/priority"
 	"server/ent/todo"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -23,6 +24,34 @@ type PriorityCreate struct {
 // SetName sets the "name" field.
 func (pc *PriorityCreate) SetName(s string) *PriorityCreate {
 	pc.mutation.SetName(s)
+	return pc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (pc *PriorityCreate) SetCreatedAt(t time.Time) *PriorityCreate {
+	pc.mutation.SetCreatedAt(t)
+	return pc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (pc *PriorityCreate) SetNillableCreatedAt(t *time.Time) *PriorityCreate {
+	if t != nil {
+		pc.SetCreatedAt(*t)
+	}
+	return pc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pc *PriorityCreate) SetUpdatedAt(t time.Time) *PriorityCreate {
+	pc.mutation.SetUpdatedAt(t)
+	return pc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (pc *PriorityCreate) SetNillableUpdatedAt(t *time.Time) *PriorityCreate {
+	if t != nil {
+		pc.SetUpdatedAt(*t)
+	}
 	return pc
 }
 
@@ -54,6 +83,7 @@ func (pc *PriorityCreate) Mutation() *PriorityMutation {
 
 // Save creates the Priority in the database.
 func (pc *PriorityCreate) Save(ctx context.Context) (*Priority, error) {
+	pc.defaults()
 	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
 }
 
@@ -79,6 +109,18 @@ func (pc *PriorityCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pc *PriorityCreate) defaults() {
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		v := priority.DefaultCreatedAt
+		pc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		v := priority.DefaultUpdatedAt
+		pc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *PriorityCreate) check() error {
 	if _, ok := pc.mutation.Name(); !ok {
@@ -88,6 +130,12 @@ func (pc *PriorityCreate) check() error {
 		if err := priority.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Priority.name": %w`, err)}
 		}
+	}
+	if _, ok := pc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Priority.created_at"`)}
+	}
+	if _, ok := pc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Priority.updated_at"`)}
 	}
 	return nil
 }
@@ -124,6 +172,14 @@ func (pc *PriorityCreate) createSpec() (*Priority, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.SetField(priority.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := pc.mutation.CreatedAt(); ok {
+		_spec.SetField(priority.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := pc.mutation.UpdatedAt(); ok {
+		_spec.SetField(priority.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if nodes := pc.mutation.TodoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -162,6 +218,7 @@ func (pcb *PriorityCreateBulk) Save(ctx context.Context) ([]*Priority, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PriorityMutation)
 				if !ok {

@@ -38,6 +38,8 @@ type PriorityMutation struct {
 	typ           string
 	id            *int
 	name          *string
+	created_at    *time.Time
+	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	todo          map[int]struct{}
 	removedtodo   map[int]struct{}
@@ -187,6 +189,78 @@ func (m *PriorityMutation) ResetName() {
 	m.name = nil
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *PriorityMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *PriorityMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Priority entity.
+// If the Priority object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PriorityMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *PriorityMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *PriorityMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *PriorityMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Priority entity.
+// If the Priority object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PriorityMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *PriorityMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // AddTodoIDs adds the "todo" edge to the Todo entity by ids.
 func (m *PriorityMutation) AddTodoIDs(ids ...int) {
 	if m.todo == nil {
@@ -275,9 +349,15 @@ func (m *PriorityMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PriorityMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, priority.FieldName)
+	}
+	if m.created_at != nil {
+		fields = append(fields, priority.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, priority.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -289,6 +369,10 @@ func (m *PriorityMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case priority.FieldName:
 		return m.Name()
+	case priority.FieldCreatedAt:
+		return m.CreatedAt()
+	case priority.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -300,6 +384,10 @@ func (m *PriorityMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case priority.FieldName:
 		return m.OldName(ctx)
+	case priority.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case priority.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Priority field %s", name)
 }
@@ -315,6 +403,20 @@ func (m *PriorityMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case priority.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case priority.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Priority field %s", name)
@@ -367,6 +469,12 @@ func (m *PriorityMutation) ResetField(name string) error {
 	switch name {
 	case priority.FieldName:
 		m.ResetName()
+		return nil
+	case priority.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case priority.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Priority field %s", name)
@@ -463,6 +571,8 @@ type StatusMutation struct {
 	typ           string
 	id            *int
 	value         *string
+	created_at    *time.Time
+	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	todo          map[int]struct{}
 	removedtodo   map[int]struct{}
@@ -612,6 +722,78 @@ func (m *StatusMutation) ResetValue() {
 	m.value = nil
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *StatusMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *StatusMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Status entity.
+// If the Status object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StatusMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *StatusMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *StatusMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *StatusMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Status entity.
+// If the Status object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StatusMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *StatusMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // AddTodoIDs adds the "todo" edge to the Todo entity by ids.
 func (m *StatusMutation) AddTodoIDs(ids ...int) {
 	if m.todo == nil {
@@ -700,9 +882,15 @@ func (m *StatusMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StatusMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 3)
 	if m.value != nil {
 		fields = append(fields, status.FieldValue)
+	}
+	if m.created_at != nil {
+		fields = append(fields, status.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, status.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -714,6 +902,10 @@ func (m *StatusMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case status.FieldValue:
 		return m.Value()
+	case status.FieldCreatedAt:
+		return m.CreatedAt()
+	case status.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -725,6 +917,10 @@ func (m *StatusMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case status.FieldValue:
 		return m.OldValue(ctx)
+	case status.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case status.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Status field %s", name)
 }
@@ -740,6 +936,20 @@ func (m *StatusMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetValue(v)
+		return nil
+	case status.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case status.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Status field %s", name)
@@ -792,6 +1002,12 @@ func (m *StatusMutation) ResetField(name string) error {
 	switch name {
 	case status.FieldValue:
 		m.ResetValue()
+		return nil
+	case status.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case status.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Status field %s", name)
