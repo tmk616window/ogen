@@ -166,11 +166,11 @@ func (tc *TodoCreate) defaults() {
 		tc.mutation.SetStatusID(v)
 	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
-		v := todo.DefaultCreatedAt()
+		v := todo.DefaultCreatedAt
 		tc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
-		v := todo.DefaultUpdatedAt()
+		v := todo.DefaultUpdatedAt
 		tc.mutation.SetUpdatedAt(v)
 	}
 }
