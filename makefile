@@ -28,12 +28,12 @@ gen:
 
 .PHONY: apply
 apply:
-	@until pg_isready -h localhost -p 5432 -U user; do sleep 1; done
+	@until pg_isready -h $(DB_HOST) -p 5432 -U $(DB_USER); do sleep 1; done
 	atlas migrate apply \
   --dir "file://server/migrations" \
-  --url "postgres://user:password@localhost:5432/db?search_path=public&sslmode=disable"
+  --url "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):5432/$(DB_NAME)?search_path=public&sslmode=disable"
 
 .PHONY: seed
 seed:
-	@until pg_isready -h localhost -p 5432 -U user; do sleep 1; done
+	@until pg_isready -h $(DB_HOST) -p 5432 -U $(DB_USER); do sleep 1; done
 	PGPASSWORD=$(DB_PASSWORD) psql -f ./server/seed/seed.sql -U $(DB_USER) -d $(DB_NAME) -h $(DB_HOST)
