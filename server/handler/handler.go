@@ -33,6 +33,10 @@ func (h *handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
 				ID:   todo.Priority.ID,
 				Name: todo.Priority.Name,
 			},
+			Status: ogen.Status{
+				ID:    todo.Status.ID,
+				Value: todo.Status.Value,
+			},
 		}
 	}), nil
 }

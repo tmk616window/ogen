@@ -47,6 +47,7 @@ func (c *client) AllTodos(ctx context.Context) ([]*ent.Todo, error) {
 	todos, err := c.client.Todo.
 		Query().
 		WithPriority().
+		WithStatus().
 		All(ctx)
 	if err != nil {
 		return nil, err

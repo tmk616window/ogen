@@ -74,12 +74,39 @@ func (s *Priority) SetName(val string) {
 	s.Name = val
 }
 
+// Ref: #/components/schemas/Status
+type Status struct {
+	ID    int    `json:"id"`
+	Value string `json:"value"`
+}
+
+// GetID returns the value of ID.
+func (s *Status) GetID() int {
+	return s.ID
+}
+
+// GetValue returns the value of Value.
+func (s *Status) GetValue() string {
+	return s.Value
+}
+
+// SetID sets the value of ID.
+func (s *Status) SetID(val int) {
+	s.ID = val
+}
+
+// SetValue sets the value of Value.
+func (s *Status) SetValue(val string) {
+	s.Value = val
+}
+
 // Ref: #/components/schemas/Todo
 type Todo struct {
 	ID          int       `json:"id"`
 	Title       string    `json:"title"`
 	Description OptString `json:"description"`
 	Priority    Priority  `json:"priority"`
+	Status      Status    `json:"status"`
 }
 
 // GetID returns the value of ID.
@@ -102,6 +129,11 @@ func (s *Todo) GetPriority() Priority {
 	return s.Priority
 }
 
+// GetStatus returns the value of Status.
+func (s *Todo) GetStatus() Status {
+	return s.Status
+}
+
 // SetID sets the value of ID.
 func (s *Todo) SetID(val int) {
 	s.ID = val
@@ -120,4 +152,9 @@ func (s *Todo) SetDescription(val OptString) {
 // SetPriority sets the value of Priority.
 func (s *Todo) SetPriority(val Priority) {
 	s.Priority = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Todo) SetStatus(val Status) {
+	s.Status = val
 }
