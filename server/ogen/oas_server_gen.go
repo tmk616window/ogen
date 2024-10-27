@@ -13,7 +13,7 @@ type Handler interface {
 	// Create a new todo item.
 	//
 	// POST /todo
-	TodoPost(ctx context.Context, req *TodoInput) (*Todo, error)
+	TodoPost(ctx context.Context, req *CreateTodoInput) (*Todo, error)
 	// TodosGet implements GET /todos operation.
 	//
 	// Get all todo items.

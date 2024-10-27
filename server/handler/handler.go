@@ -58,6 +58,34 @@ func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Tod
 	}), nil
 }
 
-func (h *handler) TodoPost(ctx context.Context, req *ogen.TodoInput) (*ogen.Todo, error) {
-	return nil, nil
+func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*ogen.Todo, error) {
+	todo, err := h.Usecase.CreateTodo(ctx, &usecase.CreateTodoInput{
+		Title:       req.Title.Value,
+		Description: req.Description.Value,
+		LabelIDs:    req.LabelIDs,
+		StatusID:    req.StatusID.Value,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &ogen.Todo{
+		ID:          todo.ID,
+		Title:       todo.Title,
+		Description: ogen.OptString{Value: todo.Description},
+		Labels: lo.Map(todo.Labels, func(label usecase.Label, _ int) ogen.Label {
+			return ogen.Label{
+				ID:    label.ID,
+				Value: label.Value,
+			}
+		}),
+		Status: ogen.Status{
+			ID:    todo.Status.ID,
+			Value: todo.Status.Value,
+		},
+		Priority: ogen.Priority{
+			ID:   todo.Priority.ID,
+			Name: todo.Priority.Name,
+		},
+	}, nil
 }

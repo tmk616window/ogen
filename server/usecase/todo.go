@@ -16,16 +16,16 @@ type Todo struct {
 	Labels      []Label
 	CreatedAt   time.Time
 	FinishedAt  time.Time
-	Priority    priority
-	Status      status
+	Priority    Priority
+	Status      Status
 }
 
-type priority struct {
+type Priority struct {
 	ID   int
 	Name string
 }
 
-type status struct {
+type Status struct {
 	ID    int
 	Value string
 }
@@ -76,11 +76,11 @@ func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 			}),
 			CreatedAt:  todo.CreatedAt,
 			FinishedAt: todo.FinishedAt,
-			Priority: priority{
+			Priority: Priority{
 				ID:   todo.Edges.Priority.ID,
 				Name: todo.Edges.Priority.Name,
 			},
-			Status: status{
+			Status: Status{
 				ID:    todo.Edges.Status.ID,
 				Value: todo.Edges.Status.Value,
 			},

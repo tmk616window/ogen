@@ -16,7 +16,7 @@ import (
 )
 
 func (s *Server) decodeTodoPostRequest(r *http.Request) (
-	req *TodoInput,
+	req *CreateTodoInput,
 	close func() error,
 	rerr error,
 ) {
@@ -55,7 +55,7 @@ func (s *Server) decodeTodoPostRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request TodoInput
+		var request CreateTodoInput
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

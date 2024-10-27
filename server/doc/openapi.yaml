@@ -40,7 +40,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TodoInput"
+              $ref: "#/components/schemas/CreateTodoInput"
       responses:
         "201":
           description: Todo item created
@@ -149,13 +149,13 @@ components:
           type: string
         description:
           type: string
-        labels:
-          typeIDs: array
-          item:
+        labelIDs:
+          type: array
+          items:
             type: integer
-        priority_id:
+        priorityID:
           type: integer
-        status_id:
+        statusID:
           type: integer
 
     ErrorResponse:

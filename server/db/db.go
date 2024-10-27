@@ -19,6 +19,7 @@ import (
 
 type ClientInterface interface {
 	AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error)
+	CreateTodo(ctx context.Context, input *CreateTodoInput) (*ent.Todo, error)
 }
 
 type client struct {
@@ -36,6 +37,14 @@ type WhereInput struct {
 	Description string
 	Labels      []string
 	Status      string
+}
+
+type CreateTodoInput struct {
+	Title       string
+	Description string
+	LabelsID    []int
+	PriorityID  int
+	StatusID    int
 }
 
 func New(c config.Database) (ClientInterface, error) {
@@ -95,6 +104,10 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 	}
 
 	return todos, nil
+}
+
+func (c *client) CreateTodo(ctx context.Context, input *CreateTodoInput) (*ent.Todo, error) {
+	return nil, nil
 }
 
 func columnFuzzySearch(column string, value string) func(s *entsql.Selector) {

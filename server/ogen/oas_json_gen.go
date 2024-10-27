@@ -15,6 +15,150 @@ import (
 )
 
 // Encode implements json.Marshaler.
+func (s *CreateTodoInput) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *CreateTodoInput) encodeFields(e *jx.Encoder) {
+	{
+		if s.Title.Set {
+			e.FieldStart("title")
+			s.Title.Encode(e)
+		}
+	}
+	{
+		if s.Description.Set {
+			e.FieldStart("description")
+			s.Description.Encode(e)
+		}
+	}
+	{
+		if s.LabelIDs != nil {
+			e.FieldStart("labelIDs")
+			e.ArrStart()
+			for _, elem := range s.LabelIDs {
+				e.Int(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		if s.PriorityID.Set {
+			e.FieldStart("priorityID")
+			s.PriorityID.Encode(e)
+		}
+	}
+	{
+		if s.StatusID.Set {
+			e.FieldStart("statusID")
+			s.StatusID.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfCreateTodoInput = [5]string{
+	0: "title",
+	1: "description",
+	2: "labelIDs",
+	3: "priorityID",
+	4: "statusID",
+}
+
+// Decode decodes CreateTodoInput from json.
+func (s *CreateTodoInput) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateTodoInput to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "title":
+			if err := func() error {
+				s.Title.Reset()
+				if err := s.Title.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"title\"")
+			}
+		case "description":
+			if err := func() error {
+				s.Description.Reset()
+				if err := s.Description.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "labelIDs":
+			if err := func() error {
+				s.LabelIDs = make([]int, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem int
+					v, err := d.Int()
+					elem = int(v)
+					if err != nil {
+						return err
+					}
+					s.LabelIDs = append(s.LabelIDs, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"labelIDs\"")
+			}
+		case "priorityID":
+			if err := func() error {
+				s.PriorityID.Reset()
+				if err := s.PriorityID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"priorityID\"")
+			}
+		case "statusID":
+			if err := func() error {
+				s.StatusID.Reset()
+				if err := s.StatusID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"statusID\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CreateTodoInput")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreateTodoInput) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateTodoInput) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Label) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -160,6 +304,41 @@ func (s OptDateTime) MarshalJSON() ([]byte, error) {
 func (s *OptDateTime) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d, json.DecodeDateTime)
+}
+
+// Encode encodes int as json.
+func (o OptInt) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Int(int(o.Value))
+}
+
+// Decode decodes int from json.
+func (o *OptInt) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptInt to nil")
+	}
+	o.Set = true
+	v, err := d.Int()
+	if err != nil {
+		return err
+	}
+	o.Value = int(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptInt) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptInt) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
 }
 
 // Encode encodes string as json.

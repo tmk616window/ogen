@@ -18,7 +18,7 @@ var _ Handler = UnimplementedHandler{}
 // Create a new todo item.
 //
 // POST /todo
-func (UnimplementedHandler) TodoPost(ctx context.Context, req *TodoInput) (r *Todo, _ error) {
+func (UnimplementedHandler) TodoPost(ctx context.Context, req *CreateTodoInput) (r *Todo, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -11,6 +11,7 @@ type usecase struct {
 
 type UsecaseInterface interface {
 	TodosGet(ctx context.Context, input *Input) ([]*Todo, error)
+	CreateTodo(ctx context.Context, input *CreateTodoInput) (*Todo, error)
 }
 
 func NewUsecase(dbc db.ClientInterface) UsecaseInterface {

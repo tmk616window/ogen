@@ -6,6 +6,65 @@ import (
 	"time"
 )
 
+// Ref: #/components/schemas/CreateTodoInput
+type CreateTodoInput struct {
+	Title       OptString `json:"title"`
+	Description OptString `json:"description"`
+	LabelIDs    []int     `json:"labelIDs"`
+	PriorityID  OptInt    `json:"priorityID"`
+	StatusID    OptInt    `json:"statusID"`
+}
+
+// GetTitle returns the value of Title.
+func (s *CreateTodoInput) GetTitle() OptString {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *CreateTodoInput) GetDescription() OptString {
+	return s.Description
+}
+
+// GetLabelIDs returns the value of LabelIDs.
+func (s *CreateTodoInput) GetLabelIDs() []int {
+	return s.LabelIDs
+}
+
+// GetPriorityID returns the value of PriorityID.
+func (s *CreateTodoInput) GetPriorityID() OptInt {
+	return s.PriorityID
+}
+
+// GetStatusID returns the value of StatusID.
+func (s *CreateTodoInput) GetStatusID() OptInt {
+	return s.StatusID
+}
+
+// SetTitle sets the value of Title.
+func (s *CreateTodoInput) SetTitle(val OptString) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *CreateTodoInput) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetLabelIDs sets the value of LabelIDs.
+func (s *CreateTodoInput) SetLabelIDs(val []int) {
+	s.LabelIDs = val
+}
+
+// SetPriorityID sets the value of PriorityID.
+func (s *CreateTodoInput) SetPriorityID(val OptInt) {
+	s.PriorityID = val
+}
+
+// SetStatusID sets the value of StatusID.
+func (s *CreateTodoInput) SetStatusID(val OptInt) {
+	s.StatusID = val
+}
+
 // Ref: #/components/schemas/Label
 type Label struct {
 	ID    int    `json:"id"`
@@ -72,6 +131,52 @@ func (o OptDateTime) Get() (v time.Time, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}

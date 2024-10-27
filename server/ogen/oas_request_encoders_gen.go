@@ -12,7 +12,7 @@ import (
 )
 
 func encodeTodoPostRequest(
-	req *TodoInput,
+	req *CreateTodoInput,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

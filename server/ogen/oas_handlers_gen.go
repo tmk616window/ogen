@@ -95,7 +95,7 @@ func (s *Server) handleTodoPostRequest(args [0]string, argsEscaped bool, w http.
 		}
 
 		type (
-			Request  = *TodoInput
+			Request  = *CreateTodoInput
 			Params   = struct{}
 			Response = *Todo
 		)
