@@ -13,6 +13,7 @@ type Todo struct {
 	ID          int
 	Title       string
 	Description string
+	Labels      []Label
 	CreatedAt   time.Time
 	FinishedAt  time.Time
 	Priority    priority
@@ -25,6 +26,11 @@ type priority struct {
 }
 
 type status struct {
+	ID    int
+	Value string
+}
+
+type Label struct {
 	ID    int
 	Value string
 }
@@ -60,8 +66,14 @@ func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 			ID:          todo.ID,
 			Title:       todo.Title,
 			Description: todo.Description,
-			CreatedAt:   todo.CreatedAt,
-			FinishedAt:  todo.FinishedAt,
+			Labels: lo.Map(todo.Edges.Labels, func(label *ent.Label, _ int) Label { // Corrected function signature
+				return Label{
+					ID:    label.ID,
+					Value: label.Value,
+				}
+			}),
+			CreatedAt:  todo.CreatedAt,
+			FinishedAt: todo.FinishedAt,
 			Priority: priority{
 				ID:   todo.Edges.Priority.ID,
 				Name: todo.Edges.Priority.Name,

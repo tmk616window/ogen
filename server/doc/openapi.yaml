@@ -100,6 +100,10 @@ components:
         createdAt:
           type: string
           format: date-time
+        labels:
+          type: array
+          items:
+            $ref: "#/components/schemas/Label"
         finishedAt:
           type: string
           format: date-time

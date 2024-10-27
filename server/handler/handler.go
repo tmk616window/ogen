@@ -37,8 +37,14 @@ func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Tod
 			ID:          todo.ID,
 			Title:       todo.Title,
 			Description: ogen.OptString{Value: todo.Description},
-			CreatedAt:   todo.CreatedAt,
-			FinishedAt:  ogen.OptDateTime{Value: todo.FinishedAt},
+			Labels: lo.Map(todo.Labels, func(label usecase.Label, _ int) ogen.Label {
+				return ogen.Label{
+					ID:    label.ID,
+					Value: label.Value,
+				}
+			}),
+			CreatedAt:  todo.CreatedAt,
+			FinishedAt: ogen.OptDateTime{Value: todo.FinishedAt},
 			Priority: ogen.Priority{
 				ID:   todo.Priority.ID,
 				Name: todo.Priority.Name,

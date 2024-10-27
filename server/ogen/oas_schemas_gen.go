@@ -6,6 +6,32 @@ import (
 	"time"
 )
 
+// Ref: #/components/schemas/Label
+type Label struct {
+	ID    int    `json:"id"`
+	Value string `json:"value"`
+}
+
+// GetID returns the value of ID.
+func (s *Label) GetID() int {
+	return s.ID
+}
+
+// GetValue returns the value of Value.
+func (s *Label) GetValue() string {
+	return s.Value
+}
+
+// SetID sets the value of ID.
+func (s *Label) SetID(val int) {
+	s.ID = val
+}
+
+// SetValue sets the value of Value.
+func (s *Label) SetValue(val string) {
+	s.Value = val
+}
+
 // NewOptDateTime returns new OptDateTime with value set to v.
 func NewOptDateTime(v time.Time) OptDateTime {
 	return OptDateTime{
@@ -202,6 +228,7 @@ type Todo struct {
 	Title       string      `json:"title"`
 	Description OptString   `json:"description"`
 	CreatedAt   time.Time   `json:"createdAt"`
+	Labels      []Label     `json:"labels"`
 	FinishedAt  OptDateTime `json:"finishedAt"`
 	Priority    Priority    `json:"priority"`
 	Status      Status      `json:"status"`
@@ -225,6 +252,11 @@ func (s *Todo) GetDescription() OptString {
 // GetCreatedAt returns the value of CreatedAt.
 func (s *Todo) GetCreatedAt() time.Time {
 	return s.CreatedAt
+}
+
+// GetLabels returns the value of Labels.
+func (s *Todo) GetLabels() []Label {
+	return s.Labels
 }
 
 // GetFinishedAt returns the value of FinishedAt.
@@ -260,6 +292,11 @@ func (s *Todo) SetDescription(val OptString) {
 // SetCreatedAt sets the value of CreatedAt.
 func (s *Todo) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
+}
+
+// SetLabels sets the value of Labels.
+func (s *Todo) SetLabels(val []Label) {
+	s.Labels = val
 }
 
 // SetFinishedAt sets the value of FinishedAt.
