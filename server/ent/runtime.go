@@ -69,20 +69,16 @@ func init() {
 	todoDescTitle := todoFields[1].Descriptor()
 	// todo.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	todo.TitleValidator = todoDescTitle.Validators[0].(func(string) error)
-	// todoDescName is the schema descriptor for name field.
-	todoDescName := todoFields[3].Descriptor()
-	// todo.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	todo.NameValidator = todoDescName.Validators[0].(func(string) error)
 	// todoDescStatusID is the schema descriptor for status_id field.
-	todoDescStatusID := todoFields[6].Descriptor()
+	todoDescStatusID := todoFields[5].Descriptor()
 	// todo.DefaultStatusID holds the default value on creation for the status_id field.
 	todo.DefaultStatusID = todoDescStatusID.Default.(int)
 	// todoDescCreatedAt is the schema descriptor for created_at field.
-	todoDescCreatedAt := todoFields[7].Descriptor()
+	todoDescCreatedAt := todoFields[6].Descriptor()
 	// todo.DefaultCreatedAt holds the default value on creation for the created_at field.
 	todo.DefaultCreatedAt = todoDescCreatedAt.Default.(func() time.Time)
 	// todoDescUpdatedAt is the schema descriptor for updated_at field.
-	todoDescUpdatedAt := todoFields[8].Descriptor()
+	todoDescUpdatedAt := todoFields[7].Descriptor()
 	// todo.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	todo.DefaultUpdatedAt = todoDescUpdatedAt.Default.(func() time.Time)
 	// todo.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

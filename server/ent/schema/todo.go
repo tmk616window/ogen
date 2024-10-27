@@ -19,7 +19,6 @@ func (Todo) Fields() []ent.Field {
 		field.Int("id").Unique().Immutable(),
 		field.String("title").NotEmpty(),
 		field.String("description").Optional(),
-		field.String("name").NotEmpty(),
 		field.Time("finished_at").Optional(),
 		field.Int("priority_id"),
 		field.Int("status_id").Default(1),

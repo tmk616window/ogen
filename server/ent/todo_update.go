@@ -65,20 +65,6 @@ func (tu *TodoUpdate) ClearDescription() *TodoUpdate {
 	return tu
 }
 
-// SetName sets the "name" field.
-func (tu *TodoUpdate) SetName(s string) *TodoUpdate {
-	tu.mutation.SetName(s)
-	return tu
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (tu *TodoUpdate) SetNillableName(s *string) *TodoUpdate {
-	if s != nil {
-		tu.SetName(*s)
-	}
-	return tu
-}
-
 // SetFinishedAt sets the "finished_at" field.
 func (tu *TodoUpdate) SetFinishedAt(t time.Time) *TodoUpdate {
 	tu.mutation.SetFinishedAt(t)
@@ -253,11 +239,6 @@ func (tu *TodoUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
 		}
 	}
-	if v, ok := tu.mutation.Name(); ok {
-		if err := todo.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
-		}
-	}
 	if tu.mutation.PriorityCleared() && len(tu.mutation.PriorityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Todo.priority"`)
 	}
@@ -287,9 +268,6 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.DescriptionCleared() {
 		_spec.ClearField(todo.FieldDescription, field.TypeString)
-	}
-	if value, ok := tu.mutation.Name(); ok {
-		_spec.SetField(todo.FieldName, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.FinishedAt(); ok {
 		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
@@ -457,20 +435,6 @@ func (tuo *TodoUpdateOne) SetNillableDescription(s *string) *TodoUpdateOne {
 // ClearDescription clears the value of the "description" field.
 func (tuo *TodoUpdateOne) ClearDescription() *TodoUpdateOne {
 	tuo.mutation.ClearDescription()
-	return tuo
-}
-
-// SetName sets the "name" field.
-func (tuo *TodoUpdateOne) SetName(s string) *TodoUpdateOne {
-	tuo.mutation.SetName(s)
-	return tuo
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (tuo *TodoUpdateOne) SetNillableName(s *string) *TodoUpdateOne {
-	if s != nil {
-		tuo.SetName(*s)
-	}
 	return tuo
 }
 
@@ -661,11 +625,6 @@ func (tuo *TodoUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
 		}
 	}
-	if v, ok := tuo.mutation.Name(); ok {
-		if err := todo.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
-		}
-	}
 	if tuo.mutation.PriorityCleared() && len(tuo.mutation.PriorityIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Todo.priority"`)
 	}
@@ -712,9 +671,6 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 	}
 	if tuo.mutation.DescriptionCleared() {
 		_spec.ClearField(todo.FieldDescription, field.TypeString)
-	}
-	if value, ok := tuo.mutation.Name(); ok {
-		_spec.SetField(todo.FieldName, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.FinishedAt(); ok {
 		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)

@@ -18,8 +18,6 @@ const (
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
 	// FieldFinishedAt holds the string denoting the finished_at field in the database.
 	FieldFinishedAt = "finished_at"
 	// FieldPriorityID holds the string denoting the priority_id field in the database.
@@ -64,7 +62,6 @@ var Columns = []string{
 	FieldID,
 	FieldTitle,
 	FieldDescription,
-	FieldName,
 	FieldFinishedAt,
 	FieldPriorityID,
 	FieldStatusID,
@@ -91,8 +88,6 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
-	// NameValidator is a validator for the "name" field. It is called by the builders before save.
-	NameValidator func(string) error
 	// DefaultStatusID holds the default value on creation for the "status_id" field.
 	DefaultStatusID int
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
@@ -119,11 +114,6 @@ func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByFinishedAt orders the results by the finished_at field.

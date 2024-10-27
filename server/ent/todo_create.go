@@ -43,12 +43,6 @@ func (tc *TodoCreate) SetNillableDescription(s *string) *TodoCreate {
 	return tc
 }
 
-// SetName sets the "name" field.
-func (tc *TodoCreate) SetName(s string) *TodoCreate {
-	tc.mutation.SetName(s)
-	return tc
-}
-
 // SetFinishedAt sets the "finished_at" field.
 func (tc *TodoCreate) SetFinishedAt(t time.Time) *TodoCreate {
 	tc.mutation.SetFinishedAt(t)
@@ -201,14 +195,6 @@ func (tc *TodoCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Todo.title": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Todo.name"`)}
-	}
-	if v, ok := tc.mutation.Name(); ok {
-		if err := todo.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Todo.name": %w`, err)}
-		}
-	}
 	if _, ok := tc.mutation.PriorityID(); !ok {
 		return &ValidationError{Name: "priority_id", err: errors.New(`ent: missing required field "Todo.priority_id"`)}
 	}
@@ -266,10 +252,6 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Description(); ok {
 		_spec.SetField(todo.FieldDescription, field.TypeString, value)
 		_node.Description = value
-	}
-	if value, ok := tc.mutation.Name(); ok {
-		_spec.SetField(todo.FieldName, field.TypeString, value)
-		_node.Name = value
 	}
 	if value, ok := tc.mutation.FinishedAt(); ok {
 		_spec.SetField(todo.FieldFinishedAt, field.TypeTime, value)
