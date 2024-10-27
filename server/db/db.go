@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"server/config"
 	"server/ent"
 
 	"entgo.io/ent/dialect"
@@ -20,8 +21,8 @@ type client struct {
 	client *ent.Client
 }
 
-func New() (ClientInterface, error) {
-	databaseUrl := fmt.Sprintf("postgresql://%s:%s@db/%s", "user", "password", "db")
+func New(c config.Database) (ClientInterface, error) {
+	databaseUrl := fmt.Sprintf("postgresql://%s:%s@%s/%s", c.User, c.Password, c.Host, c.Name)
 
 	db, err := sql.Open("pgx", databaseUrl)
 	if err != nil {
@@ -48,6 +49,9 @@ func (c *client) AllTodos(ctx context.Context) ([]*ent.Todo, error) {
 		Query().
 		WithPriority().
 		WithStatus().
+		Limit(10).
+		Offset(0).
+		Order(ent.Desc("created_at")).
 		All(ctx)
 	if err != nil {
 		return nil, err

@@ -8,8 +8,14 @@ services:
       - ./server:/go/src/server
     environment:
       TZ: Asia/Tokyo
+      PORT: ${PORT:-8001}
+      DB_HOST: db
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: db
+      DB_PORT: 5432
     ports:
-      - "8001:8001"
+      - "${PORT:-8001}:8001"
     depends_on:
       - db
   db:

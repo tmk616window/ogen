@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"server/config"
 	"server/db"
 	"server/handler"
 	"server/ogen"
@@ -10,7 +12,12 @@ import (
 )
 
 func main() {
-	dbi, err := db.New()
+	cfg, err := config.New()
+	if err != nil {
+		panic(err)
+	}
+
+	dbi, err := db.New(cfg.Database)
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +31,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	if err := http.ListenAndServe(":8001", s); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), s); err != nil {
 		log.Fatalln(err)
 	}
 }
