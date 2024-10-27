@@ -63,7 +63,6 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 	todoWhere := []predicate.Todo{
 		columnFuzzySearch(todo.FieldDescription, input.WhereInput.Description),
 		columnFuzzySearch(todo.FieldTitle, input.WhereInput.Title),
-		todo.HasStatusWith(status.Value("未着手")),
 	}
 
 	if input.WhereInput.Status != "" {
@@ -71,7 +70,8 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 	}
 
 	todos, err := c.client.Todo.
-		Query().QueryLabels().QueryTodos().
+		Query().
+		WithLabels().
 		WithPriority().
 		WithStatus().
 		Limit(input.Limit).
