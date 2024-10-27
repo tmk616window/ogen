@@ -3,8 +3,13 @@
 package ogen
 
 import (
+	"fmt"
 	"time"
 )
+
+func (s *ErrorResponseStatusCode) Error() string {
+	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
+}
 
 // Ref: #/components/schemas/CreateTodoInput
 type CreateTodoInput struct {
@@ -63,6 +68,47 @@ func (s *CreateTodoInput) SetPriorityID(val OptInt) {
 // SetStatusID sets the value of StatusID.
 func (s *CreateTodoInput) SetStatusID(val OptInt) {
 	s.StatusID = val
+}
+
+// Ref: #/components/schemas/ErrorResponse
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *ErrorResponse) GetError() string {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *ErrorResponse) SetError(val string) {
+	s.Error = val
+}
+
+// ErrorResponseStatusCode wraps ErrorResponse with StatusCode.
+type ErrorResponseStatusCode struct {
+	StatusCode int
+	Response   ErrorResponse
+}
+
+// GetStatusCode returns the value of StatusCode.
+func (s *ErrorResponseStatusCode) GetStatusCode() int {
+	return s.StatusCode
+}
+
+// GetResponse returns the value of Response.
+func (s *ErrorResponseStatusCode) GetResponse() ErrorResponse {
+	return s.Response
+}
+
+// SetStatusCode sets the value of StatusCode.
+func (s *ErrorResponseStatusCode) SetStatusCode(val int) {
+	s.StatusCode = val
+}
+
+// SetResponse sets the value of Response.
+func (s *ErrorResponseStatusCode) SetResponse(val ErrorResponse) {
+	s.Response = val
 }
 
 // Ref: #/components/schemas/Label

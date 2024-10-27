@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"net/http"
 	"server/ogen"
 	"server/usecase"
 
@@ -30,7 +31,7 @@ func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Tod
 		},
 	})
 	if err != nil {
-		return nil, err
+		return nil, h.NewError(ctx, err)
 	}
 
 	return lo.Map(todos, func(todo *usecase.Todo, _ int) ogen.Todo {
@@ -67,7 +68,7 @@ func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*oge
 		PriorityID:  req.PriorityID.Value,
 	})
 	if err != nil {
-		return nil, err
+		return nil, h.NewError(ctx, err)
 	}
 
 	return &ogen.Todo{
@@ -89,4 +90,13 @@ func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*oge
 			Name: todo.Priority.Name,
 		},
 	}, nil
+}
+
+func (h *handler) NewError(ctx context.Context, err error) *ogen.ErrorResponseStatusCode {
+	return &ogen.ErrorResponseStatusCode{
+		StatusCode: http.StatusInternalServerError,
+		Response: ogen.ErrorResponse{
+			Error: err.Error(),
+		},
+	}
 }

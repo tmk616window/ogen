@@ -26,12 +26,12 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
-        # default: # default エラーレスポンスを追加
-        #   description: Unexpected error
-        #   content:
-        #     application/json:
-        #       schema:
-        #         $ref: "#/components/schemas/ErrorResponse"
+        default: # default エラーレスポンスを追加
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /todo:
     post:
       summary: Create a new todo item
@@ -48,12 +48,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Todo"
-        # default:
-        #   description: Unexpected error
-        #   content:
-        #     application/json:
-        #       schema:
-        #         $ref: "#/components/schemas/ErrorResponse"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -163,8 +163,5 @@ components:
       properties:
         error:
           type: string
-        code:
-          type: integer
       required:
         - error
-        - code

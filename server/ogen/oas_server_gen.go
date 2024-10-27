@@ -20,6 +20,10 @@ type Handler interface {
 	//
 	// GET /todos
 	TodosGet(ctx context.Context, req *TodoInput) ([]Todo, error)
+	// NewError creates *ErrorResponseStatusCode from error returned by handler.
+	//
+	// Used for common default response.
+	NewError(ctx context.Context, err error) *ErrorResponseStatusCode
 }
 
 // Server implements http server based on OpenAPI v3 specification and

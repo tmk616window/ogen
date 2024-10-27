@@ -30,3 +30,11 @@ func (UnimplementedHandler) TodoPost(ctx context.Context, req *CreateTodoInput) 
 func (UnimplementedHandler) TodosGet(ctx context.Context, req *TodoInput) (r []Todo, _ error) {
 	return r, ht.ErrNotImplemented
 }
+
+// NewError creates *ErrorResponseStatusCode from error returned by handler.
+//
+// Used for common default response.
+func (UnimplementedHandler) NewError(ctx context.Context, err error) (r *ErrorResponseStatusCode) {
+	r = new(ErrorResponseStatusCode)
+	return r
+}
