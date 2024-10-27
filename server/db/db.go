@@ -67,11 +67,11 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 	}
 
 	if input.WhereInput.Status != "" {
-		todoWhere = append(todoWhere, todo.HasStatusWith(status.Value("未着手")))
+		todoWhere = append(todoWhere, todo.HasStatusWith(status.Value(input.WhereInput.Status)))
 	}
 
 	todos, err := c.client.Todo.
-		Query().
+		Query().QueryLabels().QueryTodos().
 		WithPriority().
 		WithStatus().
 		Limit(input.Limit).
