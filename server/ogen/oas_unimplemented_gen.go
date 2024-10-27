@@ -18,6 +18,6 @@ var _ Handler = UnimplementedHandler{}
 // Get all todo items.
 //
 // GET /todos
-func (UnimplementedHandler) TodosGet(ctx context.Context) (r []Todo, _ error) {
+func (UnimplementedHandler) TodosGet(ctx context.Context, req *TodoInput) (r []Todo, _ error) {
 	return r, ht.ErrNotImplemented
 }

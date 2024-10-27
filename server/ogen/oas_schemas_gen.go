@@ -230,3 +230,29 @@ func (s *Todo) SetPriority(val Priority) {
 func (s *Todo) SetStatus(val Status) {
 	s.Status = val
 }
+
+// Ref: #/components/schemas/TodoInput
+type TodoInput struct {
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+}
+
+// GetLimit returns the value of Limit.
+func (s *TodoInput) GetLimit() int {
+	return s.Limit
+}
+
+// GetOffset returns the value of Offset.
+func (s *TodoInput) GetOffset() int {
+	return s.Offset
+}
+
+// SetLimit sets the value of Limit.
+func (s *TodoInput) SetLimit(val int) {
+	s.Limit = val
+}
+
+// SetOffset sets the value of Offset.
+func (s *TodoInput) SetOffset(val int) {
+	s.Offset = val
+}

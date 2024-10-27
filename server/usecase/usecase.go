@@ -10,7 +10,7 @@ type usecase struct {
 }
 
 type UsecaseInterface interface {
-TodosGet(ctx context.Context) ([]*Todo, error)
+	TodosGet(ctx context.Context) ([]*Todo, error)
 }
 
 func NewUsecase(dbc db.ClientInterface) UsecaseInterface {

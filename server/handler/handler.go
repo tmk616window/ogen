@@ -18,7 +18,7 @@ func NewHandler(u usecase.UsecaseInterface) *handler {
 	}
 }
 
-func (h *handler) TodosGet(ctx context.Context) ([]ogen.Todo, error) {
+func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Todo, error) {
 	todos, err := h.Usecase.TodosGet(ctx)
 	if err != nil {
 		return nil, err

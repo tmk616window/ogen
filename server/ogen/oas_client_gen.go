@@ -26,7 +26,7 @@ type Invoker interface {
 	// Get all todo items.
 	//
 	// GET /todos
-	TodosGet(ctx context.Context) ([]Todo, error)
+	TodosGet(ctx context.Context, request *TodoInput) ([]Todo, error)
 }
 
 // Client implements OAS client.
@@ -82,12 +82,12 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // Get all todo items.
 //
 // GET /todos
-func (c *Client) TodosGet(ctx context.Context) ([]Todo, error) {
-	res, err := c.sendTodosGet(ctx)
+func (c *Client) TodosGet(ctx context.Context, request *TodoInput) ([]Todo, error) {
+	res, err := c.sendTodosGet(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendTodosGet(ctx context.Context) (res []Todo, err error) {
+func (c *Client) sendTodosGet(ctx context.Context, request *TodoInput) (res []Todo, err error) {
 	otelAttrs := []attribute.KeyValue{
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/todos"),
@@ -130,6 +130,9 @@ func (c *Client) sendTodosGet(ctx context.Context) (res []Todo, err error) {
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeTodosGetRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	stage = "SendRequest"

@@ -13,7 +13,7 @@ type Handler interface {
 	// Get all todo items.
 	//
 	// GET /todos
-	TodosGet(ctx context.Context) ([]Todo, error)
+	TodosGet(ctx context.Context, req *TodoInput) ([]Todo, error)
 }
 
 // Server implements http server based on OpenAPI v3 specification and

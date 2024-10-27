@@ -11,6 +11,12 @@ paths:
   /todos:
     get:
       summary: Get all todo items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoInput"
       responses:
         "200":
           description: A list of todo items
@@ -100,14 +106,13 @@ components:
     TodoInput:
       type: object
       properties:
-        title:
-          type: string
-        description:
-          type: string
-        isCompleted:
-          type: boolean
+        limit:
+          type: integer
+        offset:
+          type: integer
       required:
-        - title
+        - limit
+        - offset
 
     ErrorResponse:
       type: object
