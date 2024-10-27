@@ -32,3 +32,23 @@ DO UPDATE SET
     value = EXCLUDED.value,
     created_at = EXCLUDED.created_at,
     updated_at = EXCLUDED.updated_at;
+
+INSERT INTO labels (id, value, created_at, updated_at)
+VALUES 
+    (1, 'Label1', NOW(), NOW()),
+    (2, 'Label2', NOW(), NOW())
+ON CONFLICT (id)
+DO UPDATE SET
+    value = EXCLUDED.value,
+    created_at = EXCLUDED.created_at,
+    updated_at = EXCLUDED.updated_at;
+
+INSERT INTO label_todos (label_id, todo_id)
+VALUES
+    (1, 1),
+    (2, 1),
+    (2, 2)
+ON CONFLICT (label_id, todo_id)
+DO UPDATE SET
+    label_id = EXCLUDED.label_id,
+    todo_id = EXCLUDED.todo_id;
