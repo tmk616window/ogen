@@ -22,6 +22,11 @@ func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Tod
 	todos, err := h.Usecase.TodosGet(ctx, &usecase.Input{
 		Limit:  req.Limit,
 		Offset: req.Offset,
+		WhereInput: usecase.WhereInput{
+			Title:       req.WhereInput.Value.Title.Value,
+			Description: req.WhereInput.Value.Description.Value,
+			Status:      req.WhereInput.Value.Status.Value,
+		},
 	})
 	if err != nil {
 		return nil, err

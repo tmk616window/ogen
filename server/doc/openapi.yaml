@@ -77,6 +77,17 @@ components:
       required:
         - id
         - value
+    Label:
+      type: object
+      properties:
+        id:
+          type: integer
+        value:
+          type: string
+      required:
+        - id
+        - value
+
     Todo:
       type: object
       properties:
@@ -110,6 +121,15 @@ components:
           type: integer
         offset:
           type: integer
+        whereInput:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            status:
+              type: string
       required:
         - limit
         - offset

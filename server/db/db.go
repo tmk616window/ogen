@@ -7,6 +7,9 @@ import (
 
 	"server/config"
 	"server/ent"
+	"server/ent/predicate"
+	"server/ent/status"
+	"server/ent/todo"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -22,8 +25,15 @@ type client struct {
 }
 
 type Input struct {
-	Limit  int
-	Offset int
+	Limit      int
+	Offset     int
+	WhereInput WhereInput
+}
+
+type WhereInput struct {
+	Title       string
+	Description string
+	Status      string
 }
 
 func New(c config.Database) (ClientInterface, error) {
@@ -50,12 +60,27 @@ func (c *client) GetClient() *ent.Client {
 }
 
 func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error) {
+	todoWhere := []predicate.Todo{
+		columnFuzzySearch(todo.FieldDescription, input.WhereInput.Description),
+		columnFuzzySearch(todo.FieldTitle, input.WhereInput.Title),
+		todo.HasStatusWith(status.Value("未着手")),
+	}
+
+	if input.WhereInput.Status != "" {
+		todoWhere = append(todoWhere, todo.HasStatusWith(status.Value("未着手")))
+	}
+
 	todos, err := c.client.Todo.
 		Query().
 		WithPriority().
 		WithStatus().
 		Limit(input.Limit).
 		Offset(input.Offset).
+		Where(
+			todo.And(
+				todoWhere...,
+			),
+		).
 		Order(ent.Desc("created_at")).
 		All(ctx)
 	if err != nil {
@@ -63,4 +88,10 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 	}
 
 	return todos, nil
+}
+
+func columnFuzzySearch(column string, value string) func(s *entsql.Selector) {
+	return func(s *entsql.Selector) {
+		s.Where(entsql.Like(column, fmt.Sprintf("%%%s%%", value)))
+	}
 }

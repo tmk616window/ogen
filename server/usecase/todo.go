@@ -30,14 +30,26 @@ type status struct {
 }
 
 type Input struct {
-	Limit  int
-	Offset int
+	Limit      int
+	Offset     int
+	WhereInput WhereInput
+}
+
+type WhereInput struct {
+	Title       string
+	Description string
+	Status      string
 }
 
 func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 	todos, err := u.db.AllTodos(ctx, &db.Input{
 		Limit:  input.Limit,
 		Offset: input.Offset,
+		WhereInput: db.WhereInput{
+			Title:       input.WhereInput.Title,
+			Description: input.WhereInput.Description,
+			Status:      input.WhereInput.Status,
+		},
 	})
 	if err != nil {
 		return nil, err

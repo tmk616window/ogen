@@ -98,6 +98,52 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
+// NewOptTodoInputWhereInput returns new OptTodoInputWhereInput with value set to v.
+func NewOptTodoInputWhereInput(v TodoInputWhereInput) OptTodoInputWhereInput {
+	return OptTodoInputWhereInput{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptTodoInputWhereInput is optional TodoInputWhereInput.
+type OptTodoInputWhereInput struct {
+	Value TodoInputWhereInput
+	Set   bool
+}
+
+// IsSet returns true if OptTodoInputWhereInput was set.
+func (o OptTodoInputWhereInput) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptTodoInputWhereInput) Reset() {
+	var v TodoInputWhereInput
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptTodoInputWhereInput) SetTo(v TodoInputWhereInput) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptTodoInputWhereInput) Get() (v TodoInputWhereInput, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptTodoInputWhereInput) Or(d TodoInputWhereInput) TodoInputWhereInput {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/Priority
 type Priority struct {
 	ID   int    `json:"id"`
@@ -233,8 +279,9 @@ func (s *Todo) SetStatus(val Status) {
 
 // Ref: #/components/schemas/TodoInput
 type TodoInput struct {
-	Limit  int `json:"limit"`
-	Offset int `json:"offset"`
+	Limit      int                    `json:"limit"`
+	Offset     int                    `json:"offset"`
+	WhereInput OptTodoInputWhereInput `json:"whereInput"`
 }
 
 // GetLimit returns the value of Limit.
@@ -247,6 +294,11 @@ func (s *TodoInput) GetOffset() int {
 	return s.Offset
 }
 
+// GetWhereInput returns the value of WhereInput.
+func (s *TodoInput) GetWhereInput() OptTodoInputWhereInput {
+	return s.WhereInput
+}
+
 // SetLimit sets the value of Limit.
 func (s *TodoInput) SetLimit(val int) {
 	s.Limit = val
@@ -255,4 +307,45 @@ func (s *TodoInput) SetLimit(val int) {
 // SetOffset sets the value of Offset.
 func (s *TodoInput) SetOffset(val int) {
 	s.Offset = val
+}
+
+// SetWhereInput sets the value of WhereInput.
+func (s *TodoInput) SetWhereInput(val OptTodoInputWhereInput) {
+	s.WhereInput = val
+}
+
+type TodoInputWhereInput struct {
+	Title       OptString `json:"title"`
+	Description OptString `json:"description"`
+	Status      OptString `json:"status"`
+}
+
+// GetTitle returns the value of Title.
+func (s *TodoInputWhereInput) GetTitle() OptString {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *TodoInputWhereInput) GetDescription() OptString {
+	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *TodoInputWhereInput) GetStatus() OptString {
+	return s.Status
+}
+
+// SetTitle sets the value of Title.
+func (s *TodoInputWhereInput) SetTitle(val OptString) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *TodoInputWhereInput) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *TodoInputWhereInput) SetStatus(val OptString) {
+	s.Status = val
 }
