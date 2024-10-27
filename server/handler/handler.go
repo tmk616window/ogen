@@ -25,6 +25,7 @@ func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Tod
 		WhereInput: usecase.WhereInput{
 			Title:       req.WhereInput.Value.Title.Value,
 			Description: req.WhereInput.Value.Description.Value,
+			Labels:      req.WhereInput.Value.Labels,
 			Status:      req.WhereInput.Value.Status.Value,
 		},
 	})

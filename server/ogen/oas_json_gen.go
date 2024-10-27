@@ -830,6 +830,16 @@ func (s *TodoInputWhereInput) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Labels != nil {
+			e.FieldStart("labels")
+			e.ArrStart()
+			for _, elem := range s.Labels {
+				e.Str(elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
 		if s.Status.Set {
 			e.FieldStart("status")
 			s.Status.Encode(e)
@@ -837,10 +847,11 @@ func (s *TodoInputWhereInput) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfTodoInputWhereInput = [3]string{
+var jsonFieldsNameOfTodoInputWhereInput = [4]string{
 	0: "title",
 	1: "description",
-	2: "status",
+	2: "labels",
+	3: "status",
 }
 
 // Decode decodes TodoInputWhereInput from json.
@@ -870,6 +881,25 @@ func (s *TodoInputWhereInput) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "labels":
+			if err := func() error {
+				s.Labels = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Labels = append(s.Labels, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"labels\"")
 			}
 		case "status":
 			if err := func() error {

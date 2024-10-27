@@ -132,6 +132,10 @@ components:
               type: string
             description:
               type: string
+            labels:
+              type: array
+              items:
+                type: string
             status:
               type: string
       required:

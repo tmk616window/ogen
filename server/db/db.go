@@ -7,6 +7,7 @@ import (
 
 	"server/config"
 	"server/ent"
+	"server/ent/label"
 	"server/ent/predicate"
 	"server/ent/status"
 	"server/ent/todo"
@@ -33,6 +34,7 @@ type Input struct {
 type WhereInput struct {
 	Title       string
 	Description string
+	Labels      []string
 	Status      string
 }
 
@@ -69,6 +71,11 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 		todoWhere = append(todoWhere, todo.HasStatusWith(status.Value(input.WhereInput.Status)))
 	}
 
+	if len(input.WhereInput.Labels) > 0 {
+		for _, labelValue := range input.WhereInput.Labels {
+			todoWhere = append(todoWhere, todo.HasLabelsWith(label.Value(labelValue)))
+		}
+	}
 	todos, err := c.client.Todo.
 		Query().
 		WithLabels().

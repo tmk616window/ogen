@@ -354,6 +354,7 @@ func (s *TodoInput) SetWhereInput(val OptTodoInputWhereInput) {
 type TodoInputWhereInput struct {
 	Title       OptString `json:"title"`
 	Description OptString `json:"description"`
+	Labels      []string  `json:"labels"`
 	Status      OptString `json:"status"`
 }
 
@@ -365,6 +366,11 @@ func (s *TodoInputWhereInput) GetTitle() OptString {
 // GetDescription returns the value of Description.
 func (s *TodoInputWhereInput) GetDescription() OptString {
 	return s.Description
+}
+
+// GetLabels returns the value of Labels.
+func (s *TodoInputWhereInput) GetLabels() []string {
+	return s.Labels
 }
 
 // GetStatus returns the value of Status.
@@ -380,6 +386,11 @@ func (s *TodoInputWhereInput) SetTitle(val OptString) {
 // SetDescription sets the value of Description.
 func (s *TodoInputWhereInput) SetDescription(val OptString) {
 	s.Description = val
+}
+
+// SetLabels sets the value of Labels.
+func (s *TodoInputWhereInput) SetLabels(val []string) {
+	s.Labels = val
 }
 
 // SetStatus sets the value of Status.

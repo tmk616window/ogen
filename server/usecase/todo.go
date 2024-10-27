@@ -44,6 +44,7 @@ type Input struct {
 type WhereInput struct {
 	Title       string
 	Description string
+	Labels      []string
 	Status      string
 }
 
@@ -54,6 +55,7 @@ func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 		WhereInput: db.WhereInput{
 			Title:       input.WhereInput.Title,
 			Description: input.WhereInput.Description,
+			Labels:      input.WhereInput.Labels,
 			Status:      input.WhereInput.Status,
 		},
 	})
