@@ -32,28 +32,28 @@ paths:
         #     application/json:
         #       schema:
         #         $ref: "#/components/schemas/ErrorResponse"
-
-    # post:
-    #   summary: Create a new todo item
-    #   requestBody:
-    #     required: true
-    #     content:
-    #       application/json:
-    #         schema:
-    #           $ref: "#/components/schemas/TodoInput"
-    #   responses:
-    #     "201":
-    #       description: Todo item created
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/Todo"
-    #     default: # default エラーレスポンスを追加
-    #       description: Unexpected error
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/ErrorResponse"
+  /todo:
+    post:
+      summary: Create a new todo item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TodoInput"
+      responses:
+        "201":
+          description: Todo item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        # default:
+        #   description: Unexpected error
+        #   content:
+        #     application/json:
+        #       schema:
+        #         $ref: "#/components/schemas/ErrorResponse"
 
 components:
   schemas:
@@ -141,6 +141,22 @@ components:
       required:
         - limit
         - offset
+
+    CreateTodoInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        labels:
+          typeIDs: array
+          item:
+            type: integer
+        priority_id:
+          type: integer
+        status_id:
+          type: integer
 
     ErrorResponse:
       type: object

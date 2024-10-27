@@ -48,24 +48,46 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/todos"
+		case '/': // Prefix: "/todo"
 			origElem := elem
-			if l := len("/todos"); len(elem) >= l && elem[0:l] == "/todos" {
+			if l := len("/todo"); len(elem) >= l && elem[0:l] == "/todo" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				// Leaf node.
 				switch r.Method {
-				case "GET":
-					s.handleTodosGetRequest([0]string{}, elemIsEscaped, w, r)
+				case "POST":
+					s.handleTodoPostRequest([0]string{}, elemIsEscaped, w, r)
 				default:
-					s.notAllowed(w, r, "GET")
+					s.notAllowed(w, r, "POST")
 				}
 
 				return
+			}
+			switch elem[0] {
+			case 's': // Prefix: "s"
+				origElem := elem
+				if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleTodosGetRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+
+				elem = origElem
 			}
 
 			elem = origElem
@@ -149,28 +171,54 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/todos"
+		case '/': // Prefix: "/todo"
 			origElem := elem
-			if l := len("/todos"); len(elem) >= l && elem[0:l] == "/todos" {
+			if l := len("/todo"); len(elem) >= l && elem[0:l] == "/todo" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				// Leaf node.
 				switch method {
-				case "GET":
-					r.name = "TodosGet"
-					r.summary = "Get all todo items"
+				case "POST":
+					r.name = "TodoPost"
+					r.summary = "Create a new todo item"
 					r.operationID = ""
-					r.pathPattern = "/todos"
+					r.pathPattern = "/todo"
 					r.args = args
 					r.count = 0
 					return r, true
 				default:
 					return
 				}
+			}
+			switch elem[0] {
+			case 's': // Prefix: "s"
+				origElem := elem
+				if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = "TodosGet"
+						r.summary = "Get all todo items"
+						r.operationID = ""
+						r.pathPattern = "/todos"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+				elem = origElem
 			}
 
 			elem = origElem

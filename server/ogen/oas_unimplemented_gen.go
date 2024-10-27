@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// TodoPost implements POST /todo operation.
+//
+// Create a new todo item.
+//
+// POST /todo
+func (UnimplementedHandler) TodoPost(ctx context.Context, req *TodoInput) (r *Todo, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // TodosGet implements GET /todos operation.
 //
 // Get all todo items.

@@ -8,6 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// TodoPost implements POST /todo operation.
+	//
+	// Create a new todo item.
+	//
+	// POST /todo
+	TodoPost(ctx context.Context, req *TodoInput) (*Todo, error)
 	// TodosGet implements GET /todos operation.
 	//
 	// Get all todo items.

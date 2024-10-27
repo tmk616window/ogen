@@ -57,3 +57,7 @@ func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Tod
 		}
 	}), nil
 }
+
+func (h *handler) TodoPost(ctx context.Context, req *ogen.TodoInput) (*ogen.Todo, error) {
+	return nil, nil
+}
