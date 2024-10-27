@@ -19,7 +19,10 @@ func NewHandler(u usecase.UsecaseInterface) *handler {
 }
 
 func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Todo, error) {
-	todos, err := h.Usecase.TodosGet(ctx)
+	todos, err := h.Usecase.TodosGet(ctx, &usecase.Input{
+		Limit:  req.Limit,
+		Offset: req.Offset,
+	})
 	if err != nil {
 		return nil, err
 	}

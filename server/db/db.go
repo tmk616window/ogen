@@ -14,11 +14,16 @@ import (
 )
 
 type ClientInterface interface {
-	AllTodos(ctx context.Context) ([]*ent.Todo, error)
+	AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error)
 }
 
 type client struct {
 	client *ent.Client
+}
+
+type Input struct {
+	Limit  int
+	Offset int
 }
 
 func New(c config.Database) (ClientInterface, error) {
@@ -44,13 +49,13 @@ func (c *client) GetClient() *ent.Client {
 	return c.client
 }
 
-func (c *client) AllTodos(ctx context.Context) ([]*ent.Todo, error) {
+func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error) {
 	todos, err := c.client.Todo.
 		Query().
 		WithPriority().
 		WithStatus().
-		Limit(10).
-		Offset(0).
+		Limit(input.Limit).
+		Offset(input.Offset).
 		Order(ent.Desc("created_at")).
 		All(ctx)
 	if err != nil {

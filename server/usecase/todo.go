@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"server/db"
 	"server/ent"
 	"time"
 
@@ -28,8 +29,16 @@ type status struct {
 	Value string
 }
 
-func (u *usecase) TodosGet(ctx context.Context) ([]*Todo, error) {
-	todos, err := u.db.AllTodos(ctx)
+type Input struct {
+	Limit  int
+	Offset int
+}
+
+func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
+	todos, err := u.db.AllTodos(ctx, &db.Input{
+		Limit:  input.Limit,
+		Offset: input.Offset,
+	})
 	if err != nil {
 		return nil, err
 	}
