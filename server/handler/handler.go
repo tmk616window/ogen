@@ -64,6 +64,7 @@ func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*oge
 		Description: req.Description.Value,
 		LabelIDs:    req.LabelIDs,
 		StatusID:    req.StatusID.Value,
+		PriorityID:  req.PriorityID.Value,
 	})
 	if err != nil {
 		return nil, err

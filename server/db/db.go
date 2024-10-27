@@ -107,7 +107,41 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 }
 
 func (c *client) CreateTodo(ctx context.Context, input *CreateTodoInput) (*ent.Todo, error) {
-	return nil, nil
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := tx.Todo.
+		Create().
+		SetTitle(input.Title).
+		SetDescription(input.Description).
+		AddLabelIDs(input.LabelsID...).
+		SetStatusID(input.StatusID).
+		SetPriorityID(input.PriorityID).
+		Save(ctx)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	tt, err := tx.Todo.
+		Query().
+		Where(
+			entsql.FieldEQ(todo.FieldID, t.ID),
+		).
+		WithStatus().
+		WithPriority().
+		WithLabels().
+		Only(ctx)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	tx.Commit()
+
+	return tt, nil
 }
 
 func columnFuzzySearch(column string, value string) func(s *entsql.Selector) {
