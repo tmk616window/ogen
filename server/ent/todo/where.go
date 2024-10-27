@@ -516,6 +516,29 @@ func HasStatusWith(preds ...predicate.Status) predicate.Todo {
 	})
 }
 
+// HasLabels applies the HasEdge predicate on the "labels" edge.
+func HasLabels() predicate.Todo {
+	return predicate.Todo(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, LabelsTable, LabelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLabelsWith applies the HasEdge predicate on the "labels" edge with a given conditions (other predicates).
+func HasLabelsWith(preds ...predicate.Label) predicate.Todo {
+	return predicate.Todo(func(s *sql.Selector) {
+		step := newLabelsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Todo) predicate.Todo {
 	return predicate.Todo(sql.AndPredicates(predicates...))

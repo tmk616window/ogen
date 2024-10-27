@@ -47,9 +47,11 @@ type TodoEdges struct {
 	Priority *Priority `json:"priority,omitempty"`
 	// Status holds the value of the status edge.
 	Status *Status `json:"status,omitempty"`
+	// Labels holds the value of the labels edge.
+	Labels []*Label `json:"labels,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // PriorityOrErr returns the Priority value or an error if the edge
@@ -72,6 +74,15 @@ func (e TodoEdges) StatusOrErr() (*Status, error) {
 		return nil, &NotFoundError{label: status.Label}
 	}
 	return nil, &NotLoadedError{edge: "status"}
+}
+
+// LabelsOrErr returns the Labels value or an error if the edge
+// was not loaded in eager-loading.
+func (e TodoEdges) LabelsOrErr() ([]*Label, error) {
+	if e.loadedTypes[2] {
+		return e.Labels, nil
+	}
+	return nil, &NotLoadedError{edge: "labels"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -175,6 +186,11 @@ func (t *Todo) QueryPriority() *PriorityQuery {
 // QueryStatus queries the "status" edge of the Todo entity.
 func (t *Todo) QueryStatus() *StatusQuery {
 	return NewTodoClient(t.config).QueryStatus(t)
+}
+
+// QueryLabels queries the "labels" edge of the Todo entity.
+func (t *Todo) QueryLabels() *LabelQuery {
+	return NewTodoClient(t.config).QueryLabels(t)
 }
 
 // Update returns a builder for updating this Todo.

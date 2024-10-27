@@ -4,8 +4,10 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
+	"server/ent/label"
 	"server/ent/predicate"
 	"server/ent/priority"
 	"server/ent/status"
@@ -26,6 +28,7 @@ type TodoQuery struct {
 	predicates   []predicate.Todo
 	withPriority *PriorityQuery
 	withStatus   *StatusQuery
+	withLabels   *LabelQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -99,6 +102,28 @@ func (tq *TodoQuery) QueryStatus() *StatusQuery {
 			sqlgraph.From(todo.Table, todo.FieldID, selector),
 			sqlgraph.To(status.Table, status.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, todo.StatusTable, todo.StatusColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLabels chains the current query on the "labels" edge.
+func (tq *TodoQuery) QueryLabels() *LabelQuery {
+	query := (&LabelClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(todo.Table, todo.FieldID, selector),
+			sqlgraph.To(label.Table, label.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, todo.LabelsTable, todo.LabelsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,6 +325,7 @@ func (tq *TodoQuery) Clone() *TodoQuery {
 		predicates:   append([]predicate.Todo{}, tq.predicates...),
 		withPriority: tq.withPriority.Clone(),
 		withStatus:   tq.withStatus.Clone(),
+		withLabels:   tq.withLabels.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -325,6 +351,17 @@ func (tq *TodoQuery) WithStatus(opts ...func(*StatusQuery)) *TodoQuery {
 		opt(query)
 	}
 	tq.withStatus = query
+	return tq
+}
+
+// WithLabels tells the query-builder to eager-load the nodes that are connected to
+// the "labels" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TodoQuery) WithLabels(opts ...func(*LabelQuery)) *TodoQuery {
+	query := (&LabelClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withLabels = query
 	return tq
 }
 
@@ -406,9 +443,10 @@ func (tq *TodoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Todo, e
 	var (
 		nodes       = []*Todo{}
 		_spec       = tq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			tq.withPriority != nil,
 			tq.withStatus != nil,
+			tq.withLabels != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -438,6 +476,13 @@ func (tq *TodoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Todo, e
 	if query := tq.withStatus; query != nil {
 		if err := tq.loadStatus(ctx, query, nodes, nil,
 			func(n *Todo, e *Status) { n.Edges.Status = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tq.withLabels; query != nil {
+		if err := tq.loadLabels(ctx, query, nodes,
+			func(n *Todo) { n.Edges.Labels = []*Label{} },
+			func(n *Todo, e *Label) { n.Edges.Labels = append(n.Edges.Labels, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -498,6 +543,67 @@ func (tq *TodoQuery) loadStatus(ctx context.Context, query *StatusQuery, nodes [
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (tq *TodoQuery) loadLabels(ctx context.Context, query *LabelQuery, nodes []*Todo, init func(*Todo), assign func(*Todo, *Label)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Todo)
+	nids := make(map[int]map[*Todo]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(todo.LabelsTable)
+		s.Join(joinT).On(s.C(label.FieldID), joinT.C(todo.LabelsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(todo.LabelsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(todo.LabelsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Todo]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Label](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "labels" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil

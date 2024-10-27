@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Label is the predicate function for label builders.
+type Label func(*sql.Selector)
+
 // Priority is the predicate function for priority builders.
 type Priority func(*sql.Selector)
 

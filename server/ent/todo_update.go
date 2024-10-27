@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"server/ent/label"
 	"server/ent/predicate"
 	"server/ent/priority"
 	"server/ent/status"
@@ -156,6 +157,21 @@ func (tu *TodoUpdate) SetStatus(s *Status) *TodoUpdate {
 	return tu.SetStatusID(s.ID)
 }
 
+// AddLabelIDs adds the "labels" edge to the Label entity by IDs.
+func (tu *TodoUpdate) AddLabelIDs(ids ...int) *TodoUpdate {
+	tu.mutation.AddLabelIDs(ids...)
+	return tu
+}
+
+// AddLabels adds the "labels" edges to the Label entity.
+func (tu *TodoUpdate) AddLabels(l ...*Label) *TodoUpdate {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return tu.AddLabelIDs(ids...)
+}
+
 // Mutation returns the TodoMutation object of the builder.
 func (tu *TodoUpdate) Mutation() *TodoMutation {
 	return tu.mutation
@@ -171,6 +187,27 @@ func (tu *TodoUpdate) ClearPriority() *TodoUpdate {
 func (tu *TodoUpdate) ClearStatus() *TodoUpdate {
 	tu.mutation.ClearStatus()
 	return tu
+}
+
+// ClearLabels clears all "labels" edges to the Label entity.
+func (tu *TodoUpdate) ClearLabels() *TodoUpdate {
+	tu.mutation.ClearLabels()
+	return tu
+}
+
+// RemoveLabelIDs removes the "labels" edge to Label entities by IDs.
+func (tu *TodoUpdate) RemoveLabelIDs(ids ...int) *TodoUpdate {
+	tu.mutation.RemoveLabelIDs(ids...)
+	return tu
+}
+
+// RemoveLabels removes "labels" edges to Label entities.
+func (tu *TodoUpdate) RemoveLabels(l ...*Label) *TodoUpdate {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return tu.RemoveLabelIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -324,6 +361,51 @@ func (tu *TodoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.LabelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.LabelsTable,
+			Columns: todo.LabelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(label.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedLabelsIDs(); len(nodes) > 0 && !tu.mutation.LabelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.LabelsTable,
+			Columns: todo.LabelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(label.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.LabelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.LabelsTable,
+			Columns: todo.LabelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(label.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{todo.Label}
@@ -470,6 +552,21 @@ func (tuo *TodoUpdateOne) SetStatus(s *Status) *TodoUpdateOne {
 	return tuo.SetStatusID(s.ID)
 }
 
+// AddLabelIDs adds the "labels" edge to the Label entity by IDs.
+func (tuo *TodoUpdateOne) AddLabelIDs(ids ...int) *TodoUpdateOne {
+	tuo.mutation.AddLabelIDs(ids...)
+	return tuo
+}
+
+// AddLabels adds the "labels" edges to the Label entity.
+func (tuo *TodoUpdateOne) AddLabels(l ...*Label) *TodoUpdateOne {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return tuo.AddLabelIDs(ids...)
+}
+
 // Mutation returns the TodoMutation object of the builder.
 func (tuo *TodoUpdateOne) Mutation() *TodoMutation {
 	return tuo.mutation
@@ -485,6 +582,27 @@ func (tuo *TodoUpdateOne) ClearPriority() *TodoUpdateOne {
 func (tuo *TodoUpdateOne) ClearStatus() *TodoUpdateOne {
 	tuo.mutation.ClearStatus()
 	return tuo
+}
+
+// ClearLabels clears all "labels" edges to the Label entity.
+func (tuo *TodoUpdateOne) ClearLabels() *TodoUpdateOne {
+	tuo.mutation.ClearLabels()
+	return tuo
+}
+
+// RemoveLabelIDs removes the "labels" edge to Label entities by IDs.
+func (tuo *TodoUpdateOne) RemoveLabelIDs(ids ...int) *TodoUpdateOne {
+	tuo.mutation.RemoveLabelIDs(ids...)
+	return tuo
+}
+
+// RemoveLabels removes "labels" edges to Label entities.
+func (tuo *TodoUpdateOne) RemoveLabels(l ...*Label) *TodoUpdateOne {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return tuo.RemoveLabelIDs(ids...)
 }
 
 // Where appends a list predicates to the TodoUpdate builder.
@@ -661,6 +779,51 @@ func (tuo *TodoUpdateOne) sqlSave(ctx context.Context) (_node *Todo, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(status.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.LabelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.LabelsTable,
+			Columns: todo.LabelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(label.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedLabelsIDs(); len(nodes) > 0 && !tuo.mutation.LabelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.LabelsTable,
+			Columns: todo.LabelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(label.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.LabelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.LabelsTable,
+			Columns: todo.LabelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(label.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

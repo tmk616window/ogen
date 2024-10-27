@@ -34,6 +34,8 @@ const (
 	EdgePriority = "priority"
 	// EdgeStatus holds the string denoting the status edge name in mutations.
 	EdgeStatus = "status"
+	// EdgeLabels holds the string denoting the labels edge name in mutations.
+	EdgeLabels = "labels"
 	// Table holds the table name of the todo in the database.
 	Table = "todos"
 	// PriorityTable is the table that holds the priority relation/edge.
@@ -50,6 +52,11 @@ const (
 	StatusInverseTable = "status"
 	// StatusColumn is the table column denoting the status relation/edge.
 	StatusColumn = "status_id"
+	// LabelsTable is the table that holds the labels relation/edge. The primary key declared below.
+	LabelsTable = "label_todos"
+	// LabelsInverseTable is the table name for the Label entity.
+	// It exists in this package in order to avoid circular dependency with the "label" package.
+	LabelsInverseTable = "labels"
 )
 
 // Columns holds all SQL columns for todo fields.
@@ -64,6 +71,12 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
+
+var (
+	// LabelsPrimaryKey and LabelsColumn2 are the table columns denoting the
+	// primary key for the labels relation (M2M).
+	LabelsPrimaryKey = []string{"label_id", "todo_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -151,6 +164,20 @@ func ByStatusField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newStatusStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByLabelsCount orders the results by labels count.
+func ByLabelsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLabelsStep(), opts...)
+	}
+}
+
+// ByLabels orders the results by labels terms.
+func ByLabels(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLabelsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPriorityStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -163,5 +190,12 @@ func newStatusStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StatusInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, StatusTable, StatusColumn),
+	)
+}
+func newLabelsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LabelsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, LabelsTable, LabelsPrimaryKey...),
 	)
 }

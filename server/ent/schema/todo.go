@@ -41,5 +41,7 @@ func (Todo) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("status_id"),
+		edge.From("labels", Label.Type).
+			Ref("todos"),
 	}
 }

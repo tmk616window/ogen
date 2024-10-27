@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"server/ent/label"
 	"server/ent/priority"
 	"server/ent/status"
 	"server/ent/todo"
@@ -124,6 +125,21 @@ func (tc *TodoCreate) SetPriority(p *Priority) *TodoCreate {
 // SetStatus sets the "status" edge to the Status entity.
 func (tc *TodoCreate) SetStatus(s *Status) *TodoCreate {
 	return tc.SetStatusID(s.ID)
+}
+
+// AddLabelIDs adds the "labels" edge to the Label entity by IDs.
+func (tc *TodoCreate) AddLabelIDs(ids ...int) *TodoCreate {
+	tc.mutation.AddLabelIDs(ids...)
+	return tc
+}
+
+// AddLabels adds the "labels" edges to the Label entity.
+func (tc *TodoCreate) AddLabels(l ...*Label) *TodoCreate {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return tc.AddLabelIDs(ids...)
 }
 
 // Mutation returns the TodoMutation object of the builder.
@@ -299,6 +315,22 @@ func (tc *TodoCreate) createSpec() (*Todo, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.StatusID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.LabelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   todo.LabelsTable,
+			Columns: todo.LabelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(label.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

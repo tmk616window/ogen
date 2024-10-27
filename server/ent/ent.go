@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"server/ent/label"
 	"server/ent/priority"
 	"server/ent/status"
 	"server/ent/todo"
@@ -75,6 +76,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			label.Table:    label.ValidColumn,
 			priority.Table: priority.ValidColumn,
 			status.Table:   status.ValidColumn,
 			todo.Table:     todo.ValidColumn,

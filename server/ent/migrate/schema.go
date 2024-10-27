@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// LabelsColumns holds the columns for the "labels" table.
+	LabelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "value", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// LabelsTable holds the schema information for the "labels" table.
+	LabelsTable = &schema.Table{
+		Name:       "labels",
+		Columns:    LabelsColumns,
+		PrimaryKey: []*schema.Column{LabelsColumns[0]},
+	}
 	// PrioritiesColumns holds the columns for the "priorities" table.
 	PrioritiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -66,15 +79,44 @@ var (
 			},
 		},
 	}
+	// LabelTodosColumns holds the columns for the "label_todos" table.
+	LabelTodosColumns = []*schema.Column{
+		{Name: "label_id", Type: field.TypeInt},
+		{Name: "todo_id", Type: field.TypeInt},
+	}
+	// LabelTodosTable holds the schema information for the "label_todos" table.
+	LabelTodosTable = &schema.Table{
+		Name:       "label_todos",
+		Columns:    LabelTodosColumns,
+		PrimaryKey: []*schema.Column{LabelTodosColumns[0], LabelTodosColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "label_todos_label_id",
+				Columns:    []*schema.Column{LabelTodosColumns[0]},
+				RefColumns: []*schema.Column{LabelsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "label_todos_todo_id",
+				Columns:    []*schema.Column{LabelTodosColumns[1]},
+				RefColumns: []*schema.Column{TodosColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		LabelsTable,
 		PrioritiesTable,
 		StatusTable,
 		TodosTable,
+		LabelTodosTable,
 	}
 )
 
 func init() {
 	TodosTable.ForeignKeys[0].RefTable = PrioritiesTable
 	TodosTable.ForeignKeys[1].RefTable = StatusTable
+	LabelTodosTable.ForeignKeys[0].RefTable = LabelsTable
+	LabelTodosTable.ForeignKeys[1].RefTable = TodosTable
 }

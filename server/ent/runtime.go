@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"server/ent/label"
 	"server/ent/priority"
 	"server/ent/schema"
 	"server/ent/status"
@@ -14,6 +15,22 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	labelFields := schema.Label{}.Fields()
+	_ = labelFields
+	// labelDescValue is the schema descriptor for value field.
+	labelDescValue := labelFields[1].Descriptor()
+	// label.ValueValidator is a validator for the "value" field. It is called by the builders before save.
+	label.ValueValidator = labelDescValue.Validators[0].(func(string) error)
+	// labelDescCreatedAt is the schema descriptor for created_at field.
+	labelDescCreatedAt := labelFields[2].Descriptor()
+	// label.DefaultCreatedAt holds the default value on creation for the created_at field.
+	label.DefaultCreatedAt = labelDescCreatedAt.Default.(func() time.Time)
+	// labelDescUpdatedAt is the schema descriptor for updated_at field.
+	labelDescUpdatedAt := labelFields[3].Descriptor()
+	// label.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	label.DefaultUpdatedAt = labelDescUpdatedAt.Default.(func() time.Time)
+	// label.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	label.UpdateDefaultUpdatedAt = labelDescUpdatedAt.UpdateDefault.(func() time.Time)
 	priorityFields := schema.Priority{}.Fields()
 	_ = priorityFields
 	// priorityDescName is the schema descriptor for name field.

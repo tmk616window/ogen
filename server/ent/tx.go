@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Label is the client for interacting with the Label builders.
+	Label *LabelClient
 	// Priority is the client for interacting with the Priority builders.
 	Priority *PriorityClient
 	// Status is the client for interacting with the Status builders.
@@ -149,6 +151,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Label = NewLabelClient(tx.config)
 	tx.Priority = NewPriorityClient(tx.config)
 	tx.Status = NewStatusClient(tx.config)
 	tx.Todo = NewTodoClient(tx.config)
@@ -161,7 +164,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Priority.QueryXXX(), the query will be executed
+// applies a query, for example: Label.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.
