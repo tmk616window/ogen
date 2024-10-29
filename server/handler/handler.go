@@ -19,16 +19,17 @@ func NewHandler(u usecase.UsecaseInterface) *handler {
 	}
 }
 
-func (h *handler) TodosGet(ctx context.Context, req *ogen.TodoInput) ([]ogen.Todo, error) {
+func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]ogen.Todo, error) {
+
 	todos, err := h.Usecase.TodosGet(ctx, &usecase.Input{
-		Limit:  req.Limit,
-		Offset: req.Offset,
-		WhereInput: usecase.WhereInput{
-			Title:       req.WhereInput.Value.Title.Value,
-			Description: req.WhereInput.Value.Description.Value,
-			Labels:      req.WhereInput.Value.Labels,
-			Status:      req.WhereInput.Value.Status.Value,
-		},
+		Limit:  params.Limit.Value,
+		Offset: params.Offset.Value,
+		// WhereInput: usecase.WhereInput{
+		// 	Title:       req.WhereInput.Value.Title.Value,
+		// 	Description: req.WhereInput.Value.Description.Value,
+		// 	Labels:      req.WhereInput.Value.Labels,
+		// 	Status:      req.WhereInput.Value.Status.Value,
+		// },
 	})
 	if err != nil {
 		return nil, h.NewError(ctx, err)

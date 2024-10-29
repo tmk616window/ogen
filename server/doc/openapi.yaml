@@ -11,12 +11,21 @@ paths:
   /todos:
     get:
       summary: Get all todo items
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/TodoInput"
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+          required: false
+          description: The number of items to return
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          required: false
+          description: The number of items to skip before starting to collect the result set
       responses:
         "200":
           description: A list of todo items
@@ -117,30 +126,6 @@ components:
         - priority
         - status
         - createdAt
-
-    TodoInput:
-      type: object
-      properties:
-        limit:
-          type: integer
-        offset:
-          type: integer
-        whereInput:
-          type: object
-          properties:
-            title:
-              type: string
-            description:
-              type: string
-            labels:
-              type: array
-              items:
-                type: string
-            status:
-              type: string
-      required:
-        - limit
-        - offset
 
     CreateTodoInput:
       type: object

@@ -15,6 +15,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/uri"
 )
@@ -32,7 +33,7 @@ type Invoker interface {
 	// Get all todo items.
 	//
 	// GET /todos
-	TodosGet(ctx context.Context, request *TodoInput) ([]Todo, error)
+	TodosGet(ctx context.Context, params TodosGetParams) ([]Todo, error)
 }
 
 // Client implements OAS client.
@@ -166,12 +167,12 @@ func (c *Client) sendTodoPost(ctx context.Context, request *CreateTodoInput) (re
 // Get all todo items.
 //
 // GET /todos
-func (c *Client) TodosGet(ctx context.Context, request *TodoInput) ([]Todo, error) {
-	res, err := c.sendTodosGet(ctx, request)
+func (c *Client) TodosGet(ctx context.Context, params TodosGetParams) ([]Todo, error) {
+	res, err := c.sendTodosGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendTodosGet(ctx context.Context, request *TodoInput) (res []Todo, err error) {
+func (c *Client) sendTodosGet(ctx context.Context, params TodosGetParams) (res []Todo, err error) {
 	otelAttrs := []attribute.KeyValue{
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/todos"),
@@ -210,13 +211,48 @@ func (c *Client) sendTodosGet(ctx context.Context, request *TodoInput) (res []To
 	pathParts[0] = "/todos"
 	uri.AddPathParts(u, pathParts[:]...)
 
+	stage = "EncodeQueryParams"
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "limit" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "limit",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Limit.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
+		// Encode "offset" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "offset",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Offset.Get(); ok {
+				return e.EncodeValue(conv.IntToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
 	stage = "EncodeRequest"
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeTodosGetRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
 	}
 
 	stage = "SendRequest"

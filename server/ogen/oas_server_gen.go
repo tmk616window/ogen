@@ -19,7 +19,7 @@ type Handler interface {
 	// Get all todo items.
 	//
 	// GET /todos
-	TodosGet(ctx context.Context, req *TodoInput) ([]Todo, error)
+	TodosGet(ctx context.Context, params TodosGetParams) ([]Todo, error)
 	// NewError creates *ErrorResponseStatusCode from error returned by handler.
 	//
 	// Used for common default response.

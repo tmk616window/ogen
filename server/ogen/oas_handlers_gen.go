@@ -188,21 +188,16 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 			ID:   "",
 		}
 	)
-	request, close, err := s.decodeTodosGetRequest(r)
+	params, err := decodeTodosGetParams(args, argsEscaped, r)
 	if err != nil {
-		err = &ogenerrors.DecodeRequestError{
+		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
 			Err:              err,
 		}
-		defer recordError("DecodeRequest", err)
+		defer recordError("DecodeParams", err)
 		s.cfg.ErrorHandler(ctx, w, r, err)
 		return
 	}
-	defer func() {
-		if err := close(); err != nil {
-			recordError("CloseRequest", err)
-		}
-	}()
 
 	var response []Todo
 	if m := s.cfg.Middleware; m != nil {
@@ -211,14 +206,23 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 			OperationName:    "TodosGet",
 			OperationSummary: "Get all todo items",
 			OperationID:      "",
-			Body:             request,
-			Params:           middleware.Parameters{},
-			Raw:              r,
+			Body:             nil,
+			Params: middleware.Parameters{
+				{
+					Name: "limit",
+					In:   "query",
+				}: params.Limit,
+				{
+					Name: "offset",
+					In:   "query",
+				}: params.Offset,
+			},
+			Raw: r,
 		}
 
 		type (
-			Request  = *TodoInput
-			Params   = struct{}
+			Request  = struct{}
+			Params   = TodosGetParams
 			Response = []Todo
 		)
 		response, err = middleware.HookMiddleware[
@@ -228,14 +232,14 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 		](
 			m,
 			mreq,
-			nil,
+			unpackTodosGetParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.TodosGet(ctx, request)
+				response, err = s.h.TodosGet(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.TodosGet(ctx, request)
+		response, err = s.h.TodosGet(ctx, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*ErrorResponseStatusCode](err); ok {

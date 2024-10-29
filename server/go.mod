@@ -9,6 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/ogen-go/ogen v1.4.1
+	github.com/rs/cors v1.11.1
 	github.com/samber/lo v1.47.0
 	go.opentelemetry.io/otel v1.31.0
 	go.opentelemetry.io/otel/metric v1.31.0
