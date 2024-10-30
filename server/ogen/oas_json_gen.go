@@ -24,38 +24,28 @@ func (s *CreateTodoInput) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *CreateTodoInput) encodeFields(e *jx.Encoder) {
 	{
-		if s.Title.Set {
-			e.FieldStart("title")
-			s.Title.Encode(e)
-		}
+		e.FieldStart("title")
+		e.Str(s.Title)
 	}
 	{
-		if s.Description.Set {
-			e.FieldStart("description")
-			s.Description.Encode(e)
-		}
+		e.FieldStart("description")
+		e.Str(s.Description)
 	}
 	{
-		if s.LabelIDs != nil {
-			e.FieldStart("labelIDs")
-			e.ArrStart()
-			for _, elem := range s.LabelIDs {
-				e.Int(elem)
-			}
-			e.ArrEnd()
+		e.FieldStart("labelIDs")
+		e.ArrStart()
+		for _, elem := range s.LabelIDs {
+			e.Int(elem)
 		}
+		e.ArrEnd()
 	}
 	{
-		if s.PriorityID.Set {
-			e.FieldStart("priorityID")
-			s.PriorityID.Encode(e)
-		}
+		e.FieldStart("priorityID")
+		e.Int(s.PriorityID)
 	}
 	{
-		if s.StatusID.Set {
-			e.FieldStart("statusID")
-			s.StatusID.Encode(e)
-		}
+		e.FieldStart("statusID")
+		e.Int(s.StatusID)
 	}
 }
 
@@ -72,13 +62,16 @@ func (s *CreateTodoInput) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode CreateTodoInput to nil")
 	}
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
 		case "title":
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.Title.Reset()
-				if err := s.Title.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Title = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -86,9 +79,11 @@ func (s *CreateTodoInput) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"title\"")
 			}
 		case "description":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				s.Description.Reset()
-				if err := s.Description.Decode(d); err != nil {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -96,6 +91,7 @@ func (s *CreateTodoInput) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
 		case "labelIDs":
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				s.LabelIDs = make([]int, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -115,9 +111,11 @@ func (s *CreateTodoInput) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"labelIDs\"")
 			}
 		case "priorityID":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				s.PriorityID.Reset()
-				if err := s.PriorityID.Decode(d); err != nil {
+				v, err := d.Int()
+				s.PriorityID = int(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -125,9 +123,11 @@ func (s *CreateTodoInput) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"priorityID\"")
 			}
 		case "statusID":
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				s.StatusID.Reset()
-				if err := s.StatusID.Decode(d); err != nil {
+				v, err := d.Int()
+				s.StatusID = int(v)
+				if err != nil {
 					return err
 				}
 				return nil
@@ -140,6 +140,38 @@ func (s *CreateTodoInput) Decode(d *jx.Decoder) error {
 		return nil
 	}); err != nil {
 		return errors.Wrap(err, "decode CreateTodoInput")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00011111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfCreateTodoInput) {
+					name = jsonFieldsNameOfCreateTodoInput[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
 
 	return nil
@@ -400,41 +432,6 @@ func (s OptDateTime) MarshalJSON() ([]byte, error) {
 func (s *OptDateTime) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d, json.DecodeDateTime)
-}
-
-// Encode encodes int as json.
-func (o OptInt) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	e.Int(int(o.Value))
-}
-
-// Decode decodes int from json.
-func (o *OptInt) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptInt to nil")
-	}
-	o.Set = true
-	v, err := d.Int()
-	if err != nil {
-		return err
-	}
-	o.Value = int(v)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptInt) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptInt) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
 }
 
 // Encode encodes string as json.

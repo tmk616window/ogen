@@ -62,10 +62,10 @@ func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]o
 
 func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*ogen.Todo, error) {
 	todo, err := h.Usecase.CreateTodo(ctx, &usecase.CreateTodo{
-		Title:       req.Title.Value,
-		Description: req.Description.Value,
-		StatusID:    req.StatusID.Value,
-		PriorityID:  req.PriorityID.Value,
+		Title:       req.Title,
+		Description: req.Description,
+		StatusID:    req.StatusID,
+		PriorityID:  req.PriorityID,
 	}, req.LabelIDs)
 	if err != nil {
 		return nil, h.NewError(ctx, err)

@@ -13,20 +13,20 @@ func (s *ErrorResponseStatusCode) Error() string {
 
 // Ref: #/components/schemas/CreateTodoInput
 type CreateTodoInput struct {
-	Title       OptString `json:"title"`
-	Description OptString `json:"description"`
-	LabelIDs    []int     `json:"labelIDs"`
-	PriorityID  OptInt    `json:"priorityID"`
-	StatusID    OptInt    `json:"statusID"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	LabelIDs    []int  `json:"labelIDs"`
+	PriorityID  int    `json:"priorityID"`
+	StatusID    int    `json:"statusID"`
 }
 
 // GetTitle returns the value of Title.
-func (s *CreateTodoInput) GetTitle() OptString {
+func (s *CreateTodoInput) GetTitle() string {
 	return s.Title
 }
 
 // GetDescription returns the value of Description.
-func (s *CreateTodoInput) GetDescription() OptString {
+func (s *CreateTodoInput) GetDescription() string {
 	return s.Description
 }
 
@@ -36,22 +36,22 @@ func (s *CreateTodoInput) GetLabelIDs() []int {
 }
 
 // GetPriorityID returns the value of PriorityID.
-func (s *CreateTodoInput) GetPriorityID() OptInt {
+func (s *CreateTodoInput) GetPriorityID() int {
 	return s.PriorityID
 }
 
 // GetStatusID returns the value of StatusID.
-func (s *CreateTodoInput) GetStatusID() OptInt {
+func (s *CreateTodoInput) GetStatusID() int {
 	return s.StatusID
 }
 
 // SetTitle sets the value of Title.
-func (s *CreateTodoInput) SetTitle(val OptString) {
+func (s *CreateTodoInput) SetTitle(val string) {
 	s.Title = val
 }
 
 // SetDescription sets the value of Description.
-func (s *CreateTodoInput) SetDescription(val OptString) {
+func (s *CreateTodoInput) SetDescription(val string) {
 	s.Description = val
 }
 
@@ -61,12 +61,12 @@ func (s *CreateTodoInput) SetLabelIDs(val []int) {
 }
 
 // SetPriorityID sets the value of PriorityID.
-func (s *CreateTodoInput) SetPriorityID(val OptInt) {
+func (s *CreateTodoInput) SetPriorityID(val int) {
 	s.PriorityID = val
 }
 
 // SetStatusID sets the value of StatusID.
-func (s *CreateTodoInput) SetStatusID(val OptInt) {
+func (s *CreateTodoInput) SetStatusID(val int) {
 	s.StatusID = val
 }
 
