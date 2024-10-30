@@ -2,7 +2,7 @@ package usecase
 
 import (
 	"context"
-	"server/db"
+	"server/domain/repository"
 	"server/ent"
 	"time"
 
@@ -49,10 +49,10 @@ type WhereInput struct {
 }
 
 func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
-	todos, err := u.db.AllTodos(ctx, &db.Input{
+	todos, err := u.TodoRepositoryInterface.AllTodos(ctx, &repository.Input{
 		Limit:  input.Limit,
 		Offset: input.Offset,
-		WhereInput: db.WhereInput{
+		WhereInput: repository.WhereInput{
 			Title:       input.WhereInput.Title,
 			Description: input.WhereInput.Description,
 			Labels:      input.WhereInput.Labels,

@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"server/config"
+	"server/domain/model"
+	"server/domain/repository"
 	"server/ent"
 	"server/ent/label"
 	"server/ent/predicate"
@@ -17,37 +19,11 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-type ClientInterface interface {
-	AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error)
-	CreateTodo(ctx context.Context, input *CreateTodoInput) (*ent.Todo, error)
-}
-
 type client struct {
 	client *ent.Client
 }
 
-type Input struct {
-	Limit      int
-	Offset     int
-	WhereInput WhereInput
-}
-
-type WhereInput struct {
-	Title       string
-	Description string
-	Labels      []string
-	Status      string
-}
-
-type CreateTodoInput struct {
-	Title       string
-	Description string
-	LabelsID    []int
-	PriorityID  int
-	StatusID    int
-}
-
-func New(c config.Database) (ClientInterface, error) {
+func New(c config.Database) (repository.TodoRepositoryInterface, error) {
 	databaseUrl := fmt.Sprintf("postgresql://%s:%s@%s/%s", c.User, c.Password, c.Host, c.Name)
 
 	db, err := sql.Open("pgx", databaseUrl)
@@ -70,7 +46,7 @@ func (c *client) GetClient() *ent.Client {
 	return c.client
 }
 
-func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error) {
+func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.Todo, error) {
 	todoWhere := []predicate.Todo{
 		columnFuzzySearch(todo.FieldDescription, input.WhereInput.Description),
 		columnFuzzySearch(todo.FieldTitle, input.WhereInput.Title),
@@ -106,7 +82,7 @@ func (c *client) AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error
 	return todos, nil
 }
 
-func (c *client) CreateTodo(ctx context.Context, input *CreateTodoInput) (*ent.Todo, error) {
+func (c *client) CreateTodo(ctx context.Context, td *model.Todo, labelIDs []int) (*ent.Todo, error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -114,11 +90,11 @@ func (c *client) CreateTodo(ctx context.Context, input *CreateTodoInput) (*ent.T
 
 	t, err := tx.Todo.
 		Create().
-		SetTitle(input.Title).
-		SetDescription(input.Description).
-		AddLabelIDs(input.LabelsID...).
-		SetStatusID(input.StatusID).
-		SetPriorityID(input.PriorityID).
+		SetTitle(td.Title).
+		SetDescription(td.Description).
+		AddLabelIDs(labelIDs...).
+		SetStatusID(td.StatusID).
+		SetPriorityID(td.PriorityID).
 		Save(ctx)
 	if err != nil {
 		tx.Rollback()

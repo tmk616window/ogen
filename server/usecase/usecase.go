@@ -2,18 +2,18 @@ package usecase
 
 import (
 	"context"
-	"server/db"
+	"server/domain/repository"
 )
 
 type usecase struct {
-	db db.ClientInterface
+	TodoRepositoryInterface repository.TodoRepositoryInterface
 }
 
 type UsecaseInterface interface {
 	TodosGet(ctx context.Context, input *Input) ([]*Todo, error)
-	CreateTodo(ctx context.Context, input *CreateTodoInput) (*Todo, error)
+	CreateTodo(ctx context.Context, todo *CreateTodo, labelIDs []int) (*Todo, error)
 }
 
-func NewUsecase(dbc db.ClientInterface) UsecaseInterface {
-	return &usecase{dbc}
+func NewUsecase(rtri repository.TodoRepositoryInterface) UsecaseInterface {
+	return &usecase{rtri}
 }

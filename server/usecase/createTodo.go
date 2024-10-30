@@ -2,28 +2,27 @@ package usecase
 
 import (
 	"context"
-	"server/db"
+	"server/domain/model"
 	"server/ent"
 
 	"github.com/samber/lo"
 )
 
-type CreateTodoInput struct {
+type CreateTodo struct {
 	Title       string
 	Description string
-	LabelIDs    []int
 	PriorityID  int
 	StatusID    int
 }
 
-func (u *usecase) CreateTodo(ctx context.Context, input *CreateTodoInput) (*Todo, error) {
-	todo, err := u.db.CreateTodo(ctx, &db.CreateTodoInput{
-		Title:       input.Title,
-		Description: input.Description,
-		LabelsID:    input.LabelIDs,
-		StatusID:    input.StatusID,
-		PriorityID:  input.PriorityID,
-	})
+func (u *usecase) CreateTodo(ctx context.Context, t *CreateTodo, labelIDs []int) (*Todo, error) {
+	todo, err := u.TodoRepositoryInterface.CreateTodo(ctx, &model.Todo{
+		Title:       t.Title,
+		Description: t.Description,
+		StatusID:    t.StatusID,
+		PriorityID:  t.PriorityID,
+	},
+		labelIDs)
 	if err != nil {
 		return nil, err
 	}
