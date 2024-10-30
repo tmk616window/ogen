@@ -11,7 +11,7 @@ import (
 	"server/ent/status"
 	"server/ent/todo"
 
-	entsql "entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 )
 
 func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.Todo, error) {
@@ -72,7 +72,7 @@ func (c *client) CreateTodo(ctx context.Context, td *model.Todo, labelIDs []int)
 	tt, err := tx.Todo.
 		Query().
 		Where(
-			entsql.FieldEQ(todo.FieldID, t.ID),
+			sql.FieldEQ(todo.FieldID, t.ID),
 		).
 		WithStatus().
 		WithPriority().
@@ -88,8 +88,8 @@ func (c *client) CreateTodo(ctx context.Context, td *model.Todo, labelIDs []int)
 	return tt, nil
 }
 
-func columnFuzzySearch(column string, value string) func(s *entsql.Selector) {
-	return func(s *entsql.Selector) {
-		s.Where(entsql.Like(column, fmt.Sprintf("%%%s%%", value)))
+func columnFuzzySearch(column string, value string) func(s *sql.Selector) {
+	return func(s *sql.Selector) {
+		s.Where(sql.Like(column, fmt.Sprintf("%%%s%%", value)))
 	}
 }
