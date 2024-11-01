@@ -14,7 +14,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeTodoPostResponse(resp *http.Response) (res *Todo, _ error) {
+func decodeTodoPostResponse(resp *http.Response) (res *CreateTodoResponse, _ error) {
 	switch resp.StatusCode {
 	case 201:
 		// Code 201.
@@ -30,7 +30,7 @@ func decodeTodoPostResponse(resp *http.Response) (res *Todo, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response Todo
+			var response CreateTodoResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

@@ -21,5 +21,5 @@ type WhereInput struct {
 
 type TodoRepositoryInterface interface {
 	AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error)
-	CreateTodo(ctx context.Context, todo *model.Todo, labelIDs []int) (*ent.Todo, error)
+	CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*ent.Todo, error)
 }

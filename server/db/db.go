@@ -39,3 +39,9 @@ func New(c config.Database) (repository.TodoRepositoryInterface, error) {
 func (c *client) GetClient() *ent.Client {
 	return c.client
 }
+
+func columnFuzzySearch(column string, value string) func(s *entsql.Selector) {
+	return func(s *entsql.Selector) {
+		s.Where(entsql.Like(column, fmt.Sprintf("%%%s%%", value)))
+	}
+}

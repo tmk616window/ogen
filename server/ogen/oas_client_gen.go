@@ -27,7 +27,7 @@ type Invoker interface {
 	// Create a new todo item.
 	//
 	// POST /todo
-	TodoPost(ctx context.Context, request *CreateTodoInput) (*Todo, error)
+	TodoPost(ctx context.Context, request *CreateTodoInput) (*CreateTodoResponse, error)
 	// TodosGet invokes GET /todos operation.
 	//
 	// Get all todo items.
@@ -93,12 +93,12 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 // Create a new todo item.
 //
 // POST /todo
-func (c *Client) TodoPost(ctx context.Context, request *CreateTodoInput) (*Todo, error) {
+func (c *Client) TodoPost(ctx context.Context, request *CreateTodoInput) (*CreateTodoResponse, error) {
 	res, err := c.sendTodoPost(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendTodoPost(ctx context.Context, request *CreateTodoInput) (res *Todo, err error) {
+func (c *Client) sendTodoPost(ctx context.Context, request *CreateTodoInput) (res *CreateTodoResponse, err error) {
 	otelAttrs := []attribute.KeyValue{
 		semconv.HTTPRequestMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/todo"),

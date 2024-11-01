@@ -70,6 +70,21 @@ func (s *CreateTodoInput) SetStatusID(val int) {
 	s.StatusID = val
 }
 
+// Ref: #/components/schemas/CreateTodoResponse
+type CreateTodoResponse struct {
+	ID int `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *CreateTodoResponse) GetID() int {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *CreateTodoResponse) SetID(val int) {
+	s.ID = val
+}
+
 // Ref: #/components/schemas/ErrorResponse
 type ErrorResponse struct {
 	Error string `json:"error"`

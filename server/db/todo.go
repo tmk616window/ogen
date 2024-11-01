@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"server/domain/model"
 	"server/domain/repository"
 	"server/ent"
@@ -10,8 +9,6 @@ import (
 	"server/ent/predicate"
 	"server/ent/status"
 	"server/ent/todo"
-
-	"entgo.io/ent/dialect/sql"
 )
 
 func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.Todo, error) {
@@ -50,34 +47,20 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.
 	return todos, nil
 }
 
-func (c *client) CreateTodo(ctx context.Context, td *model.Todo, labelIDs []int) (*ent.Todo, error) {
+func (c *client) CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*ent.Todo, error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	t, err := tx.Todo.
+	todo, err := tx.Todo.
 		Create().
-		SetTitle(td.Title).
-		SetDescription(td.Description).
+		SetTitle(mt.Title).
+		SetDescription(mt.Description).
 		AddLabelIDs(labelIDs...).
-		SetStatusID(td.StatusID).
-		SetPriorityID(td.PriorityID).
+		SetStatusID(mt.StatusID).
+		SetPriorityID(mt.PriorityID).
 		Save(ctx)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	tt, err := tx.Todo.
-		Query().
-		Where(
-			sql.FieldEQ(todo.FieldID, t.ID),
-		).
-		WithStatus().
-		WithPriority().
-		WithLabels().
-		Only(ctx)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -85,11 +68,5 @@ func (c *client) CreateTodo(ctx context.Context, td *model.Todo, labelIDs []int)
 
 	tx.Commit()
 
-	return tt, nil
-}
-
-func columnFuzzySearch(column string, value string) func(s *sql.Selector) {
-	return func(s *sql.Selector) {
-		s.Where(sql.Like(column, fmt.Sprintf("%%%s%%", value)))
-	}
+	return todo, nil
 }

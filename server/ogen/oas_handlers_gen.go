@@ -82,7 +82,7 @@ func (s *Server) handleTodoPostRequest(args [0]string, argsEscaped bool, w http.
 		}
 	}()
 
-	var response *Todo
+	var response *CreateTodoResponse
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -97,7 +97,7 @@ func (s *Server) handleTodoPostRequest(args [0]string, argsEscaped bool, w http.
 		type (
 			Request  = *CreateTodoInput
 			Params   = struct{}
-			Response = *Todo
+			Response = *CreateTodoResponse
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
