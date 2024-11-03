@@ -27,6 +27,13 @@ paths:
           required: false
           description: The number of items to skip before starting to collect the result set
         - in: query
+          name: labelIDs
+          schema:
+            type: array
+            items:
+              type: integer
+          required: false
+        - in: query
           name: whereTodoInput
           schema:
             $ref: "#/components/schemas/WhereTodoInput"
@@ -184,10 +191,6 @@ components:
           type: string
         description:
           type: string
-        labelIDs:
-          type: array
-          items:
-            type: integer
         priorityID:
           type: integer
         statusID:

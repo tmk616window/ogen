@@ -320,6 +320,10 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 					In:   "query",
 				}: params.Offset,
 				{
+					Name: "labelIDs",
+					In:   "query",
+				}: params.LabelIDs,
+				{
 					Name: "whereTodoInput",
 					In:   "query",
 				}: params.WhereTodoInput,

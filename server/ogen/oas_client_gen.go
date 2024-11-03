@@ -325,6 +325,32 @@ func (c *Client) sendTodosGet(ctx context.Context, params TodosGetParams) (res [
 		}
 	}
 	{
+		// Encode "labelIDs" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "labelIDs",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if params.LabelIDs != nil {
+				return e.EncodeArray(func(e uri.Encoder) error {
+					for i, item := range params.LabelIDs {
+						if err := func() error {
+							return e.EncodeValue(conv.IntToString(item))
+						}(); err != nil {
+							return errors.Wrapf(err, "[%d]", i)
+						}
+					}
+					return nil
+				})
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	{
 		// Encode "whereTodoInput" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
 			Name:    "whereTodoInput",

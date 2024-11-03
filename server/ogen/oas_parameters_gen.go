@@ -19,7 +19,8 @@ type TodosGetParams struct {
 	// The number of items to return.
 	Limit OptInt
 	// The number of items to skip before starting to collect the result set.
-	Offset OptInt
+	Offset   OptInt
+	LabelIDs []int
 	// Criteria to filter todo items.
 	WhereTodoInput OptWhereTodoInput
 }
@@ -41,6 +42,15 @@ func unpackTodosGetParams(packed middleware.Parameters) (params TodosGetParams) 
 		}
 		if v, ok := packed[key]; ok {
 			params.Offset = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "labelIDs",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.LabelIDs = v.([]int)
 		}
 	}
 	{
@@ -183,6 +193,49 @@ func decodeTodosGetParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: labelIDs.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "labelIDs",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				return d.DecodeArray(func(d uri.Decoder) error {
+					var paramsDotLabelIDsVal int
+					if err := func() error {
+						val, err := d.DecodeValue()
+						if err != nil {
+							return err
+						}
+
+						c, err := conv.ToInt(val)
+						if err != nil {
+							return err
+						}
+
+						paramsDotLabelIDsVal = c
+						return nil
+					}(); err != nil {
+						return err
+					}
+					params.LabelIDs = append(params.LabelIDs, paramsDotLabelIDsVal)
+					return nil
+				})
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "labelIDs",
 			In:   "query",
 			Err:  err,
 		}
