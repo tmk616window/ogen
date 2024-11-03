@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"server/domain/model"
-	"server/ent"
 )
 
 type Input struct {
@@ -20,7 +19,14 @@ type WhereInput struct {
 	StatusID    int
 }
 
+type SearchResult struct {
+	Labels     []*model.Label
+	Statuses   []*model.Status
+	Priorities []*model.Priority
+}
+
 type TodoRepositoryInterface interface {
-	AllTodos(ctx context.Context, input *Input) ([]*ent.Todo, error)
-	CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*ent.Todo, error)
+	AllTodos(ctx context.Context, input *Input) ([]*model.Todo, error)
+	CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*model.Todo, error)
+	Search(ctx context.Context) (SearchResult, error)
 }

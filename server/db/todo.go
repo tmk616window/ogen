@@ -11,7 +11,7 @@ import (
 	"server/ent/todo"
 )
 
-func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.Todo, error) {
+func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*model.Todo, error) {
 	todoWhere := []predicate.Todo{
 		columnFuzzySearch(todo.FieldDescription, input.WhereInput.Description),
 		columnFuzzySearch(todo.FieldTitle, input.WhereInput.Title),
@@ -47,7 +47,7 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.
 	return todos, nil
 }
 
-func (c *client) CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*ent.Todo, error) {
+func (c *client) CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*model.Todo, error) {
 	tx, err := c.client.Tx(ctx)
 	if err != nil {
 		return nil, err
@@ -69,4 +69,27 @@ func (c *client) CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int)
 	tx.Commit()
 
 	return todo, nil
+}
+
+func (c *client) Search(ctx context.Context) (repository.SearchResult, error) {
+	labels, err := c.client.Label.Query().All(ctx)
+	if err != nil {
+		return repository.SearchResult{}, err
+	}
+
+	status, err := c.client.Status.Query().All(ctx)
+	if err != nil {
+		return repository.SearchResult{}, err
+	}
+
+	priorities, err := c.client.Priority.Query().All(ctx)
+	if err != nil {
+		return repository.SearchResult{}, err
+	}
+
+	return repository.SearchResult{
+		Labels:     labels,
+		Statuses:   status,
+		Priorities: priorities,
+	}, nil
 }

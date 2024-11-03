@@ -78,10 +78,30 @@ func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*oge
 }
 
 func (h *handler) SearchGet(ctx context.Context) (*ogen.ResponseSearchTodo, error) {
+	search, err := h.Usecase.Search(ctx)
+	if err != nil {
+		return nil, h.NewError(ctx, err)
+	}
+
 	return &ogen.ResponseSearchTodo{
-		Labels:     []ogen.Label{},
-		Priorities: []ogen.Priority{},
-		Status:     []ogen.Status{},
+		Labels: lo.Map(search.Labels, func(label *usecase.Label, _ int) ogen.Label {
+			return ogen.Label{
+				ID:    label.ID,
+				Value: label.Value,
+			}
+		}),
+		Status: lo.Map(search.Statuses, func(status *usecase.Status, _ int) ogen.Status {
+			return ogen.Status{
+				ID:    status.ID,
+				Value: status.Value,
+			}
+		}),
+		Priorities: lo.Map(search.Priorities, func(priority *usecase.Priority, _ int) ogen.Priority {
+			return ogen.Priority{
+				ID:   priority.ID,
+				Name: priority.Name,
+			}
+		}),
 	}, nil
 }
 

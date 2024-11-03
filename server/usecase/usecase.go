@@ -12,6 +12,7 @@ type usecase struct {
 type UsecaseInterface interface {
 	TodosGet(ctx context.Context, input *Input) ([]*Todo, error)
 	CreateTodo(ctx context.Context, t *CreateTodo, labelIDs []int) (*Todo, error)
+	Search(ctx context.Context) (*SearchResult, error)
 }
 
 func NewUsecase(rtri repository.TodoRepositoryInterface) UsecaseInterface {
