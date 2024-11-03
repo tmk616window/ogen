@@ -679,6 +679,166 @@ func (s *Priority) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *ResponseSearchTodo) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *ResponseSearchTodo) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("labels")
+		e.ArrStart()
+		for _, elem := range s.Labels {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("priorities")
+		e.ArrStart()
+		for _, elem := range s.Priorities {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("status")
+		e.ArrStart()
+		for _, elem := range s.Status {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfResponseSearchTodo = [3]string{
+	0: "labels",
+	1: "priorities",
+	2: "status",
+}
+
+// Decode decodes ResponseSearchTodo from json.
+func (s *ResponseSearchTodo) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode ResponseSearchTodo to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "labels":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.Labels = make([]Label, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Label
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Labels = append(s.Labels, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"labels\"")
+			}
+		case "priorities":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Priorities = make([]Priority, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Priority
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Priorities = append(s.Priorities, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"priorities\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.Status = make([]Status, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Status
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Status = append(s.Status, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode ResponseSearchTodo")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfResponseSearchTodo) {
+					name = jsonFieldsNameOfResponseSearchTodo[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *ResponseSearchTodo) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *ResponseSearchTodo) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *Status) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)

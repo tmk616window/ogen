@@ -13,6 +13,15 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// SearchGet implements GET /search operation.
+//
+// Search for todo items.
+//
+// GET /search
+func (UnimplementedHandler) SearchGet(ctx context.Context) (r *ResponseSearchTodo, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // TodoPost implements POST /todo operation.
 //
 // Create a new todo item.

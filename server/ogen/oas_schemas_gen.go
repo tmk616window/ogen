@@ -316,6 +316,43 @@ func (s *Priority) SetName(val string) {
 	s.Name = val
 }
 
+// Ref: #/components/schemas/ResponseSearchTodo
+type ResponseSearchTodo struct {
+	Labels     []Label    `json:"labels"`
+	Priorities []Priority `json:"priorities"`
+	Status     []Status   `json:"status"`
+}
+
+// GetLabels returns the value of Labels.
+func (s *ResponseSearchTodo) GetLabels() []Label {
+	return s.Labels
+}
+
+// GetPriorities returns the value of Priorities.
+func (s *ResponseSearchTodo) GetPriorities() []Priority {
+	return s.Priorities
+}
+
+// GetStatus returns the value of Status.
+func (s *ResponseSearchTodo) GetStatus() []Status {
+	return s.Status
+}
+
+// SetLabels sets the value of Labels.
+func (s *ResponseSearchTodo) SetLabels(val []Label) {
+	s.Labels = val
+}
+
+// SetPriorities sets the value of Priorities.
+func (s *ResponseSearchTodo) SetPriorities(val []Priority) {
+	s.Priorities = val
+}
+
+// SetStatus sets the value of Status.
+func (s *ResponseSearchTodo) SetStatus(val []Status) {
+	s.Status = val
+}
+
 // Ref: #/components/schemas/Status
 type Status struct {
 	ID    int    `json:"id"`

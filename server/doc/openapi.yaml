@@ -26,6 +26,11 @@ paths:
             minimum: 0
           required: false
           description: The number of items to skip before starting to collect the result set
+        # - in: query
+        #   name: whereTodoInput
+        #   schema:
+        #     $ref: "#/components/schemas/WhereTodoInput"
+        #   description: Criteria to filter todo items
       responses:
         "200":
           description: A list of todo items
@@ -35,7 +40,23 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
-        default: # default エラーレスポンスを追加
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /search:
+    get:
+      summary: Search for todo items
+      responses:
+        "200":
+          description: A list of todo items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseSearchTodo"
+        default:
           description: Unexpected error
           content:
             application/json:
@@ -127,6 +148,26 @@ components:
         - status
         - createdAt
 
+    ResponseSearchTodo:
+      type: object
+      properties:
+        labels:
+          type: array
+          items:
+            $ref: "#/components/schemas/Label"
+        priorities:
+          type: array
+          items:
+            $ref: "#/components/schemas/Priority"
+        status:
+          type: array
+          items:
+            $ref: "#/components/schemas/Status"
+      required:
+        - labels
+        - priorities
+        - status
+
     CreateTodoResponse:
       type: object
       properties:
@@ -134,6 +175,22 @@ components:
           type: integer
       required:
         - id
+
+    WhereTodoInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        labelIDs:
+          type: array
+          items:
+            type: integer
+        priorityID:
+          type: integer
+        statusID:
+          type: integer
 
     CreateTodoInput:
       type: object

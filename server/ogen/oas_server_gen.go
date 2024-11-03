@@ -8,6 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// SearchGet implements GET /search operation.
+	//
+	// Search for todo items.
+	//
+	// GET /search
+	SearchGet(ctx context.Context) (*ResponseSearchTodo, error)
 	// TodoPost implements POST /todo operation.
 	//
 	// Create a new todo item.
