@@ -38,25 +38,25 @@ type Label struct {
 type Input struct {
 	Limit      int
 	Offset     int
+	LabelIDs   []int
 	WhereInput WhereInput
 }
 
 type WhereInput struct {
 	Title       string
 	Description string
-	LabelIDs    []int
 	PriorityID  int
 	StatusID    int
 }
 
 func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 	todos, err := u.TodoRepositoryInterface.AllTodos(ctx, &repository.Input{
-		Limit:  input.Limit,
-		Offset: input.Offset,
+		Limit:    input.Limit,
+		Offset:   input.Offset,
+		LabelIDs: input.LabelIDs,
 		WhereInput: repository.WhereInput{
 			Title:       input.WhereInput.Title,
 			Description: input.WhereInput.Description,
-			LabelIDs:    input.WhereInput.LabelIDs,
 			StatusID:    input.WhereInput.StatusID,
 		},
 	})

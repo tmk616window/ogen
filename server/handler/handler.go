@@ -22,14 +22,14 @@ func NewHandler(u usecase.UsecaseInterface) *handler {
 func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]ogen.Todo, error) {
 
 	todos, err := h.Usecase.TodosGet(ctx, &usecase.Input{
-		Limit:  params.Limit.Value,
-		Offset: params.Offset.Value,
+		Limit:    params.Limit.Value,
+		Offset:   params.Offset.Value,
+		LabelIDs: params.LabelIDs,
 		WhereInput: usecase.WhereInput{
 			Title:       params.WhereTodoInput.Value.Title.Value,
 			Description: params.WhereTodoInput.Value.Description.Value,
-			// LabelIDs:    params.WhereTodoInput.Value.Labels,
-			PriorityID: params.WhereTodoInput.Value.PriorityID.Value,
-			StatusID:   params.WhereTodoInput.Value.StatusID.Value,
+			PriorityID:  params.WhereTodoInput.Value.PriorityID.Value,
+			StatusID:    params.WhereTodoInput.Value.StatusID.Value,
 		},
 	})
 	if err != nil {
@@ -74,6 +74,14 @@ func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*oge
 
 	return &ogen.CreateTodoResponse{
 		ID: todo.ID,
+	}, nil
+}
+
+func (h *handler) SearchGet(ctx context.Context) (*ogen.ResponseSearchTodo, error) {
+	return &ogen.ResponseSearchTodo{
+		Labels:     []ogen.Label{},
+		Priorities: []ogen.Priority{},
+		Status:     []ogen.Status{},
 	}, nil
 }
 

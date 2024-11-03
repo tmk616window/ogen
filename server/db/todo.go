@@ -21,8 +21,8 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.
 		todoWhere = append(todoWhere, todo.HasStatusWith(status.ID(input.WhereInput.StatusID)))
 	}
 
-	if len(input.WhereInput.LabelIDs) > 0 {
-		for _, labelValue := range input.WhereInput.LabelIDs {
+	if len(input.LabelIDs) > 0 {
+		for _, labelValue := range input.LabelIDs {
 			todoWhere = append(todoWhere, todo.HasLabelsWith(label.ID(labelValue)))
 		}
 	}

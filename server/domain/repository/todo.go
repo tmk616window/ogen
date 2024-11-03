@@ -9,13 +9,13 @@ import (
 type Input struct {
 	Limit      int
 	Offset     int
+	LabelIDs   []int
 	WhereInput WhereInput
 }
 
 type WhereInput struct {
 	Title       string
 	Description string
-	LabelIDs    []int
 	PriorityID  int
 	StatusID    int
 }
