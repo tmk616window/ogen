@@ -44,8 +44,9 @@ type Input struct {
 type WhereInput struct {
 	Title       string
 	Description string
-	Labels      []string
-	Status      string
+	LabelIDs    []int
+	PriorityID  int
+	StatusID    int
 }
 
 func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
@@ -55,8 +56,8 @@ func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 		WhereInput: repository.WhereInput{
 			Title:       input.WhereInput.Title,
 			Description: input.WhereInput.Description,
-			Labels:      input.WhereInput.Labels,
-			Status:      input.WhereInput.Status,
+			LabelIDs:    input.WhereInput.LabelIDs,
+			StatusID:    input.WhereInput.StatusID,
 		},
 	})
 	if err != nil {

@@ -26,11 +26,12 @@ paths:
             minimum: 0
           required: false
           description: The number of items to skip before starting to collect the result set
-        # - in: query
-        #   name: whereTodoInput
-        #   schema:
-        #     $ref: "#/components/schemas/WhereTodoInput"
-        #   description: Criteria to filter todo items
+        - in: query
+          name: whereTodoInput
+          schema:
+            $ref: "#/components/schemas/WhereTodoInput"
+          required: false
+          description: Criteria to filter todo items
       responses:
         "200":
           description: A list of todo items

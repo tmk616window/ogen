@@ -319,6 +319,10 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 					Name: "offset",
 					In:   "query",
 				}: params.Offset,
+				{
+					Name: "whereTodoInput",
+					In:   "query",
+				}: params.WhereTodoInput,
 			},
 			Raw: r,
 		}

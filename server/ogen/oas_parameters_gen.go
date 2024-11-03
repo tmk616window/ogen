@@ -20,6 +20,8 @@ type TodosGetParams struct {
 	Limit OptInt
 	// The number of items to skip before starting to collect the result set.
 	Offset OptInt
+	// Criteria to filter todo items.
+	WhereTodoInput OptWhereTodoInput
 }
 
 func unpackTodosGetParams(packed middleware.Parameters) (params TodosGetParams) {
@@ -39,6 +41,15 @@ func unpackTodosGetParams(packed middleware.Parameters) (params TodosGetParams) 
 		}
 		if v, ok := packed[key]; ok {
 			params.Offset = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "whereTodoInput",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.WhereTodoInput = v.(OptWhereTodoInput)
 		}
 	}
 	return params
@@ -172,6 +183,37 @@ func decodeTodosGetParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "offset",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: whereTodoInput.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "whereTodoInput",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+			Fields:  []uri.QueryParameterObjectField{{Name: "title", Required: false}, {Name: "description", Required: false}, {Name: "priorityID", Required: false}, {Name: "statusID", Required: false}},
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotWhereTodoInputVal WhereTodoInput
+				if err := func() error {
+					return paramsDotWhereTodoInputVal.DecodeURI(d)
+				}(); err != nil {
+					return err
+				}
+				params.WhereTodoInput.SetTo(paramsDotWhereTodoInputVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "whereTodoInput",
 			In:   "query",
 			Err:  err,
 		}

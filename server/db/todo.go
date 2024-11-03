@@ -17,13 +17,13 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*ent.
 		columnFuzzySearch(todo.FieldTitle, input.WhereInput.Title),
 	}
 
-	if input.WhereInput.Status != "" {
-		todoWhere = append(todoWhere, todo.HasStatusWith(status.Value(input.WhereInput.Status)))
+	if input.WhereInput.StatusID != 0 {
+		todoWhere = append(todoWhere, todo.HasStatusWith(status.ID(input.WhereInput.StatusID)))
 	}
 
-	if len(input.WhereInput.Labels) > 0 {
-		for _, labelValue := range input.WhereInput.Labels {
-			todoWhere = append(todoWhere, todo.HasLabelsWith(label.Value(labelValue)))
+	if len(input.WhereInput.LabelIDs) > 0 {
+		for _, labelValue := range input.WhereInput.LabelIDs {
+			todoWhere = append(todoWhere, todo.HasLabelsWith(label.ID(labelValue)))
 		}
 	}
 	todos, err := c.client.Todo.

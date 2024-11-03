@@ -15,8 +15,9 @@ type Input struct {
 type WhereInput struct {
 	Title       string
 	Description string
-	Labels      []string
-	Status      string
+	LabelIDs    []int
+	PriorityID  int
+	StatusID    int
 }
 
 type TodoRepositoryInterface interface {

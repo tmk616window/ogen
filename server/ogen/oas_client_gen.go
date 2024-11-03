@@ -324,6 +324,23 @@ func (c *Client) sendTodosGet(ctx context.Context, params TodosGetParams) (res [
 			return res, errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "whereTodoInput" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "whereTodoInput",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.WhereTodoInput.Get(); ok {
+				return val.EncodeURI(e)
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
 	u.RawQuery = q.Values().Encode()
 
 	stage = "EncodeRequest"

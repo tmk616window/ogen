@@ -24,12 +24,13 @@ func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]o
 	todos, err := h.Usecase.TodosGet(ctx, &usecase.Input{
 		Limit:  params.Limit.Value,
 		Offset: params.Offset.Value,
-		// WhereInput: usecase.WhereInput{
-		// 	Title:       req.WhereInput.Value.Title.Value,
-		// 	Description: req.WhereInput.Value.Description.Value,
-		// 	Labels:      req.WhereInput.Value.Labels,
-		// 	Status:      req.WhereInput.Value.Status.Value,
-		// },
+		WhereInput: usecase.WhereInput{
+			Title:       params.WhereTodoInput.Value.Title.Value,
+			Description: params.WhereTodoInput.Value.Description.Value,
+			// LabelIDs:    params.WhereTodoInput.Value.Labels,
+			PriorityID: params.WhereTodoInput.Value.PriorityID.Value,
+			StatusID:   params.WhereTodoInput.Value.StatusID.Value,
+		},
 	})
 	if err != nil {
 		return nil, h.NewError(ctx, err)
