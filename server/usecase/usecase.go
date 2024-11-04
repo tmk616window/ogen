@@ -10,7 +10,7 @@ type usecase struct {
 }
 
 type UsecaseInterface interface {
-	TodosGet(ctx context.Context, input *Input) ([]*Todo, error)
+	TodosGet(ctx context.Context, input *Input) (*TodosGet, error)
 	CreateTodo(ctx context.Context, t *CreateTodo, labelIDs []int) (*Todo, error)
 	Search(ctx context.Context) (*SearchResult, error)
 }

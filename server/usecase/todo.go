@@ -49,7 +49,12 @@ type WhereInput struct {
 	StatusID    int
 }
 
-func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
+type TodosGet struct {
+	Todos     []*Todo
+	PageCount int
+}
+
+func (u *usecase) TodosGet(ctx context.Context, input *Input) (*TodosGet, error) {
 	todos, err := u.TodoRepositoryInterface.AllTodos(ctx, &repository.Input{
 		Limit:    input.Limit,
 		Offset:   input.Offset,
@@ -65,27 +70,30 @@ func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 		return nil, err
 	}
 
-	return lo.Map(todos, func(todo *ent.Todo, _ int) *Todo {
-		return &Todo{
-			ID:          todo.ID,
-			Title:       todo.Title,
-			Description: todo.Description,
-			Labels: lo.Map(todo.Edges.Labels, func(label *ent.Label, _ int) Label { // Corrected function signature
-				return Label{
-					ID:    label.ID,
-					Value: label.Value,
-				}
-			}),
-			CreatedAt:  todo.CreatedAt,
-			FinishedAt: todo.FinishedAt,
-			Priority: Priority{
-				ID:   todo.Edges.Priority.ID,
-				Name: todo.Edges.Priority.Name,
-			},
-			Status: Status{
-				ID:    todo.Edges.Status.ID,
-				Value: todo.Edges.Status.Value,
-			},
-		}
-	}), nil
+	return &TodosGet{
+		Todos: lo.Map(todos.Todos, func(todo *ent.Todo, _ int) *Todo {
+			return &Todo{
+				ID:          todo.ID,
+				Title:       todo.Title,
+				Description: todo.Description,
+				Labels: lo.Map(todo.Edges.Labels, func(label *ent.Label, _ int) Label {
+					return Label{
+						ID:    label.ID,
+						Value: label.Value,
+					}
+				}),
+				CreatedAt:  todo.CreatedAt,
+				FinishedAt: todo.FinishedAt,
+				Priority: Priority{
+					ID:   todo.Edges.Priority.ID,
+					Name: todo.Edges.Priority.Name,
+				},
+				Status: Status{
+					ID:    todo.Edges.Status.ID,
+					Value: todo.Edges.Status.Value,
+				},
+			}
+		}),
+		PageCount: todos.PageCount,
+	}, nil
 }

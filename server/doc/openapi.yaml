@@ -72,6 +72,9 @@ paths:
                   pageCount:
                     type: integer
                     description: Total number of pages
+                required:
+                  - todoList
+                  - pageCount
         default:
           description: Unexpected error
           content:

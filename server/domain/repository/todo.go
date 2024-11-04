@@ -25,8 +25,13 @@ type SearchResult struct {
 	Priorities []*model.Priority
 }
 
+type TodoGet struct {
+	Todos     []*model.Todo
+	PageCount int
+}
+
 type TodoRepositoryInterface interface {
-	AllTodos(ctx context.Context, input *Input) ([]*model.Todo, error)
+	AllTodos(ctx context.Context, input *Input) (*TodoGet, error)
 	CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*model.Todo, error)
 	Search(ctx context.Context) (SearchResult, error)
 }

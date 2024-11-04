@@ -474,7 +474,7 @@ func (s *Todo) SetStatus(val Status) {
 type TodosGetOK struct {
 	TodoList []Todo `json:"todoList"`
 	// Total number of pages.
-	PageCount OptInt `json:"pageCount"`
+	PageCount int `json:"pageCount"`
 }
 
 // GetTodoList returns the value of TodoList.
@@ -483,7 +483,7 @@ func (s *TodosGetOK) GetTodoList() []Todo {
 }
 
 // GetPageCount returns the value of PageCount.
-func (s *TodosGetOK) GetPageCount() OptInt {
+func (s *TodosGetOK) GetPageCount() int {
 	return s.PageCount
 }
 
@@ -493,6 +493,6 @@ func (s *TodosGetOK) SetTodoList(val []Todo) {
 }
 
 // SetPageCount sets the value of PageCount.
-func (s *TodosGetOK) SetPageCount(val OptInt) {
+func (s *TodosGetOK) SetPageCount(val int) {
 	s.PageCount = val
 }

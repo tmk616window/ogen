@@ -37,7 +37,7 @@ func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) (*og
 	}
 
 	return &ogen.TodosGetOK{
-		TodoList: lo.Map(todos, func(todo *usecase.Todo, _ int) ogen.Todo {
+		TodoList: lo.Map(todos.Todos, func(todo *usecase.Todo, _ int) ogen.Todo {
 			return ogen.Todo{
 				ID:          todo.ID,
 				Title:       todo.Title,
@@ -60,7 +60,7 @@ func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) (*og
 				},
 			}
 		}),
-		PageCount: ogen.OptInt{Value: len(todos)},
+		PageCount: todos.PageCount,
 	}, nil
 }
 

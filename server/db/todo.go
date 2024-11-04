@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"server/domain/model"
 	"server/domain/repository"
 	"server/ent"
@@ -13,7 +12,7 @@ import (
 	"server/ent/todo"
 )
 
-func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*model.Todo, error) {
+func (c *client) AllTodos(ctx context.Context, input *repository.Input) (*repository.TodoGet, error) {
 	todoWhere := []predicate.Todo{
 		columnFuzzySearch(todo.FieldDescription, input.WhereInput.Description),
 		columnFuzzySearch(todo.FieldTitle, input.WhereInput.Title),
@@ -22,10 +21,6 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*mode
 	if input.WhereInput.StatusID != 0 {
 		todoWhere = append(todoWhere, todo.HasStatusWith(status.ID(input.WhereInput.StatusID)))
 	}
-
-	fmt.Println("input.WhereInput.PriorityID")
-	fmt.Println(input.WhereInput.PriorityID)
-	fmt.Println(input.WhereInput.PriorityID)
 
 	if input.WhereInput.PriorityID != 0 {
 		todoWhere = append(todoWhere, todo.HasPriorityWith(priority.ID(input.WhereInput.PriorityID)))
@@ -54,7 +49,12 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*mode
 		return nil, err
 	}
 
-	return todos, nil
+	count, err := c.client.Todo.Query().Count(ctx)
+
+	return &repository.TodoGet{
+		Todos:     todos,
+		PageCount: count,
+	}, nil
 }
 
 func (c *client) CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*model.Todo, error) {
