@@ -38,7 +38,8 @@ SELECT pg_catalog.setval('public.status_id_seq', (select max(id) from status), t
 INSERT INTO labels (id, value, created_at, updated_at)
 VALUES 
     (1, 'Label1', NOW(), NOW()),
-    (2, 'Label2', NOW(), NOW())
+    (2, 'Label2', NOW(), NOW()),
+    (3, 'Label3', NOW(), NOW())
 ON CONFLICT (id)
 DO UPDATE SET
     value = EXCLUDED.value,
