@@ -290,52 +290,6 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
-// NewOptWhereTodoInput returns new OptWhereTodoInput with value set to v.
-func NewOptWhereTodoInput(v WhereTodoInput) OptWhereTodoInput {
-	return OptWhereTodoInput{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptWhereTodoInput is optional WhereTodoInput.
-type OptWhereTodoInput struct {
-	Value WhereTodoInput
-	Set   bool
-}
-
-// IsSet returns true if OptWhereTodoInput was set.
-func (o OptWhereTodoInput) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptWhereTodoInput) Reset() {
-	var v WhereTodoInput
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptWhereTodoInput) SetTo(v WhereTodoInput) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptWhereTodoInput) Get() (v WhereTodoInput, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptWhereTodoInput) Or(d WhereTodoInput) WhereTodoInput {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
 // Ref: #/components/schemas/Priority
 type Priority struct {
 	ID   int    `json:"id"`
@@ -515,52 +469,4 @@ func (s *Todo) SetPriority(val Priority) {
 // SetStatus sets the value of Status.
 func (s *Todo) SetStatus(val Status) {
 	s.Status = val
-}
-
-// Ref: #/components/schemas/WhereTodoInput
-type WhereTodoInput struct {
-	Title       OptString `json:"title"`
-	Description OptString `json:"description"`
-	PriorityID  OptInt    `json:"priorityID"`
-	StatusID    OptInt    `json:"statusID"`
-}
-
-// GetTitle returns the value of Title.
-func (s *WhereTodoInput) GetTitle() OptString {
-	return s.Title
-}
-
-// GetDescription returns the value of Description.
-func (s *WhereTodoInput) GetDescription() OptString {
-	return s.Description
-}
-
-// GetPriorityID returns the value of PriorityID.
-func (s *WhereTodoInput) GetPriorityID() OptInt {
-	return s.PriorityID
-}
-
-// GetStatusID returns the value of StatusID.
-func (s *WhereTodoInput) GetStatusID() OptInt {
-	return s.StatusID
-}
-
-// SetTitle sets the value of Title.
-func (s *WhereTodoInput) SetTitle(val OptString) {
-	s.Title = val
-}
-
-// SetDescription sets the value of Description.
-func (s *WhereTodoInput) SetDescription(val OptString) {
-	s.Description = val
-}
-
-// SetPriorityID sets the value of PriorityID.
-func (s *WhereTodoInput) SetPriorityID(val OptInt) {
-	s.PriorityID = val
-}
-
-// SetStatusID sets the value of StatusID.
-func (s *WhereTodoInput) SetStatusID(val OptInt) {
-	s.StatusID = val
 }

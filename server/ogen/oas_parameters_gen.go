@@ -22,7 +22,13 @@ type TodosGetParams struct {
 	Offset   OptInt
 	LabelIDs []int
 	// Criteria to filter todo items.
-	WhereTodoInput OptWhereTodoInput
+	PriorityID OptInt
+	// Criteria to filter todo items.
+	StatusID OptInt
+	// Criteria to filter todo items.
+	Title OptString
+	// Criteria to filter todo items.
+	Description OptString
 }
 
 func unpackTodosGetParams(packed middleware.Parameters) (params TodosGetParams) {
@@ -55,11 +61,38 @@ func unpackTodosGetParams(packed middleware.Parameters) (params TodosGetParams) 
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "whereTodoInput",
+			Name: "priorityID",
 			In:   "query",
 		}
 		if v, ok := packed[key]; ok {
-			params.WhereTodoInput = v.(OptWhereTodoInput)
+			params.PriorityID = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "statusID",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.StatusID = v.(OptInt)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "title",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Title = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "description",
+			In:   "query",
+		}
+		if v, ok := packed[key]; ok {
+			params.Description = v.(OptString)
 		}
 	}
 	return params
@@ -240,24 +273,34 @@ func decodeTodosGetParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 			Err:  err,
 		}
 	}
-	// Decode query: whereTodoInput.
+	// Decode query: priorityID.
 	if err := func() error {
 		cfg := uri.QueryParameterDecodingConfig{
-			Name:    "whereTodoInput",
+			Name:    "priorityID",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
-			Fields:  []uri.QueryParameterObjectField{{Name: "title", Required: false}, {Name: "description", Required: false}, {Name: "priorityID", Required: false}, {Name: "statusID", Required: false}},
 		}
 
 		if err := q.HasParam(cfg); err == nil {
 			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotWhereTodoInputVal WhereTodoInput
+				var paramsDotPriorityIDVal int
 				if err := func() error {
-					return paramsDotWhereTodoInputVal.DecodeURI(d)
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotPriorityIDVal = c
+					return nil
 				}(); err != nil {
 					return err
 				}
-				params.WhereTodoInput.SetTo(paramsDotWhereTodoInputVal)
+				params.PriorityID.SetTo(paramsDotPriorityIDVal)
 				return nil
 			}); err != nil {
 				return err
@@ -266,7 +309,130 @@ func decodeTodosGetParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "whereTodoInput",
+			Name: "priorityID",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: statusID.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "statusID",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotStatusIDVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotStatusIDVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.StatusID.SetTo(paramsDotStatusIDVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "statusID",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: title.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "title",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotTitleVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotTitleVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Title.SetTo(paramsDotTitleVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "title",
+			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode query: description.
+	if err := func() error {
+		cfg := uri.QueryParameterDecodingConfig{
+			Name:    "description",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.HasParam(cfg); err == nil {
+			if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotDescriptionVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotDescriptionVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.Description.SetTo(paramsDotDescriptionVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "description",
 			In:   "query",
 			Err:  err,
 		}

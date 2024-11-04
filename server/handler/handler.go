@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"server/ogen"
 	"server/usecase"
@@ -26,12 +27,18 @@ func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]o
 		Offset:   params.Offset.Value,
 		LabelIDs: params.LabelIDs,
 		WhereInput: usecase.WhereInput{
-			Title:       params.WhereTodoInput.Value.Title.Value,
-			Description: params.WhereTodoInput.Value.Description.Value,
-			PriorityID:  params.WhereTodoInput.Value.PriorityID.Value,
-			StatusID:    params.WhereTodoInput.Value.StatusID.Value,
+			Title:       params.Title.Value,
+			Description: params.Description.Value,
+			PriorityID:  params.PriorityID.Value,
+			StatusID:    params.StatusID.Value,
 		},
 	})
+
+	fmt.Println(params.Limit.Value)
+	fmt.Println(params.Title.Value)
+	fmt.Println(params.LabelIDs)
+	fmt.Println(params)
+
 	if err != nil {
 		return nil, h.NewError(ctx, err)
 	}

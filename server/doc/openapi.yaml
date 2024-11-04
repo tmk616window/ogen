@@ -34,9 +34,27 @@ paths:
               type: integer
           required: false
         - in: query
-          name: whereTodoInput
+          name: priorityID
           schema:
-            $ref: "#/components/schemas/WhereTodoInput"
+            type: integer
+          required: false
+          description: Criteria to filter todo items
+        - in: query
+          name: statusID
+          schema:
+            type: integer
+          required: false
+          description: Criteria to filter todo items
+        - in: query
+          name: title
+          schema:
+            type: string
+          required: false
+          description: Criteria to filter todo items
+        - in: query
+          name: description
+          schema:
+            type: string
           required: false
           description: Criteria to filter todo items
       responses:

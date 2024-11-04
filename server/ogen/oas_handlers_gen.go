@@ -324,9 +324,21 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 					In:   "query",
 				}: params.LabelIDs,
 				{
-					Name: "whereTodoInput",
+					Name: "priorityID",
 					In:   "query",
-				}: params.WhereTodoInput,
+				}: params.PriorityID,
+				{
+					Name: "statusID",
+					In:   "query",
+				}: params.StatusID,
+				{
+					Name: "title",
+					In:   "query",
+				}: params.Title,
+				{
+					Name: "description",
+					In:   "query",
+				}: params.Description,
 			},
 			Raw: r,
 		}
