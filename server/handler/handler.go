@@ -19,8 +19,7 @@ func NewHandler(u usecase.UsecaseInterface) *handler {
 	}
 }
 
-func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]ogen.Todo, error) {
-
+func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) (*ogen.TodosGetOK, error) {
 	todos, err := h.Usecase.TodosGet(ctx, &usecase.Input{
 		Limit:    params.Limit.Value,
 		Offset:   params.Offset.Value,
@@ -33,37 +32,36 @@ func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]o
 		},
 	})
 
-	// fmt.Println(params.PriorityID.Value)
-	// fmt.Println(params.PriorityID.Value)
-	// fmt.Println(params.PriorityID.Value)
-
 	if err != nil {
 		return nil, h.NewError(ctx, err)
 	}
 
-	return lo.Map(todos, func(todo *usecase.Todo, _ int) ogen.Todo {
-		return ogen.Todo{
-			ID:          todo.ID,
-			Title:       todo.Title,
-			Description: ogen.OptString{Value: todo.Description},
-			Labels: lo.Map(todo.Labels, func(label usecase.Label, _ int) ogen.Label {
-				return ogen.Label{
-					ID:    label.ID,
-					Value: label.Value,
-				}
-			}),
-			CreatedAt:  todo.CreatedAt,
-			FinishedAt: ogen.OptDateTime{Value: todo.FinishedAt},
-			Priority: ogen.Priority{
-				ID:   todo.Priority.ID,
-				Name: todo.Priority.Name,
-			},
-			Status: ogen.Status{
-				ID:    todo.Status.ID,
-				Value: todo.Status.Value,
-			},
-		}
-	}), nil
+	return &ogen.TodosGetOK{
+		TodoList: lo.Map(todos, func(todo *usecase.Todo, _ int) ogen.Todo {
+			return ogen.Todo{
+				ID:          todo.ID,
+				Title:       todo.Title,
+				Description: ogen.OptString{Value: todo.Description},
+				Labels: lo.Map(todo.Labels, func(label usecase.Label, _ int) ogen.Label {
+					return ogen.Label{
+						ID:    label.ID,
+						Value: label.Value,
+					}
+				}),
+				CreatedAt:  todo.CreatedAt,
+				FinishedAt: ogen.OptDateTime{Value: todo.FinishedAt},
+				Priority: ogen.Priority{
+					ID:   todo.Priority.ID,
+					Name: todo.Priority.Name,
+				},
+				Status: ogen.Status{
+					ID:    todo.Status.ID,
+					Value: todo.Status.Value,
+				},
+			}
+		}),
+		PageCount: ogen.OptInt{Value: len(todos)},
+	}, nil
 }
 
 func (h *handler) TodoPost(ctx context.Context, req *ogen.CreateTodoInput) (*ogen.CreateTodoResponse, error) {

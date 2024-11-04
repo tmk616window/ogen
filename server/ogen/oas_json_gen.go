@@ -530,6 +530,41 @@ func (s *OptDateTime) UnmarshalJSON(data []byte) error {
 	return s.Decode(d, json.DecodeDateTime)
 }
 
+// Encode encodes int as json.
+func (o OptInt) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Int(int(o.Value))
+}
+
+// Decode decodes int from json.
+func (o *OptInt) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptInt to nil")
+	}
+	o.Set = true
+	v, err := d.Int()
+	if err != nil {
+		return err
+	}
+	o.Value = int(v)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptInt) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptInt) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes string as json.
 func (o OptString) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -979,14 +1014,12 @@ func (s *Todo) encodeFields(e *jx.Encoder) {
 		json.EncodeDateTime(e, s.CreatedAt)
 	}
 	{
-		if s.Labels != nil {
-			e.FieldStart("labels")
-			e.ArrStart()
-			for _, elem := range s.Labels {
-				elem.Encode(e)
-			}
-			e.ArrEnd()
+		e.FieldStart("labels")
+		e.ArrStart()
+		for _, elem := range s.Labels {
+			elem.Encode(e)
 		}
+		e.ArrEnd()
 	}
 	{
 		if s.FinishedAt.Set {
@@ -1071,6 +1104,7 @@ func (s *Todo) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"createdAt\"")
 			}
 		case "labels":
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				s.Labels = make([]Label, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -1127,7 +1161,7 @@ func (s *Todo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b11001011,
+		0b11011011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -1169,6 +1203,97 @@ func (s *Todo) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Todo) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *TodosGetOK) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *TodosGetOK) encodeFields(e *jx.Encoder) {
+	{
+		if s.TodoList != nil {
+			e.FieldStart("todoList")
+			e.ArrStart()
+			for _, elem := range s.TodoList {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		if s.PageCount.Set {
+			e.FieldStart("pageCount")
+			s.PageCount.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfTodosGetOK = [2]string{
+	0: "todoList",
+	1: "pageCount",
+}
+
+// Decode decodes TodosGetOK from json.
+func (s *TodosGetOK) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TodosGetOK to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "todoList":
+			if err := func() error {
+				s.TodoList = make([]Todo, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Todo
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.TodoList = append(s.TodoList, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"todoList\"")
+			}
+		case "pageCount":
+			if err := func() error {
+				s.PageCount.Reset()
+				if err := s.PageCount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"pageCount\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TodosGetOK")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *TodosGetOK) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TodosGetOK) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

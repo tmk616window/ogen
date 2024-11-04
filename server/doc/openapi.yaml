@@ -63,9 +63,15 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Todo"
+                type: object
+                properties:
+                  todoList:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Todo"
+                  pageCount:
+                    type: integer
+                    description: Total number of pages
         default:
           description: Unexpected error
           content:
@@ -172,6 +178,7 @@ components:
         - title
         - priority
         - status
+        - labels
         - createdAt
 
     ResponseSearchTodo:

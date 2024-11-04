@@ -302,7 +302,7 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 		return
 	}
 
-	var response []Todo
+	var response *TodosGetOK
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
@@ -346,7 +346,7 @@ func (s *Server) handleTodosGetRequest(args [0]string, argsEscaped bool, w http.
 		type (
 			Request  = struct{}
 			Params   = TodosGetParams
-			Response = []Todo
+			Response = *TodosGetOK
 		)
 		response, err = middleware.HookMiddleware[
 			Request,

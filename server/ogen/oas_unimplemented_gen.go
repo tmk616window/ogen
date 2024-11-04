@@ -36,7 +36,7 @@ func (UnimplementedHandler) TodoPost(ctx context.Context, req *CreateTodoInput) 
 // Get all todo items.
 //
 // GET /todos
-func (UnimplementedHandler) TodosGet(ctx context.Context, params TodosGetParams) (r []Todo, _ error) {
+func (UnimplementedHandler) TodosGet(ctx context.Context, params TodosGetParams) (r *TodosGetOK, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

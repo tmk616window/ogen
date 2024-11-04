@@ -189,7 +189,7 @@ func decodeTodoPostResponse(resp *http.Response) (res *CreateTodoResponse, _ err
 	return res, errors.Wrap(defRes, "error")
 }
 
-func decodeTodosGetResponse(resp *http.Response) (res []Todo, _ error) {
+func decodeTodosGetResponse(resp *http.Response) (res *TodosGetOK, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -205,17 +205,9 @@ func decodeTodosGetResponse(resp *http.Response) (res []Todo, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response []Todo
+			var response TodosGetOK
 			if err := func() error {
-				response = make([]Todo, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem Todo
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					response = append(response, elem)
-					return nil
-				}); err != nil {
+				if err := response.Decode(d); err != nil {
 					return err
 				}
 				if err := d.Skip(); err != io.EOF {
@@ -232,14 +224,14 @@ func decodeTodosGetResponse(resp *http.Response) (res []Todo, _ error) {
 			}
 			// Validate response.
 			if err := func() error {
-				if response == nil {
-					return errors.New("nil is invalid value")
+				if err := response.Validate(); err != nil {
+					return err
 				}
 				return nil
 			}(); err != nil {
 				return res, errors.Wrap(err, "validate")
 			}
-			return response, nil
+			return &response, nil
 		default:
 			return res, validate.InvalidContentType(ct)
 		}

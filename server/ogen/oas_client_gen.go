@@ -39,7 +39,7 @@ type Invoker interface {
 	// Get all todo items.
 	//
 	// GET /todos
-	TodosGet(ctx context.Context, params TodosGetParams) ([]Todo, error)
+	TodosGet(ctx context.Context, params TodosGetParams) (*TodosGetOK, error)
 }
 
 // Client implements OAS client.
@@ -244,12 +244,12 @@ func (c *Client) sendTodoPost(ctx context.Context, request *CreateTodoInput) (re
 // Get all todo items.
 //
 // GET /todos
-func (c *Client) TodosGet(ctx context.Context, params TodosGetParams) ([]Todo, error) {
+func (c *Client) TodosGet(ctx context.Context, params TodosGetParams) (*TodosGetOK, error) {
 	res, err := c.sendTodosGet(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendTodosGet(ctx context.Context, params TodosGetParams) (res []Todo, err error) {
+func (c *Client) sendTodosGet(ctx context.Context, params TodosGetParams) (res *TodosGetOK, err error) {
 	otelAttrs := []attribute.KeyValue{
 		semconv.HTTPRequestMethodKey.String("GET"),
 		semconv.HTTPRouteKey.String("/todos"),

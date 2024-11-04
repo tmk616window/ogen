@@ -470,3 +470,29 @@ func (s *Todo) SetPriority(val Priority) {
 func (s *Todo) SetStatus(val Status) {
 	s.Status = val
 }
+
+type TodosGetOK struct {
+	TodoList []Todo `json:"todoList"`
+	// Total number of pages.
+	PageCount OptInt `json:"pageCount"`
+}
+
+// GetTodoList returns the value of TodoList.
+func (s *TodosGetOK) GetTodoList() []Todo {
+	return s.TodoList
+}
+
+// GetPageCount returns the value of PageCount.
+func (s *TodosGetOK) GetPageCount() OptInt {
+	return s.PageCount
+}
+
+// SetTodoList sets the value of TodoList.
+func (s *TodosGetOK) SetTodoList(val []Todo) {
+	s.TodoList = val
+}
+
+// SetPageCount sets the value of PageCount.
+func (s *TodosGetOK) SetPageCount(val OptInt) {
+	s.PageCount = val
+}
