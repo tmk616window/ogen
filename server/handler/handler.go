@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"server/ogen"
 	"server/usecase"
@@ -34,10 +33,9 @@ func (h *handler) TodosGet(ctx context.Context, params ogen.TodosGetParams) ([]o
 		},
 	})
 
-	fmt.Println(params.Limit.Value)
-	fmt.Println(params.Title.Value)
-	fmt.Println(params.LabelIDs)
-	fmt.Println(params)
+	// fmt.Println(params.PriorityID.Value)
+	// fmt.Println(params.PriorityID.Value)
+	// fmt.Println(params.PriorityID.Value)
 
 	if err != nil {
 		return nil, h.NewError(ctx, err)

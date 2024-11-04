@@ -2,11 +2,13 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"server/domain/model"
 	"server/domain/repository"
 	"server/ent"
 	"server/ent/label"
 	"server/ent/predicate"
+	"server/ent/priority"
 	"server/ent/status"
 	"server/ent/todo"
 )
@@ -19,6 +21,14 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) ([]*mode
 
 	if input.WhereInput.StatusID != 0 {
 		todoWhere = append(todoWhere, todo.HasStatusWith(status.ID(input.WhereInput.StatusID)))
+	}
+
+	fmt.Println("input.WhereInput.PriorityID")
+	fmt.Println(input.WhereInput.PriorityID)
+	fmt.Println(input.WhereInput.PriorityID)
+
+	if input.WhereInput.PriorityID != 0 {
+		todoWhere = append(todoWhere, todo.HasPriorityWith(priority.ID(input.WhereInput.PriorityID)))
 	}
 
 	if len(input.LabelIDs) > 0 {

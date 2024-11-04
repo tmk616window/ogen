@@ -57,6 +57,7 @@ func (u *usecase) TodosGet(ctx context.Context, input *Input) ([]*Todo, error) {
 		WhereInput: repository.WhereInput{
 			Title:       input.WhereInput.Title,
 			Description: input.WhereInput.Description,
+			PriorityID:  input.WhereInput.PriorityID,
 			StatusID:    input.WhereInput.StatusID,
 		},
 	})
