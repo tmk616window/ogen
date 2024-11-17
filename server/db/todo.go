@@ -49,7 +49,15 @@ func (c *client) AllTodos(ctx context.Context, input *repository.Input) (*reposi
 		return nil, err
 	}
 
-	count, err := c.client.Todo.Query().Count(ctx)
+	count, err := c.client.Todo.
+		Query().
+		Where(todo.And(
+			todoWhere...,
+		)).
+		Count(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	return &repository.TodoGet{
 		Todos:     todos,
