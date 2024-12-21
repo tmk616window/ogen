@@ -14,6 +14,18 @@ type Handler interface {
 	//
 	// GET /search
 	SearchGet(ctx context.Context) (*ResponseSearchTodo, error)
+	// TodoIDDelete implements DELETE /todo/{id} operation.
+	//
+	// Delete a todo item by ID.
+	//
+	// DELETE /todo/{id}
+	TodoIDDelete(ctx context.Context, params TodoIDDeleteParams) (int, error)
+	// TodoIDPut implements PUT /todo/{id} operation.
+	//
+	// Update a todo item by ID.
+	//
+	// PUT /todo/{id}
+	TodoIDPut(ctx context.Context, req *WhereTodoInput, params TodoIDPutParams) (int, error)
 	// TodoPost implements POST /todo operation.
 	//
 	// Create a new todo item.

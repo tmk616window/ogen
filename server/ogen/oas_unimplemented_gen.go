@@ -22,6 +22,24 @@ func (UnimplementedHandler) SearchGet(ctx context.Context) (r *ResponseSearchTod
 	return r, ht.ErrNotImplemented
 }
 
+// TodoIDDelete implements DELETE /todo/{id} operation.
+//
+// Delete a todo item by ID.
+//
+// DELETE /todo/{id}
+func (UnimplementedHandler) TodoIDDelete(ctx context.Context, params TodoIDDeleteParams) (r int, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// TodoIDPut implements PUT /todo/{id} operation.
+//
+// Update a todo item by ID.
+//
+// PUT /todo/{id}
+func (UnimplementedHandler) TodoIDPut(ctx context.Context, req *WhereTodoInput, params TodoIDPutParams) (r int, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // TodoPost implements POST /todo operation.
 //
 // Create a new todo item.

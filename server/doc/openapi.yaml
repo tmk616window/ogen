@@ -58,7 +58,7 @@ paths:
           required: false
           description: Criteria to filter todo items
       responses:
-        "200":
+        '200':
           description: A list of todo items
           content:
             application/json:
@@ -68,7 +68,7 @@ paths:
                   todoList:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Todo"
+                      $ref: '#/components/schemas/Todo'
                   pageCount:
                     type: integer
                     description: Total number of pages
@@ -80,23 +80,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /search:
     get:
       summary: Search for todo items
       responses:
-        "200":
+        '200':
           description: A list of todo items
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResponseSearchTodo"
+                $ref: '#/components/schemas/ResponseSearchTodo'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /todo:
     post:
       summary: Create a new todo item
@@ -105,20 +105,69 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateTodoInput"
+              $ref: '#/components/schemas/CreateTodoInput'
       responses:
-        "201":
+        '201':
           description: Todo item created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateTodoResponse"
+                $ref: '#/components/schemas/CreateTodoResponse'
         default:
           description: Unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
+  /todo/{id}:
+    put:
+      summary: Update a todo item by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WhereTodoInput'
+      responses:
+        '204':
+          description: Todo item updated
+          content:
+            application/json:
+              schema:
+                type: integer
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a todo item by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Todo item deleted
+          content:
+            application/json:
+              schema:
+                type: integer
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -168,14 +217,14 @@ components:
         labels:
           type: array
           items:
-            $ref: "#/components/schemas/Label"
+            $ref: '#/components/schemas/Label'
         finishedAt:
           type: string
           format: date-time
         priority:
-          $ref: "#/components/schemas/Priority"
+          $ref: '#/components/schemas/Priority'
         status:
-          $ref: "#/components/schemas/Status"
+          $ref: '#/components/schemas/Status'
       required:
         - id
         - title
@@ -190,15 +239,15 @@ components:
         labels:
           type: array
           items:
-            $ref: "#/components/schemas/Label"
+            $ref: '#/components/schemas/Label'
         priorities:
           type: array
           items:
-            $ref: "#/components/schemas/Priority"
+            $ref: '#/components/schemas/Priority'
         status:
           type: array
           items:
-            $ref: "#/components/schemas/Status"
+            $ref: '#/components/schemas/Status'
       required:
         - labels
         - priorities

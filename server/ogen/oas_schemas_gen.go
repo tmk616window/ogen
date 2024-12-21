@@ -496,3 +496,51 @@ func (s *TodosGetOK) SetTodoList(val []Todo) {
 func (s *TodosGetOK) SetPageCount(val int) {
 	s.PageCount = val
 }
+
+// Ref: #/components/schemas/WhereTodoInput
+type WhereTodoInput struct {
+	Title       OptString `json:"title"`
+	Description OptString `json:"description"`
+	PriorityID  OptInt    `json:"priorityID"`
+	StatusID    OptInt    `json:"statusID"`
+}
+
+// GetTitle returns the value of Title.
+func (s *WhereTodoInput) GetTitle() OptString {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *WhereTodoInput) GetDescription() OptString {
+	return s.Description
+}
+
+// GetPriorityID returns the value of PriorityID.
+func (s *WhereTodoInput) GetPriorityID() OptInt {
+	return s.PriorityID
+}
+
+// GetStatusID returns the value of StatusID.
+func (s *WhereTodoInput) GetStatusID() OptInt {
+	return s.StatusID
+}
+
+// SetTitle sets the value of Title.
+func (s *WhereTodoInput) SetTitle(val OptString) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *WhereTodoInput) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetPriorityID sets the value of PriorityID.
+func (s *WhereTodoInput) SetPriorityID(val OptInt) {
+	s.PriorityID = val
+}
+
+// SetStatusID sets the value of StatusID.
+func (s *WhereTodoInput) SetStatusID(val OptInt) {
+	s.StatusID = val
+}
