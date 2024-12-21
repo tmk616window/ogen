@@ -113,7 +113,7 @@ func (h *handler) TodoIDPut(ctx context.Context, req *ogen.WhereTodoInput, param
 }
 
 func (h *handler) TodoIDDelete(ctx context.Context, params ogen.TodoIDDeleteParams) (int, error) {
-	return 0, nil
+	return h.Usecase.DeleteTodo(ctx, usecase.DeleteTodo{ID: params.ID})
 }
 
 func (h *handler) NewError(ctx context.Context, err error) *ogen.ErrorResponseStatusCode {

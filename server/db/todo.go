@@ -111,3 +111,25 @@ func (c *client) Search(ctx context.Context) (repository.SearchResult, error) {
 		Priorities: priorities,
 	}, nil
 }
+
+func (c *client) DeleteTodo(ctx context.Context, id int) (int, error) {
+	tx, err := c.client.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Todo.UpdateOneID(id).ClearLabels().Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	err = tx.Todo.DeleteOneID(id).Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	tx.Commit()
+	return id, nil
+}

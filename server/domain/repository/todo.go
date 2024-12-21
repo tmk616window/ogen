@@ -34,4 +34,5 @@ type TodoRepositoryInterface interface {
 	AllTodos(ctx context.Context, input *Input) (*TodoGet, error)
 	CreateTodo(ctx context.Context, mt *model.Todo, labelIDs []int) (*model.Todo, error)
 	Search(ctx context.Context) (SearchResult, error)
+	DeleteTodo(ctx context.Context, id int) (int, error)
 }
