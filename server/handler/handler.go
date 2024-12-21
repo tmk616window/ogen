@@ -108,6 +108,14 @@ func (h *handler) SearchGet(ctx context.Context) (*ogen.ResponseSearchTodo, erro
 	}, nil
 }
 
+func (h *handler) TodoIDPut(ctx context.Context, req *ogen.WhereTodoInput, params ogen.TodoIDPutParams) (int, error) {
+	return 0, nil
+}
+
+func (h *handler) TodoIDDelete(ctx context.Context, params ogen.TodoIDDeleteParams) (int, error) {
+	return 0, nil
+}
+
 func (h *handler) NewError(ctx context.Context, err error) *ogen.ErrorResponseStatusCode {
 	return &ogen.ErrorResponseStatusCode{
 		StatusCode: http.StatusInternalServerError,
